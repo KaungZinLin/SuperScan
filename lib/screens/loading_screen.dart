@@ -16,7 +16,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
             children: [
               Text('SuperScan', style: TextStyle(fontSize: 50.0, fontWeight: FontWeight.w600),),
               const SizedBox(height: 30),
-              const SpinKitDualRing(color: Colors.blueGrey, size: 70.0),
+              const SpinKitDualRing(color: Colors.indigo, size: 70.0),
             ],
         )
       )
