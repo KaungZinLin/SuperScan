@@ -32,6 +32,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
+        // Removed elevation from floating action button
+        elevation: 0.0,
         child: Icon(Icons.document_scanner),
         onPressed: () {
           Alert(
@@ -39,19 +41,34 @@ class _HomePageState extends State<HomePage> {
             type: AlertType.none,
             title: 'Scan Options',
             desc: 'Choose your preferred scanning format',
-            style: const AlertStyle(
+            // Set custom broder radius and color
+            style: AlertStyle(
               isCloseButton: true,
               isOverlayTapDismiss: true,
+              alertBorder: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25.0),
+                side: BorderSide(
+                  color: Colors.indigo,
+                ),
+              ),
+              // Fix the Title Color
+              titleStyle: TextStyle(
+                // 2. Explicitly toggle color based on brightness
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+              descStyle: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white70
+                    : Colors.black87,
+              ),
             ),
+            // Removed URI scanning and default "Image" scanning
             buttons: [
               DialogButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _processScan(FlutterDocScanner().getScanDocuments(page: 4));
-                },
-                child: const Text('Scan', style: TextStyle(color: Colors.white)),
-              ),
-              DialogButton(
+                color: Colors.indigo,
                 onPressed: () {
                   Navigator.pop(context);
                   _processScan(FlutterDocScanner().getScannedDocumentAsImages(page: 4));
@@ -59,19 +76,13 @@ class _HomePageState extends State<HomePage> {
                 child: const Text('Image', style: TextStyle(color: Colors.white)),
               ),
               DialogButton(
+                color: Colors.indigo,
                 onPressed: () {
                   Navigator.pop(context);
                   _processScan(FlutterDocScanner().getScannedDocumentAsPdf(page: 4));
                 },
                 child: const Text('PDF', style: TextStyle(color: Colors.white)),
               ),
-              DialogButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _processScan(FlutterDocScanner().getScanDocumentsUri(page: 4));
-                },
-                child: const Text('URI', style: TextStyle(color: Colors.white)),
-              )
             ],
           ).show();
         },
@@ -112,3 +123,21 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
+// Removed URI Scanning Option as it is Android-only
+// DialogButton(
+//   onPressed: () {
+//     Navigator.pop(context);
+//     _processScan(FlutterDocScanner().getScanDocumentsUri(page: 4));
+//   },
+//   child: const Text('URI', style: TextStyle(color: Colors.white)),
+// )
+
+// Removed Default Scanning Option that saves as images
+// DialogButton(
+//   onPressed: () {
+//     Navigator.pop(context);
+//     _processScan(FlutterDocScanner().getScanDocuments(page: 4));
+//   },
+//   child: const Text('Scan', style: TextStyle(color: Colors.white)),
+// ),

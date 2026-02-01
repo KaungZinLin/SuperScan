@@ -19,14 +19,16 @@ class SuperScan extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blueGrey,
+          // Change color theme for light mode
+          seedColor: Colors.indigo,
           brightness: Brightness.light,
         ),
       ),
       darkTheme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blueGrey,
+          // Changed color theme for dark mode
+          seedColor: Colors.indigo,
           brightness: Brightness.dark,
         ),
       ),
