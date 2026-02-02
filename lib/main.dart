@@ -73,57 +73,74 @@ class _MainLayoutState extends State<MainLayout> {
       return LoadingScreen();
     }
 
-    final bool isWide = MediaQuery.of(context).size.width >= 600;
+    final bool isWide = MediaQuery
+        .of(context)
+        .size
+        .width >= 600;
 
     return Scaffold(
-      body: Row(
-        children: [
-          if (isWide)
-            NavigationRail(
-              selectedIndex: _selectedIndex,
-              onDestinationSelected: (i) =>
-                  setState(() => _selectedIndex = i),
-              labelType: NavigationRailLabelType.all,
-              destinations: const [
-                NavigationRailDestination(
-                  icon: Icon(Icons.home),
-                  label: Text('Home'),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.settings),
-                  label: Text('Settings'),
-                ),
-              ],
+        body: Row(
+          children: [
+            if (isWide)
+              NavigationRail(
+                selectedIndex: _selectedIndex,
+                onDestinationSelected: (i) =>
+                    setState(() => _selectedIndex = i),
+                labelType: NavigationRailLabelType.all,
+                destinations: const [
+                  NavigationRailDestination(
+                    icon: Icon(Icons.home),
+                    label: Text(
+                      'Home',
+                      style: TextStyle(
+                        // fontSize: 12.0,
+                        letterSpacing: 0.0,
+                      ),
+                    ),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.settings),
+                    label: Text(
+                      'Settings',
+                      style: TextStyle(
+                        // fontSize: 12.0,
+                        letterSpacing: 0.0,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+            if (isWide) const VerticalDivider(thickness: 1, width: 1),
+
+            Expanded(
+              child: IndexedStack(
+                index: _selectedIndex,
+                children: _pages,
+              ),
             ),
+          ],
+        ),
 
-          if (isWide) const VerticalDivider(thickness: 1, width: 1),
-
-          Expanded(
-            child: IndexedStack(
-              index: _selectedIndex,
-              children: _pages,
+        bottomNavigationBar: isWide ? null : NavigationBarTheme(
+          data: NavigationBarThemeData(
+            labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>(
+                  (states) =>
+                  TextStyle(
+                    letterSpacing: 0.0,
+                  ),
             ),
           ),
-        ],
-      ),
-
-      bottomNavigationBar: isWide
-          ? null
-          : NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (i) =>
-            setState(() => _selectedIndex = i),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home),
-            label: 'Home',
+          child: NavigationBar(
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: (i) => setState(() => _selectedIndex = i),
+            destinations: const [
+              NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+              NavigationDestination(
+                  icon: Icon(Icons.settings), label: 'Settings'),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-      ),
-    );
+        )
+      );
+    }
   }
-}
