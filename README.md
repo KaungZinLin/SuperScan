@@ -30,6 +30,7 @@ MagicEyes is a set of AI and algorithm-based features that improves the experien
 - Summarize documents using AI
 
 **How will the AI features implemented in SuperScan?**
+
 I believe that the best way to implement AI features with MagicEyes is via API Keys. This is so that users who want to use AI (more specifically, OpenAI's ChatGPT) can do so with their own API Keys. And those who aren't interested can choose to not use AI.
 ## Technicial Features
 - Clean code
