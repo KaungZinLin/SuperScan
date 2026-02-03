@@ -5,7 +5,7 @@
 <h1 align="center">SuperScan</h1>
 
 <p align="center">
-  <strong>Scan &amp; Sync with SuperScan</strong>: Scan documents and sync them across all platforms<br>
+  <strong>Scan &amp; Sync with SuperScan: Scan documents and sync them across all platforms</strong><br>
   Welcome to the official GitHub repository of SuperScan!
 </p>
 
