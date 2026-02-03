@@ -39,10 +39,11 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         // Removed elevation from floating action button
         elevation: 0.0,
-        child: Icon(Icons.document_scanner),
+        icon: Icon(Icons.document_scanner, size: 35.0),
+        label: Text('Scan'),
         onPressed: () {
           // Added desktop check and prevented users from scanning if they're on desktop
           if (isDesktop) {
@@ -151,7 +152,7 @@ class _HomePageState extends State<HomePage> {
           // Added sync button and marked as Work In Progress
           actions: <Widget>[
             IconButton(
-              icon: Icon(Icons.sync),
+              icon: Icon(Icons.sync, color: Colors.indigo, fontWeight: FontWeight.w900,),
               onPressed: () {
                 Alert(
                   context: context,

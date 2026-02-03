@@ -98,7 +98,7 @@ class _MainLayoutState extends State<MainLayout> {
                 destinations: [
                   NavigationRailDestination(
                     // Changed to sync on desktop
-                    icon: Icon(isDesktop ? Icons.sync : Icons.home),
+                    icon: Icon(isDesktop ? Icons.sync : Icons.home,),
                     label: Text(
                       isDesktop ? 'Sync' : 'Home',
                       style: TextStyle(
@@ -145,7 +145,7 @@ class _MainLayoutState extends State<MainLayout> {
             onDestinationSelected: (i) => setState(() => _selectedIndex = i),
             destinations: [
               // Changed to Sync on desktop
-              NavigationDestination(icon: Icon(isDesktop ? Icons.sync : Icons.home), label: isDesktop ? 'Sync' : 'Home'),
+              NavigationDestination(icon: Icon(isDesktop ? Icons.sync : Icons.home), label: isDesktop ? 'Sync' : 'Home',),
               NavigationDestination(
                   icon: Icon(Icons.settings), label: 'Settings'),
             ],
