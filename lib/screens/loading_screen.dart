@@ -16,6 +16,16 @@ class _LoadingScreenState extends State<LoadingScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(22), // iOS-style
+                child: Image.asset(
+                  'assets/images/app_icon.png',
+                  width: 150,
+                  height: 150,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 30),
               Text('SuperScan', style: TextStyle(fontSize: 50.0, fontWeight: FontWeight.w600),),
               const SizedBox(height: 30),
               const SpinKitDualRing(color: Colors.indigo, size: 70.0),

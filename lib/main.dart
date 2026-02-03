@@ -3,6 +3,8 @@ import 'package:super_scan/screens/home_page.dart';
 import 'package:super_scan/screens/loading_screen.dart';
 import 'package:super_scan/screens/settings_page.dart';
 import 'dart:async';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart';
 
 void main() {
   runApp(const SuperScan());
@@ -67,6 +69,12 @@ class _MainLayoutState extends State<MainLayout> {
     });
   }
 
+  // Added desktop check
+  bool get isDesktop {
+    if (kIsWeb) return false;
+    return Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isloading) {
@@ -87,11 +95,12 @@ class _MainLayoutState extends State<MainLayout> {
                 onDestinationSelected: (i) =>
                     setState(() => _selectedIndex = i),
                 labelType: NavigationRailLabelType.all,
-                destinations: const [
+                destinations: [
                   NavigationRailDestination(
-                    icon: Icon(Icons.home),
+                    // Changed to sync on desktop
+                    icon: Icon(isDesktop ? Icons.sync : Icons.home),
                     label: Text(
-                      'Home',
+                      isDesktop ? 'Sync' : 'Home',
                       style: TextStyle(
                         // fontSize: 12.0,
                         letterSpacing: 0.0,
@@ -134,8 +143,9 @@ class _MainLayoutState extends State<MainLayout> {
           child: NavigationBar(
             selectedIndex: _selectedIndex,
             onDestinationSelected: (i) => setState(() => _selectedIndex = i),
-            destinations: const [
-              NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+            destinations: [
+              // Changed to Sync on desktop
+              NavigationDestination(icon: Icon(isDesktop ? Icons.sync : Icons.home), label: isDesktop ? 'Sync' : 'Home'),
               NavigationDestination(
                   icon: Icon(Icons.settings), label: 'Settings'),
             ],
