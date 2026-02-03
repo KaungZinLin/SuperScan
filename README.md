@@ -4,6 +4,8 @@
 <h1 align="center">SuperScan</h1>
   </a>
 </p>
+**Scan & Sync with SuperScan**: Scan Documents and Sync them Across all Platforms
+Welecome to the official GitHub Repository of SuperScan!
 
 # Highlights
 - Scan documents using native scanning tools (such as MLKit on iOS)
