@@ -40,6 +40,7 @@ SuperScan will be available on the following platforms on launch:
 - Android
 - Windows
 - macOS
+
 I'll expand the availability to the other platforms a little while after launch. Other platforms include:
 - iOS
 - Linux
