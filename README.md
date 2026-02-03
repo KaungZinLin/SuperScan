@@ -1,7 +1,7 @@
-<p align="center">
+<p align="left">
   <img width="120" height="120" alt="AppleIconSuperScan" src="https://github.com/user-attachments/assets/a5523e8d-89f0-404e-9e90-64138b2d67a1" />
 </p>
-<h1 align="center">SuperScan</h1>
+<h1 align="left">SuperScan</h1>
   </a>
 </p>
 
@@ -28,6 +28,7 @@ Although there are many alternatives that exist, mosty notably CamScanner, I've 
 MagicEyes is a set of AI and algorithm-based features that improves the experience of SuperScan. In MagicEyes, you get the ability to:
 - Extract text from documents using system-level OCR
 - Summarize documents using AI
+
 **How will the AI features implemented in SuperScan?**
   I believe that the best way to implement AI features with MagicEyes is via API Keys. This is so that users who want to use AI (more specifically, OpenAI's ChatGPT) can do so with their own API Keys. And those who aren't interested can choose to not use AI.
 ## Technicial Features
