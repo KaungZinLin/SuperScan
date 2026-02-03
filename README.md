@@ -24,13 +24,13 @@ Although there are many alternatives that exist, mosty notably CamScanner, I've 
 - Save documents into local storage
 - Sync documents with Google Drive
 - Implement an in-app feature, nicknamed MagicEyes
-## Technicial Features
-- Clean code
-- Flutter Stage Management
 ### What is MagicEyes?
 MagicEyes is a set of AI and algorithm-based features that improves the experience of SuperScan. In MagicEyes, you get the ability to:
 - Extract text from documents using system-level OCR
 - Summarize documents using AI
+## Technicial Features
+- Clean code
+- Flutter Stage Management
 **How will the AI features implemented in SuperScan?**
   I believe that the best way to implement AI features with MagicEyes is via API Keys. This is so that users who want to use AI (more specifically, OpenAI's ChatGPT) can do so with their own API Keys. And those who aren't interested can choose to not use AI.
 # Release & Download
