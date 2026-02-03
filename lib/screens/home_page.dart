@@ -116,6 +116,14 @@ class _HomePageState extends State<HomePage> {
               ),
               // Removed URI scanning and default "Image" scanning
               buttons: [
+                // Re-added the default scanning option for testing and to implement storage-saving and Google Drive sync
+                DialogButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _processScan(FlutterDocScanner().getScanDocuments(page: 4));
+                  },
+                  child: const Text('Scan', style: TextStyle(color: Colors.white)),
+                ),
                 DialogButton(
                   color: Colors.indigo,
                   onPressed: () {
@@ -230,12 +238,3 @@ class _HomePageState extends State<HomePage> {
 //   },
 //   child: const Text('URI', style: TextStyle(color: Colors.white)),
 // )
-
-// Removed Default Scanning Option that saves as images
-// DialogButton(
-//   onPressed: () {
-//     Navigator.pop(context);
-//     _processScan(FlutterDocScanner().getScanDocuments(page: 4));
-//   },
-//   child: const Text('Scan', style: TextStyle(color: Colors.white)),
-// ),
