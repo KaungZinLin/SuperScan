@@ -32,12 +32,12 @@ Although there are many alternatives that exist, mosty notably CamScanner, I've 
 MagicEyes is a set of AI and algorithm-based features that improves the experience of SuperScan. In MagicEyes, you get the ability to:
 - Extract text from documents using system-level OCR
 - Summarize documents using AI
-### Why Google Drive for Sync?
-The reason I've chosen Google Drive is because I want the user to use a cloud storage platform (which the user most likely already has), instead of buying a subscription. It's also easier for me in terms of budget as I don't need to invest in database fees.
 
 **How will the AI features implemented in SuperScan?**
 
 I believe that the best way to implement AI features with MagicEyes is via API Keys. This is so that users who want to use AI (more specifically, OpenAI's ChatGPT) can do so with their own API Keys. And those who aren't interested can choose to not use AI.
+### Why Google Drive for Sync?
+The reason I've chosen Google Drive is because I want the user to use a cloud storage platform (which the user most likely already has), instead of buying a subscription. It's also easier for me in terms of budget as I don't need to invest in database fees.
 ## Technicial Features
 - Clean code
 - Flutter Stage Management
