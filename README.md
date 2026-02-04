@@ -36,6 +36,8 @@ MagicEyes is a set of AI and algorithm-based features that improves the experien
 **How will the AI features implemented in SuperScan?**
 
 I believe that the best way to implement AI features with MagicEyes is via API Keys. This is so that users who want to use AI (more specifically, OpenAI's ChatGPT) can do so with their own API Keys. And those who aren't interested can choose to not use AI.
+### Why Google Drive for Sync?
+The reason I've chosen Google Drive is because I want the user to use a cloud storage platform (which the user most likely already has), instead of buying a subscription. It's also easier for me in terms of budget as I don't need to invest in database fees.
 ## Technicial Features
 - Clean code
 - Flutter Stage Management
@@ -51,7 +53,7 @@ I'll expand the availability to the other platforms a little while after launch.
 - iOS
 - Linux
 # Business Model
-**Freemium**: I plan to give the user access to all features, with the inclusion of ads implemented in a non-intrusive way. Users will be able to donate me via In-App Purchases or other methods, which will disable ads.
+**Freemium, technically**: I plan to give the user access to all features, with the inclusion of ads implemented in a non-intrusive way. Users will be able to donate me via In-App Purchases or other methods, which will disable ads.
 # License
-I still haven't decided on a license yet, but one thing remains clear: this app will be open-source.
+I still haven't decided on a license yet, but one thing remains clear: this app will be open-source, and I'll allow anyone to clone my project as long as the person gives credit.
 
