@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+class SettingsScreen extends StatelessWidget {
+  static const String id = 'settings_screen';
+  const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

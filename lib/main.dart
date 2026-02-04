@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:super_scan/screens/home_page.dart';
+
+import 'constants.dart';
+
+import 'package:super_scan/components/launch_controller.dart';
+
+import 'package:super_scan/widgets/adaptive_rail.dart';
+import 'package:super_scan/widgets/adaptive_navigation_bar.dart';
+import 'package:super_scan/components/navigation_destinations.dart';
+
+import 'package:super_scan/screens/home_screen.dart';
 import 'package:super_scan/screens/loading_screen.dart';
-import 'package:super_scan/screens/settings_page.dart';
-import 'dart:async';
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart';
+import 'package:super_scan/screens/settings_screen.dart';
 
 void main() {
   runApp(const SuperScan());
@@ -17,25 +23,16 @@ class SuperScan extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'SuperScan',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          // Change color theme for light mode
-          seedColor: Colors.indigo,
-          brightness: Brightness.light,
-        ),
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          // Changed color theme for dark mode
-          seedColor: Colors.indigo,
-          brightness: Brightness.dark,
-        ),
-      ),
+      theme: kLightThemeData,
+      darkTheme: kDarkThemeData,
       themeMode: ThemeMode.system,
-      home: const MainLayout(),
+
+      initialRoute: '/',
+      routes: {
+        '/': (_) => const MainLayout(),
+        HomeScreen.id: (_) => const HomeScreen(),
+        SettingsScreen.id: (_) => const SettingsScreen(),
+      },
     );
   }
 }
@@ -49,75 +46,47 @@ class MainLayout extends StatefulWidget {
 
 class _MainLayoutState extends State<MainLayout> {
   int _selectedIndex = 0;
-  bool _isloading = true;
+  final LaunchController _launchController = LaunchController();
+  bool _isLoading = true;
 
-  final List<Widget> _pages = const [
-    HomePage(),
-    SettingsPage(),
+  final List<Widget> _pagesByIndex = const [
+    HomeScreen(), // Index 0
+    SettingsScreen(), // Index 1
   ];
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    Timer(const Duration(seconds: 3), () {
-      if (mounted) {
-        setState(() {
-          _isloading = false;
-        });
-      }
-    });
+    _runStartupSequence();
   }
 
-  // Added desktop check
-  bool get isDesktop {
-    if (kIsWeb) return false;
-    return Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+  Future<void> _runStartupSequence() async {
+    await _launchController.initializeApp();
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isloading) {
-      return LoadingScreen();
+    if (_isLoading) {
+      return const LoadingScreen();
     }
 
-    final bool isWide = MediaQuery
-        .of(context)
-        .size
-        .width >= 600;
+    final bool isWide =
+        MediaQuery
+            .of(context)
+            .size
+            .width >= kDesktopBreakpoint;
 
     return Scaffold(
         body: Row(
           children: [
             if (isWide)
-              NavigationRail(
+              AdaptiveNavigationRail(
                 selectedIndex: _selectedIndex,
-                onDestinationSelected: (i) =>
-                    setState(() => _selectedIndex = i),
-                labelType: NavigationRailLabelType.all,
-                destinations: [
-                  NavigationRailDestination(
-                    // Changed to sync on desktop
-                    icon: Icon(isDesktop ? Icons.sync : Icons.home,),
-                    label: Text(
-                      isDesktop ? 'Sync' : 'Home',
-                      style: TextStyle(
-                        // fontSize: 12.0,
-                        letterSpacing: 0.0,
-                      ),
-                    ),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.settings),
-                    label: Text(
-                      'Settings',
-                      style: TextStyle(
-                        // fontSize: 12.0,
-                        letterSpacing: 0.0,
-                      ),
-                    ),
-                  ),
-                ],
+                onSelected: (i) => setState(() => _selectedIndex = i),
+                destinations: railDestinations,
               ),
 
             if (isWide) const VerticalDivider(thickness: 1, width: 1),
@@ -125,32 +94,19 @@ class _MainLayoutState extends State<MainLayout> {
             Expanded(
               child: IndexedStack(
                 index: _selectedIndex,
-                children: _pages,
+                children: _pagesByIndex,
               ),
             ),
           ],
         ),
 
-        bottomNavigationBar: isWide ? null : NavigationBarTheme(
-          data: NavigationBarThemeData(
-            labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>(
-                  (states) =>
-                  TextStyle(
-                    letterSpacing: 0.0,
-                  ),
-            ),
-          ),
-          child: NavigationBar(
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: (i) => setState(() => _selectedIndex = i),
-            destinations: [
-              // Changed to Sync on desktop
-              NavigationDestination(icon: Icon(isDesktop ? Icons.sync : Icons.home), label: isDesktop ? 'Sync' : 'Home',),
-              NavigationDestination(
-                  icon: Icon(Icons.settings), label: 'Settings'),
-            ],
-          ),
+        bottomNavigationBar: isWide ? null : AdaptiveBottomNavigation
+          (
+          selectedIndex: _selectedIndex,
+          onSelected: (i) => setState(() => _selectedIndex = i),
+          destinations: bottomDestinations,
+          labelStyle: kNavigationBarLabelStyle,
         )
-      );
-    }
+    );
   }
+}

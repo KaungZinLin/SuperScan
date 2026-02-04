@@ -4,15 +4,19 @@ import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
+import 'package:super_scan/components/platform_helper.dart';
+import 'package:super_scan/constants.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+
+class HomeScreen extends StatefulWidget {
+  static const String id = 'home_screen';
+  const HomeScreen({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomeScreenState extends State<HomeScreen> {
   dynamic _scannedDocuments;
 
   /// Helper to handle the scanner calls and catch platform errors
@@ -30,12 +34,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  // Desktop check
-  bool get isDesktop {
-    if (kIsWeb) return false;
-    return Platform.isMacOS || Platform.isWindows || Platform.isLinux;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,7 +44,7 @@ class _HomePageState extends State<HomePage> {
         label: Text('Scan'),
         onPressed: () {
           // Added desktop check and prevented users from scanning if they're on desktop
-          if (isDesktop) {
+          if (PlatformHelper.isDesktop) {
             Alert(
               context: context,
               type: AlertType.warning,
@@ -58,7 +56,7 @@ class _HomePageState extends State<HomePage> {
               alertBorder: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25.0),
                 side: BorderSide(
-                  color: Colors.indigo,
+                  color: kAccentColor,
                 ),
               ),
               // Fix the Title Color
@@ -77,7 +75,7 @@ class _HomePageState extends State<HomePage> {
             ),
               buttons: [
                 DialogButton(
-                  color: Colors.indigo,
+                  color: kAccentColor,
                   onPressed: () {
                     Navigator.pop(context);
                   },
@@ -98,7 +96,7 @@ class _HomePageState extends State<HomePage> {
                 alertBorder: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25.0),
                   side: BorderSide(
-                    color: Colors.indigo,
+                    color: kAccentColor,
                   ),
                 ),
                 // Fix the Title Color
@@ -126,7 +124,7 @@ class _HomePageState extends State<HomePage> {
                   child: const Text('Scan', style: TextStyle(color: Colors.white)),
                 ),
                 DialogButton(
-                  color: Colors.indigo,
+                  color: kAccentColor,
                   onPressed: () {
                     Navigator.pop(context);
                     _processScan(FlutterDocScanner().getScannedDocumentAsImages(page: 4));
@@ -134,7 +132,7 @@ class _HomePageState extends State<HomePage> {
                   child: const Text('Image', style: TextStyle(color: Colors.white)),
                 ),
                 DialogButton(
-                  color: Colors.indigo,
+                  color: kAccentColor,
                   onPressed: () {
                     Navigator.pop(context);
                     _processScan(FlutterDocScanner().getScannedDocumentAsPdf(page: 4));
@@ -148,11 +146,11 @@ class _HomePageState extends State<HomePage> {
       ),
       // Changed appBar name to Sync on desktop
       appBar: AppBar(
-        title: Text(isDesktop ? 'Sync' : 'Home'),
+        title: Text(PlatformHelper.isDesktop ? 'Sync' : 'Home'),
           // Added sync button and marked as Work In Progress
           actions: <Widget>[
             IconButton(
-              icon: Icon(Icons.sync, color: Colors.indigo, fontWeight: FontWeight.w900,),
+              icon: Icon(Icons.sync, color: kAccentColor, fontWeight: FontWeight.w900,),
               onPressed: () {
                 Alert(
                   context: context,
@@ -165,7 +163,7 @@ class _HomePageState extends State<HomePage> {
                     alertBorder: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25.0),
                       side: BorderSide(
-                        color: Colors.indigo,
+                        color: kAccentColor,
                       ),
                     ),
                     // Fix the Title Color
@@ -184,7 +182,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   buttons: [
                     DialogButton(
-                      color: Colors.indigo,
+                      color: kAccentColor,
                       onPressed: () {
                         Navigator.pop(context);
                       },
@@ -208,7 +206,7 @@ class _HomePageState extends State<HomePage> {
                   // Different "no scans" text for different platforms
                   _scannedDocuments != null
                       ? Text(_scannedDocuments.toString())
-                      : Text(isDesktop ? 'No Synced Scans Yet.' : 'No Scans Yet.'),
+                      : Text(PlatformHelper.isDesktop ? 'No Synced Scans Yet.' : 'No Scans Yet.'),
                 ],
               ),
             ),

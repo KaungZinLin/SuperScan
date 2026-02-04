@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:super_scan/constants.dart';
 
 class LoadingScreen extends StatefulWidget {
+  static const String id = 'loading_screen';
   const LoadingScreen({super.key});
 
   @override
@@ -28,7 +30,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
               const SizedBox(height: 30),
               Text('SuperScan', style: TextStyle(fontSize: 50.0, fontWeight: FontWeight.w600),),
               const SizedBox(height: 30),
-              const SpinKitDualRing(color: Colors.indigo, size: 70.0),
+              const SpinKitDualRing(color: kAccentColor, size: 70.0),
             ],
         )
       )
