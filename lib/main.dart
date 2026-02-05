@@ -4,7 +4,7 @@ import 'constants.dart';
 
 import 'package:super_scan/components/launch_controller.dart';
 
-import 'package:super_scan/widgets/adaptive_rail.dart';
+import 'package:super_scan/widgets/adaptive_navigation_rail.dart';
 import 'package:super_scan/widgets/adaptive_navigation_bar.dart';
 import 'package:super_scan/components/navigation_destinations.dart';
 
