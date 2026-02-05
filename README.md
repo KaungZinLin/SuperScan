@@ -58,6 +58,7 @@ I'll expand the availability to the other platforms a little while after launch.
 # Business Model
 **Freemium, technically**: I plan to give the user access to all features, with the inclusion of ads implemented in a non-intrusive way. Users will be able to donate me via In-App Purchases or other methods, which will disable ads.
 # License
+MIT License
 Copyright (c) 2026 Kaung Zin Lin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
