@@ -46,6 +46,11 @@ The reason I've chosen Google Drive is because I want the user to use a cloud st
 - Flutter Stage Management
 # Release & Download
 As of now, SuperScan is still work in progress, and basic features are still being developed. Once I've completed the basic feautures and I'm confident that SuperScan is ready for public release, I'll publish the app to the Google Play Store, and I'll manually release the desktop versions.
+## Expected Launch Date
+**As APKs on Android, macOS, and Windows**: March 1, 2026
+**Google Play Store on Android**: TBA
+**Apple App Store on iOS and Apple-notarized app on macOS**: TBA
+**Linux**: TBA
 ## Availability
 SuperScan will be available on the following platforms on launch:
 - Android
