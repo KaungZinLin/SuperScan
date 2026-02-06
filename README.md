@@ -25,7 +25,10 @@ Although there are many alternatives that exist, mosty notably CamScanner, I've 
 - ✅ Beauitful UI
 - ✅ Cross-platform compatibility
 - ✅ Document Scanning
-- Save documents into local storage
+- ✅ Save documents into local storage
+- ✅ View scanned documents
+- Delete and rename scanned documents
+- Export scanned documents as PDF and images
 - Sync documents with Google Drive
 - Implement an in-app feature, nicknamed MagicEyes
 ### What is MagicEyes?
@@ -55,5 +58,25 @@ I'll expand the availability to the other platforms a little while after launch.
 # Business Model
 **Freemium, technically**: I plan to give the user access to all features, with the inclusion of ads implemented in a non-intrusive way. Users will be able to donate me via In-App Purchases or other methods, which will disable ads.
 # License
-I still haven't decided on a license yet, but one thing remains clear: this app will be open-source, and I'll allow anyone to clone my project as long as the person gives credit.
+MIT License
+
+Copyright (c) 2026 Kaung Zin Lin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
