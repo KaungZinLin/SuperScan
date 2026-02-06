@@ -144,7 +144,7 @@ class AboutScreen extends StatelessWidget {
               showLicensePage(
                 context: context,
                 applicationName: 'SuperScan',
-                applicationVersion: '0.26.0.11',
+                applicationVersion: '0.26.0.12',
                 applicationLegalese: '© 2026 Kaung Zin Lin',
               );
             },
