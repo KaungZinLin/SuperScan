@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
-import 'package:flutter/foundation.dart';
 import 'package:super_scan/components/platform_helper.dart';
+import 'package:super_scan/components/saved_scan.dart';
+import 'package:super_scan/components/scan_meta.dart';
 import 'package:super_scan/constants.dart';
 import 'dart:io';
 import 'package:super_scan/components/scan_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:super_scan/widgets/no_scans_widgets.dart';
 import 'scan_viewer_screen.dart';
+import 'dart:convert';
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
@@ -21,7 +22,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   dynamic _scannedDocuments;
-  List<Directory> _savedScans = [];
+  // List<Directory> _savedScans = [];
+  List<SavedScan> _savedScans = [];
 
   /// Helper to handle the scanner calls and catch platform errors
   Future<void> _processScan(Future<dynamic> scanTask) async {
@@ -72,34 +74,168 @@ class _HomeScreenState extends State<HomeScreen> {
     final scansDir = Directory('${dir.path}/scans');
 
     if (!await scansDir.exists()) {
-      setState(() {
-        _savedScans = [];
-      });
+      setState(() => _savedScans = []);
       return;
     }
 
-    final scanFolders = scansDir
-        .listSync()
-        .whereType<Directory>()
-        .toList();
+    final folders = scansDir.listSync().whereType<Directory>();
 
-    // Sort newest first
-    scanFolders.sort(
-          (a, b) => b.path.compareTo(a.path),
-    );
+    final scans = <SavedScan>[];
+
+    for (final folder in folders) {
+      final metaFile = File('${folder.path}/meta.json');
+      if (!metaFile.existsSync()) continue;
+
+      final metaJson = jsonDecode(metaFile.readAsStringSync());
+      scans.add(
+        SavedScan(
+          dir: folder,
+          meta: ScanMeta.fromJson(metaJson),
+        ),
+      );
+    }
+
+    // Sort newest → oldest
+    scans.sort((a, b) => b.meta.createdAt.compareTo(a.meta.createdAt));
 
     setState(() {
-      _savedScans = scanFolders;
+      _savedScans = scans;
     });
   }
 
-  void _openScanViewer(Directory scanDir) {
-    Navigator.push(
+  Future<void> _renameScan(SavedScan scan) async {
+    final controller = TextEditingController(text: scan.meta.name);
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Rename scan', style: kTextLetterSpacing,),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: 'Scan Name',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel', style: kTextLetterSpacing,),
+            ),
+            TextButton(
+              onPressed: () =>
+                  Navigator.pop(context, controller.text.trim()),
+              child: const Text('Save', style: kTextLetterSpacing,),
+            ),
+          ],
+        );
+      },
+    );
+
+
+    if (result == null || result.isEmpty) return;
+
+    await ScanStorage.renameScan(
+      scanDir: scan.dir,
+      newName: result,
+    );
+
+    await _loadSavedScans();
+  }
+
+  Future<void> _showScanOptions(SavedScan scan) async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Options for “${scan.meta.name}”', style: kTextLetterSpacing,),
+          content: const Text('What would you like to do?', style: kTextLetterSpacing,),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel',
+                style: kTextLetterSpacing,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _renameScan(scan);
+              },
+              child: const Text('Rename', style: TextStyle(
+                  letterSpacing: 0.0,
+                  fontWeight: .bold
+              )),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _deleteScan(scan);
+              },
+              child: const Text(
+                'Delete',
+                style: TextStyle(
+                  color: Colors.red,
+                    letterSpacing: 0.0,
+                    fontWeight: .bold
+                ),
+              ),
+            ),
+
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteScan(SavedScan scan) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete scan?', style: kTextLetterSpacing,),
+          content: Text(
+            '“${scan.meta.name}” will be permanently deleted.',
+            style: kTextLetterSpacing,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel', style: kTextLetterSpacing,),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('Delete', style: kTextLetterSpacing,),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+
+    await ScanStorage.deleteScan(scan.dir);
+    await _loadSavedScans();
+  }
+
+  Future<void> _openScanViewer(Directory scanDir) async {
+    final changed = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (_) => ScanViewerScreen(scanDir: scanDir),
       ),
     );
+
+    await _loadSavedScans();
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} • '
+        '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -130,51 +266,11 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: <Widget>[
             IconButton(
               icon: Icon(
-                Icons.cloud_sync, color: kAccentColor,),
+                Icons.cloud_sync,
+                color: kAccentColor,
+              ),
               onPressed: () {
-                Alert(
-                  context: context,
-                  type: AlertType.warning,
-                  title: 'Coming soon...',
-                  desc: 'SuperScan does not support Sync yet',
-                  style: AlertStyle(
-                    isCloseButton: true,
-                    isOverlayTapDismiss: true,
-                    alertBorder: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                      side: BorderSide(
-                        color: kAccentColor,
-                      ),
-                    ),
-                    // Fix the Title Color
-                    titleStyle: TextStyle(
-                      // 2. Explicitly toggle color based on brightness
-                      color: Theme
-                          .of(context)
-                          .brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    descStyle: TextStyle(
-                      color: Theme
-                          .of(context)
-                          .brightness == Brightness.dark
-                          ? Colors.white70
-                          : Colors.black87,
-                    ),
-                  ),
-                  buttons: [
-                    DialogButton(
-                      color: kAccentColor,
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('OK', style: TextStyle(color: Colors
-                          .white)),
-                    ),
-                  ],
-                ).show();
+
               },
             ),
           ]
@@ -187,7 +283,9 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(16),
             itemCount: _savedScans.length,
             itemBuilder: (context, index) {
-              final scanDir = _savedScans[index];
+              final savedScan = _savedScans[index];
+              final scanDir = savedScan.dir;
+              final meta = savedScan.meta;
 
               final pages = scanDir
                   .listSync()
@@ -201,9 +299,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: ListTile(
-                  leading: const Icon(Icons.document_scanner),
-                  title: Text('Scan ${index + 1}'),
-                  subtitle: Text('$pages page(s)'),
+                  // leading: const Icon(Icons.document_scanner),
+                  trailing: const Icon(Icons.chevron_right),
+                  title: Text(meta.name, style: kTextLetterSpacing,),
+                  subtitle: Text(
+                    '$pages page(s) • ${_formatDate(meta.createdAt)}',
+                    style: kTextLetterSpacing,
+                  ),
+                  onLongPress: () => _showScanOptions(savedScan),
                   onTap: () {
                     _openScanViewer(scanDir);
                   },

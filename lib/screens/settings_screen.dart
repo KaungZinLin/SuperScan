@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:super_scan/constants.dart';
 import 'package:super_scan/screens/about_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -21,7 +22,7 @@ class SettingsScreen extends StatelessWidget {
           // --- ABOUT SECTION ---
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('About'),
+            title: const Text('About', style: kTextLetterSpacing,),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               Navigator.push(

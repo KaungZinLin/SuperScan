@@ -6,6 +6,9 @@ const TextStyle kNavigationBarLabelStyle = TextStyle(letterSpacing: 0.0);
 
 const Color kAccentColor = Color(0xFF00c8ff);
 
+const kTextLetterSpacing =  TextStyle(
+    letterSpacing: 0.0);
+
 final ThemeData kLightThemeData = ThemeData(
   useMaterial3: true,
   colorScheme: ColorScheme.fromSeed(

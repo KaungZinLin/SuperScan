@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:super_scan/components/url_launcher.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:super_scan/constants.dart';
 
 class AboutScreen extends StatelessWidget {
   static const String id = 'settings_screen';
@@ -48,8 +49,8 @@ class AboutScreen extends StatelessWidget {
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        'Version 0.26.0.11',
-                        style: TextStyle(color: color.onSurfaceVariant, fontSize: 13,),
+                        'Version 0.26.0.12',
+                        style: TextStyle(color: color.onSurfaceVariant, fontSize: 13, letterSpacing: 0.0),
                       ),
                     ],
                   ),
@@ -63,7 +64,7 @@ class AboutScreen extends StatelessWidget {
           // --- ABOUT SECTION ---
           ListTile(
             leading: const Icon(Icons.person_outline),
-            title: const Text('Made with ❤️ by Kaung Zin Lin'),
+            title: const Text('Made with ❤️ by Kaung Zin Lin', style: kTextLetterSpacing,),
             trailing: const Icon(Icons.chevron_right),
             onTap: () async {
               await launchMyURL('https://kaung.carrd.co/');
@@ -71,27 +72,27 @@ class AboutScreen extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),
-            title: const Text('Terms of Service'),
+            title: const Text('Terms of Service', style: kTextLetterSpacing,),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {},
           ),
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
-            title: const Text('Privacy Policy'),
+            title: const Text('Privacy Policy', style: kTextLetterSpacing,),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {},
           ),
           ListTile(
             leading: const Icon(Icons.favorite_border, color: Colors.redAccent),
             trailing: const Icon(Icons.chevron_right),
-            title: const Text('Donate'),
+            title: const Text('Donate', style: kTextLetterSpacing,),
             onTap: () {},
           ),
 
           ListTile(
             leading: const Icon(Icons.medical_information_outlined),
             title: const Text('License'),
-            subtitle: const Text('MIT License © 2026'), // Keep it short here
+            subtitle: const Text('MIT License © 2026', style: kTextLetterSpacing,), // Keep it short here
             onTap: () {
               showDialog(
                 context: context,
@@ -117,13 +118,16 @@ class AboutScreen extends StatelessWidget {
                             'LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, '
                             'OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE '
                             'SOFTWARE.',
-                        style: TextStyle(fontSize: 12),
+                        style: TextStyle(
+                          fontSize: 12,
+                          letterSpacing: 0.0
+                        ),
                       ),
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Close'),
+                        child: const Text('Close', style: kTextLetterSpacing,),
                       ),
                     ],
                   );
