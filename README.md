@@ -27,8 +27,8 @@ Although there are many alternatives that exist, mosty notably CamScanner, I've 
 - ✅ Document Scanning
 - ✅ Save documents into local storage
 - ✅ View scanned documents
-- Delete and rename scanned documents
-- Export scanned documents as PDF and images
+- ✅ Delete and rename scanned documents
+- ✅ Export scanned documents as PDF and images
 - Sync documents with Google Drive
 - Implement an in-app feature, nicknamed MagicEyes
 ### What is MagicEyes?
