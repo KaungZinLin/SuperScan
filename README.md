@@ -29,7 +29,7 @@ Although there are many alternatives that exist, mosty notably CamScanner, I've 
 - ✅ View scanned documents
 - ✅ Delete and rename scanned documents
 - ✅ Export scanned documents as PDF and images
-- Edit scanned documents (rotate and crop)
+- ✅ Edit scanned documents (rotate and crop)
 - Reorder scan pages
 - Select pages of a scan before exporting
 - Sync documents with Google Drive
