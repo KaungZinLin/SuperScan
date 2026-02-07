@@ -5,6 +5,7 @@ import 'package:super_scan/constants.dart';
 import 'package:super_scan/components/scan_meta.dart';
 import 'package:super_scan/components/scan_storage.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:image_cropper/image_cropper.dart';
 
 class ScanViewerScreen extends StatefulWidget {
   final Directory scanDir;
@@ -68,9 +69,21 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
             padding: const EdgeInsets.only(bottom: 12),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.file(
-                _images[index],
-                fit: BoxFit.contain,
+              child: GestureDetector(
+                onLongPress: () async {
+                  final edited = await editScanImage(_images[index]);
+                  if (edited != null && context.mounted) {
+                    await imageCache.evict(FileImage(edited));
+                    setState(() {
+
+                    }); // refresh viewer
+                  }
+                },
+                child: Image.file(
+                  _images[index],
+                  key: ValueKey(_images[index].lastModifiedSync().millisecondsSinceEpoch),
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
           );
@@ -100,7 +113,12 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
               Navigator.pop(context);
               _renameScan();
             },
-            child: const Text('Rename', style: kTextLetterSpacing),
+            child: const Text(
+                'Rename',
+                style: TextStyle(
+                fontWeight: .bold, letterSpacing: 0.0
+                )
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -109,7 +127,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
             },
             child: const Text(
               'Delete',
-              style: TextStyle(color: Colors.red),
+              style: TextStyle(color: Colors.red, fontWeight: .bold, letterSpacing: 0.0),
             ),
           ),
         ],
@@ -275,5 +293,56 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
         );
       }
     }
+  }
+
+  Future<File?> editScanImage(File imageFile) async {
+    final cropped = await ImageCropper().cropImage(
+      sourcePath: imageFile.path,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Edit Scan',
+          toolbarColor: Colors.black,
+          toolbarWidgetColor: Colors.white,
+          lockAspectRatio: false,
+          hideBottomControls: false,
+          showCropGrid: true,
+        ),
+        IOSUiSettings(
+          title: 'Edit Scan',
+          aspectRatioLockEnabled: false,
+          rotateButtonsHidden: false,
+          resetAspectRatioEnabled: true,
+        ),
+      ],
+    );
+
+    if (cropped == null) return null;
+
+    // Replace original image
+    final editedFile = File(cropped.path);
+    await editedFile.copy(imageFile.path);
+
+    return imageFile;
+  }
+
+  Future<void> _onReorder(int oldIndex, int newIndex) async {
+    setState(() {
+      if (newIndex > oldIndex) newIndex--;
+      final file = _images.removeAt(oldIndex);
+      _images.insert(newIndex, file);
+    });
+
+    // 🔥 Persist order by renaming files
+    for (int i = 0; i < _images.length; i++) {
+      final newPath =
+          '${widget.scanDir.path}/page_${i + 1}.jpg';
+
+      if (_images[i].path != newPath) {
+        await _images[i].rename(newPath);
+        _images[i] = File(newPath);
+      }
+    }
+
+    setState(() {}); // refresh UI
   }
 }

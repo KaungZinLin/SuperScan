@@ -49,7 +49,7 @@ class AboutScreen extends StatelessWidget {
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        'Version 0.26.0.12',
+                        'Version 0.26.0.13',
                         style: TextStyle(color: color.onSurfaceVariant, fontSize: 13, letterSpacing: 0.0),
                       ),
                     ],
@@ -144,7 +144,7 @@ class AboutScreen extends StatelessWidget {
               showLicensePage(
                 context: context,
                 applicationName: 'SuperScan',
-                applicationVersion: '0.26.0.12',
+                applicationVersion: '0.26.0.13',
                 applicationLegalese: '© 2026 Kaung Zin Lin',
               );
             },
