@@ -24,7 +24,7 @@ Although there are many alternatives that exist, mosty notably CamScanner, I've 
 ## Priority Features
 - ✅ Beauitful UI
 - ✅ Cross-platform compatibility
-- ✅ Document Scanning
+- ✅ Scan documents
 - ✅ Save documents into local storage
 - ✅ View scanned documents
 - ✅ Delete and rename scanned documents
@@ -32,6 +32,7 @@ Although there are many alternatives that exist, mosty notably CamScanner, I've 
 - ✅ Edit scanned documents (rotate and crop)
 - Reorder scan pages
 - Select pages of a scan before exporting
+- Add more pages in an already scanned document
 - Sync documents with Google Drive
 - Implement an in-app feature, nicknamed MagicEyes
 ### What is MagicEyes?
