@@ -32,6 +32,7 @@ Although there are many alternatives that exist, mosty notably CamScanner, I've 
 - ✅ Edit scanned documents (rotate and crop)
 - ✅ Select pages of a scan before exporting
 - Reorder scan pages
+- Search scanned documents
 - Sync documents with Google Drive
 - Implement an in-app feature, nicknamed MagicEyes
 ### What is MagicEyes?
