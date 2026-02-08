@@ -157,7 +157,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
           TextButton(
             onPressed: () =>
                 Navigator.pop(context, controller.text.trim()),
-            child: const Text('Save', style: kTextLetterSpacing),
+            child: const Text('Save', style: TextStyle(fontWeight: .bold, letterSpacing: 0.0)),
           ),
         ],
       ),
@@ -173,6 +173,12 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
     // ✅ Update UI without leaving screen
     setState(() {
       _meta = _meta.copyWith(name: result);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Renamed successfully'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     });
   }
 
@@ -195,7 +201,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete', style: kTextLetterSpacing),
+            child: const Text('Delete', style: TextStyle(fontWeight: .bold, letterSpacing: 0.0)),
           ),
         ],
       ),
@@ -206,7 +212,13 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
     await ScanStorage.deleteScan(widget.scanDir);
 
     if (context.mounted) {
-      Navigator.pop(context, true); // Refresh HomeScreen
+      Navigator.pop(context, true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Deleted permanently'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 

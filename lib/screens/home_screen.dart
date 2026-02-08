@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
+import 'package:super_scan/components/action_button.dart';
+import 'package:super_scan/components/expandable_fab.dart';
 import 'package:super_scan/components/platform_helper.dart';
 import 'package:super_scan/components/saved_scan.dart';
 import 'package:super_scan/components/scan_meta.dart';
@@ -11,6 +13,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:super_scan/widgets/no_scans_widgets.dart';
 import 'scan_viewer_screen.dart';
 import 'dart:convert';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
@@ -126,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
             TextButton(
               onPressed: () =>
                   Navigator.pop(context, controller.text.trim()),
-              child: const Text('Save', style: kTextLetterSpacing,),
+              child: const Text('Save', style: TextStyle(fontWeight: .bold, letterSpacing: 0.0)),
             ),
           ],
         );
@@ -142,6 +146,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     await _loadSavedScans();
+    // Use ScaffoldMessenger to show the snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Renamed successfully'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   Future<void> _showScanOptions(SavedScan scan) async {
@@ -209,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextButton.styleFrom(
                 foregroundColor: Colors.red,
               ),
-              child: const Text('Delete', style: kTextLetterSpacing,),
+              child: const Text('Delete', style: TextStyle(fontWeight: .bold, letterSpacing: 0.0)),
             ),
           ],
         );
@@ -220,6 +231,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     await ScanStorage.deleteScan(scan.dir);
     await _loadSavedScans();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Deleted permanently'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   Future<void> _openScanViewer(Directory scanDir) async {
@@ -233,9 +250,46 @@ class _HomeScreenState extends State<HomeScreen> {
     await _loadSavedScans();
   }
 
+  Future<void> _importImages() async {
+    try {
+      final picker = ImagePicker();
+
+      final images = await picker.pickMultiImage(
+        imageQuality: 100,
+      );
+
+      if (images.isEmpty) return;
+
+      final paths = images.map((e) => e.path).toList();
+
+      final scanDir = await ScanStorage.saveScanImages(paths);
+
+      if (!mounted) return;
+
+      await _loadSavedScans();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Imported images successfully'),
+            behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Failed to improt images: $e'),
+            behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} • '
-        '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    // return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} • '
+    //     '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    return DateFormat.yMd().add_jm().format(date);
   }
 
   @override
@@ -249,16 +303,24 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       // Completely removed FAB on desktop
       floatingActionButton: PlatformHelper.isDesktop ? null :
-      FloatingActionButton.extended(
-        // Removed elevation from floating action button
-        elevation: 0.0,
-        icon: Icon(Icons.document_scanner, size: 35.0),
-        label: Text('Scan'),
-        onPressed: () {
-          _processScan(FlutterDocScanner().getScannedDocumentAsImages(
-              page: 4));
-        },
-      ),
+          ExpandableFab(
+            children: [
+              ActionButton(
+                icon: Icon(Icons.photo_library, color: Colors.white,),
+                onPressed: () {
+                  _importImages();
+                },
+              ),
+              ActionButton(
+                icon: Icon(Icons.camera_alt, color: Colors.white,),
+                onPressed: () {
+                  _processScan(FlutterDocScanner().getScannedDocumentAsImages(
+                      page: 4));
+                },
+              ),
+            ],
+            distance: 20,
+          ),
       // Changed appBar name to Sync on desktop
       appBar: AppBar(
           title: Text(PlatformHelper.isDesktop ? 'Sync' : 'Home'),
@@ -298,6 +360,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
+                elevation: 0.0,
+                color: kAccentColor.withAlpha(20),
                 child: ListTile(
                   // leading: const Icon(Icons.document_scanner),
                   trailing: const Icon(Icons.chevron_right),

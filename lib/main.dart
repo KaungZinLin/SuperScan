@@ -12,7 +12,11 @@ import 'package:super_scan/screens/home_screen.dart';
 import 'package:super_scan/screens/loading_screen.dart';
 import 'package:super_scan/screens/settings_screen.dart';
 
-void main() {
+import 'package:intl/date_symbol_data_local.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting();
   runApp(const SuperScan());
 }
 
