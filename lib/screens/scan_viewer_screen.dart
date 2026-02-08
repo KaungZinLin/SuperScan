@@ -156,7 +156,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
           value: 'delete',
           child: ListTile(
             leading: Icon(Icons.delete_outline, color: Colors.red),
-            title: Text('Delete', style: TextStyle(color: Colors.red)),
+            title: Text('Delete this Page', style: TextStyle(color: Colors.red)),
             contentPadding: EdgeInsets.zero,
           ),
         ),

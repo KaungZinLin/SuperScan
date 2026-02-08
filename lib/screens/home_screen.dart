@@ -15,6 +15,7 @@ import 'scan_viewer_screen.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:super_scan/components/scan_search_delegate.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
@@ -28,6 +29,19 @@ class _HomeScreenState extends State<HomeScreen> {
   dynamic _scannedDocuments;
   // List<Directory> _savedScans = [];
   List<SavedScan> _savedScans = [];
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  List<SavedScan> get _filteredScans {
+    if (_searchQuery.isEmpty) return _savedScans;
+
+    final query = _searchQuery.toLowerCase();
+
+    return _savedScans.where((scan) {
+      final name = scan.meta.name.toLowerCase();
+      return name.contains(query);
+    }).toList();
+  }
 
   /// Helper to handle the scanner calls and catch platform errors
   Future<void> _processScan(Future<dynamic> scanTask) async {
@@ -287,8 +301,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _formatDate(DateTime date) {
-    // return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} • '
-    //     '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
     return DateFormat.yMd().add_jm().format(date);
   }
 
@@ -323,29 +335,31 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
       // Changed appBar name to Sync on desktop
       appBar: AppBar(
-          title: Text(PlatformHelper.isDesktop ? 'Sync' : 'Home'),
-          // Added sync button and marked as Work In Progress
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(
-                Icons.cloud_sync,
-                color: kAccentColor,
-              ),
-              onPressed: () {
-
-              },
+        centerTitle: true,
+        title: Text('Home', style: kTextLetterSpacing,),
+        leading: IconButton(
+          icon: Icon(Icons.cloud_sync, color: kAccentColor),
+          onPressed: () {},
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search, color: kAccentColor,),
+            onPressed: () => showSearch(
+              context: context,
+              delegate: ScanSearchDelegate(_savedScans),
             ),
-          ]
+          ),
+        ],
       ),
 
         body: SafeArea(
-          child: _savedScans.isEmpty
+          child: _filteredScans.isEmpty
               ? EmptyScansPlaceholder()
               : ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: _savedScans.length,
+            itemCount: _filteredScans.length,
             itemBuilder: (context, index) {
-              final savedScan = _savedScans[index];
+              final savedScan = _filteredScans[index];
               final scanDir = savedScan.dir;
               final meta = savedScan.meta;
 
