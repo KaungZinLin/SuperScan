@@ -135,4 +135,73 @@ class ScanStorage {
       ..sort((a, b) => a.path.compareTo(b.path));
     return files;
   }
+
+  static Future<void> removePage({
+    required Directory scanDir,
+    required int pageIndex, // 0-based index
+  }) async {
+    final images = scanDir
+        .listSync()
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.jpg'))
+        .toList()
+      ..sort((a, b) => a.path.compareTo(b.path));
+
+    if (pageIndex < 0 || pageIndex >= images.length) {
+      throw RangeError('Invalid page index');
+    }
+
+    // Delete the selected page
+    await images[pageIndex].delete();
+
+    // Re-number remaining pages
+    final remaining = scanDir
+        .listSync()
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.jpg'))
+        .toList()
+      ..sort((a, b) => a.path.compareTo(b.path));
+
+    for (int i = 0; i < remaining.length; i++) {
+      final newPath = '${scanDir.path}/page_${i + 1}.jpg';
+
+      if (remaining[i].path != newPath) {
+        await remaining[i].rename(newPath);
+      }
+    }
+  }
+
+  static Future<void> removePageByFile({
+    required File imageFile,
+  }) async {
+    if (!await imageFile.exists()) return;
+
+    await imageFile.delete();
+  }
+
+  static Future<void> appendPages({
+    required Directory scanDir,
+    required List<String> imageUris,
+  }) async {
+    if (imageUris.isEmpty) return;
+
+    // Get existing pages
+    final existingImages = scanDir
+        .listSync()
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.jpg'))
+        .toList()
+      ..sort((a, b) => a.path.compareTo(b.path));
+
+    int startIndex = existingImages.length;
+
+    for (int i = 0; i < imageUris.length; i++) {
+      final source = File(imageUris[i]);
+      final target = File(
+        '${scanDir.path}/page_${startIndex + i + 1}.jpg',
+      );
+
+      await source.copy(target.path);
+    }
+  }
 }

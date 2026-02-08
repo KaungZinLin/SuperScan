@@ -149,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // Use ScaffoldMessenger to show the snackbar
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Renamed successfully'),
+        content: const Text('Renamed successfully', style: kTextLetterSpacing,),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -233,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
     await _loadSavedScans();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Deleted permanently'),
+        content: const Text('Deleted permanently', style: kTextLetterSpacing,),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -270,7 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Imported images successfully'),
+            content: Text('Imported images successfully', style: kTextLetterSpacing,),
             behavior: SnackBarBehavior.floating,
         ),
       );
@@ -279,7 +279,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('Failed to improt images: $e'),
+            content: Text('Failed to improt images: $e', style: kTextLetterSpacing,),
             behavior: SnackBarBehavior.floating,
         ),
       );

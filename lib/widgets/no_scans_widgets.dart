@@ -30,7 +30,7 @@ class EmptyScansPlaceholder extends StatelessWidget {
             child: Text(
               PlatformHelper.isDesktop
                   ? 'Check your connection or sign in'
-                  : 'Your scans will appear here',
+                  : 'Start scanning by pressing “+”',
               style: const TextStyle(fontSize: 14),
             ),
           ),

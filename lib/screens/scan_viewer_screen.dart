@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
 import 'package:super_scan/constants.dart';
 import 'package:super_scan/components/scan_meta.dart';
 import 'package:super_scan/components/scan_storage.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ScanViewerScreen extends StatefulWidget {
   final Directory scanDir;
@@ -50,16 +52,6 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_meta.name, style: kTextLetterSpacing),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.more_horiz, color: kAccentColor),
-            onPressed: _showScanOptions,
-          ),
-          IconButton(
-            icon: Icon(Icons.ios_share, color: kAccentColor),
-              onPressed: () => _showExportOptions(context),
-          ),
-        ],
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -70,15 +62,8 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: GestureDetector(
-                onLongPress: () async {
-                  final edited = await editScanImage(_images[index]);
-                  if (edited != null && context.mounted) {
-                    await imageCache.evict(FileImage(edited));
-                    setState(() {
-
-                    }); // refresh viewer
-                  }
-                },
+                // 1. Use onLongPressStart to get the tap coordinates
+                onLongPressStart: (details) => _showContextMenu(context, details.globalPosition, index),
                 child: Image.file(
                   _images[index],
                   key: ValueKey(_images[index].lastModifiedSync().millisecondsSinceEpoch),
@@ -89,50 +74,134 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
           );
         },
       ),
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            InkWell(
+              onTap: () {
+                showAddMorePagesDialog();
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.add, color: kAccentColor),
+                  Text("Add", style: TextStyle(fontSize: 12, letterSpacing: 0.0)),
+                ],
+              ),
+            ),
+            InkWell(
+              onTap: () => _showExportOptions(context),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.ios_share, color: kAccentColor),
+                  Text("Share", style: TextStyle(fontSize: 12, letterSpacing: 0.0)),
+                ],
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                _renameScan();
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.drive_file_rename_outline, color: kAccentColor),
+                  Text("Rename", style: TextStyle(fontSize: 12, letterSpacing: 0.0)),
+                ],
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                _deleteScan();
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.delete, color: kAccentColor),
+                  Text("Delete", style: TextStyle(fontSize: 12, letterSpacing: 0.0)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   /* ───────────────── OPTIONS ───────────────── */
 
-  Future<void> _showScanOptions() async {
-    await showDialog(
+  void _showContextMenu(BuildContext context, Offset tapPosition, int index) async {
+    // 2. Identify where on the screen the menu should appear
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+
+    final String? selectedAction = await showMenu<String>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Options for “${_meta.name}”', style: kTextLetterSpacing),
-        content: const Text(
-          'What would you like to do?',
-          style: kTextLetterSpacing,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: kTextLetterSpacing),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _renameScan();
-            },
-            child: const Text(
-                'Rename',
-                style: TextStyle(
-                fontWeight: .bold, letterSpacing: 0.0
-                )
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _deleteScan();
-            },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red, fontWeight: .bold, letterSpacing: 0.0),
-            ),
-          ),
-        ],
+      // Defines the "box" the menu will point toward
+      position: RelativeRect.fromRect(
+        Rect.fromLTWH(tapPosition.dx, tapPosition.dy, 40, 40),
+        Offset.zero & overlay.size,
       ),
+      items: [
+        const PopupMenuItem(
+          value: 'edit',
+          child: ListTile(
+            leading: Icon(Icons.crop),
+            title: Text('Crop and Rotate'),
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'delete',
+          child: ListTile(
+            leading: Icon(Icons.delete_outline, color: Colors.red),
+            title: Text('Delete', style: TextStyle(color: Colors.red)),
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+      ],
     );
+
+    // 3. Handle the result
+    if (selectedAction == null) return;
+
+    switch (selectedAction) {
+      case 'edit':
+        final edited = await editScanImage(_images[index]);
+        if (edited != null && mounted) {
+          // Replace the File object in the list
+          _images[index] = File(edited.path);
+
+          // Evict old image from memory cache
+          await imageCache.evict(FileImage(_images[index]));
+
+          setState(() {}); // triggers rebuild
+        }
+        break;
+      case 'delete':
+        setState(() async {
+          await ScanStorage.removePageByFile(
+            imageFile: _images[index],
+          );
+
+          if (!mounted) return;
+
+          setState(() {
+            _reloadImages();
+          });
+        });
+        break;
+    }
+  }
+
+  void _reloadImages() {
+    _images = widget.scanDir
+        .listSync()
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.jpg'))
+        .toList()
+      ..sort((a, b) => a.path.compareTo(b.path));
   }
 
   /* ───────────────── RENAME (NO POP) ───────────────── */
@@ -170,12 +239,11 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
       newName: result,
     );
 
-    // ✅ Update UI without leaving screen
     setState(() {
       _meta = _meta.copyWith(name: result);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Renamed successfully'),
+          content: const Text('Renamed successfully', style: kTextLetterSpacing,),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -215,7 +283,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
       Navigator.pop(context, true);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Deleted permanently'),
+          content: const Text('Deleted permanently', style: kTextLetterSpacing,),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -276,7 +344,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to share PDF: $e')),
+          SnackBar(content: Text('Failed to share PDF: $e', style: kTextLetterSpacing,)),
         );
       }
     }
@@ -301,7 +369,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to share images: $e')),
+          SnackBar(content: Text('Failed to share images: $e', style: kTextLetterSpacing,)),
         );
       }
     }
@@ -312,7 +380,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
       sourcePath: imageFile.path,
       uiSettings: [
         AndroidUiSettings(
-          toolbarTitle: 'Edit Scan',
+          toolbarTitle: 'Crop & Rotate',
           toolbarColor: Colors.black,
           toolbarWidgetColor: Colors.white,
           lockAspectRatio: false,
@@ -320,7 +388,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
           showCropGrid: true,
         ),
         IOSUiSettings(
-          title: 'Edit Scan',
+          title: 'Crop & Rotate',
           aspectRatioLockEnabled: false,
           rotateButtonsHidden: false,
           resetAspectRatioEnabled: true,
@@ -335,6 +403,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
     await editedFile.copy(imageFile.path);
 
     return imageFile;
+
   }
 
   Future<void> _onReorder(int oldIndex, int newIndex) async {
@@ -344,7 +413,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
       _images.insert(newIndex, file);
     });
 
-    // 🔥 Persist order by renaming files
+    // Persist order by renaming files
     for (int i = 0; i < _images.length; i++) {
       final newPath =
           '${widget.scanDir.path}/page_${i + 1}.jpg';
@@ -356,5 +425,123 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
     }
 
     setState(() {}); // refresh UI
+  }
+
+  Future<void> showAddMorePagesDialog() async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+
+          title: const Text('How would you like to add more scans?', style: kTextLetterSpacing,),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel', style: kTextLetterSpacing,),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _importImages();
+              },
+              child: const Text('From Photo Library', style: TextStyle(fontWeight: .bold, letterSpacing: 0.0)),
+            ),
+            TextButton(
+              onPressed: () => _addMorePages(),
+              child: const Text('From Camera', style: TextStyle(fontWeight: .bold, letterSpacing: 0.0)),
+            ),
+          ],
+        );
+      }
+    );
+  }
+
+  Future<void> _addMorePages() async {
+    try {
+      final result = await FlutterDocScanner()
+          .getScannedDocumentAsImages(page: 4);
+
+      List<String> images = [];
+
+      if (result is Map && result['images'] != null) {
+        images = List<String>.from(result['images']);
+      } else if (result is List) {
+        images = List<String>.from(result);
+      }
+
+      if (images.isEmpty) return;
+
+      await ScanStorage.appendPages(
+        scanDir: widget.scanDir,
+        imageUris: images,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _reloadImages(); // same method you already use
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pages added', style: kTextLetterSpacing,),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to add pages: $e', style: kTextLetterSpacing,),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _importImages() async {
+    try {
+      final picker = ImagePicker();
+
+      final pickedImages = await picker.pickMultiImage(
+        imageQuality: 100,
+      );
+
+      if (pickedImages.isEmpty) return;
+
+      final imagePaths = pickedImages.map((e) => e.path).toList();
+
+      // Append imported images to the existing scan
+      await ScanStorage.appendPages(
+        scanDir: widget.scanDir,
+        imageUris: imagePaths,
+      );
+
+      if (!mounted) return;
+
+      // Important: clear image cache so imported images show up
+      imageCache.clear();
+      imageCache.clearLiveImages();
+
+      setState(() {
+        _reloadImages();
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Images imported successfully', style: kTextLetterSpacing,),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to import images: $e', style: kTextLetterSpacing,),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }
