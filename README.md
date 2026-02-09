@@ -22,7 +22,7 @@ Although there are many alternatives that exist, mosty notably CamScanner, I've 
 - To allow the user to use Google Drive to sync, unifying the user's subscriptions into one space, instead of many
 # Feature Roadmap
 ## Priority Features
-- ✅ Beauitful UI
+- ✅ Beauitful Material 3 UI
 - ✅ Cross-platform compatibility
 - ✅ Scan documents
 - ✅ Save documents into local storage
