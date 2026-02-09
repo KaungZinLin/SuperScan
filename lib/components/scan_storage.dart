@@ -14,6 +14,7 @@ class ScanStorage {
       await scansDir.create(recursive: true);
     }
 
+
     String _defaultScanName() {
       final now = DateTime.now();
       return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} '
@@ -31,7 +32,7 @@ class ScanStorage {
     // Copy scanned images
     for (int i = 0; i < imageUris.length; i++) {
       final source = File(imageUris[i]);
-      final target = File('${scanDir.path}/page_${i + 1}.jpg');
+      final target = File('${scanDir.path}/${_pageName(i + 1)}');
       await source.copy(target.path);
     }
 
@@ -59,6 +60,10 @@ class ScanStorage {
 
 
     return scanDir;
+  }
+
+  static String _pageName(int index) {
+    return 'page_${index.toString().padLeft(3, '0')}.jpg';
   }
 
   static Future<void> deleteScan(Directory scanDir) async {
@@ -163,7 +168,7 @@ class ScanStorage {
       ..sort((a, b) => a.path.compareTo(b.path));
 
     for (int i = 0; i < remaining.length; i++) {
-      final newPath = '${scanDir.path}/page_${i + 1}.jpg';
+      final newPath = '${scanDir.path}/${_pageName(i + 1)}';
 
       if (remaining[i].path != newPath) {
         await remaining[i].rename(newPath);
@@ -198,10 +203,29 @@ class ScanStorage {
     for (int i = 0; i < imageUris.length; i++) {
       final source = File(imageUris[i]);
       final target = File(
-        '${scanDir.path}/page_${startIndex + i + 1}.jpg',
+          '${scanDir.path}/${_pageName(startIndex + i + 1)}'
       );
 
       await source.copy(target.path);
+    }
+  }
+
+  static Future<void> reorderPages(
+      Directory scanDir,
+      List<File> orderedFiles,
+      ) async {
+    final dirPath = scanDir.path;
+
+    // Step 1: temp rename (prevents overwrite)
+    for (int i = 0; i < orderedFiles.length; i++) {
+      final tempFile = File('$dirPath/_tmp_$i.jpg');
+      orderedFiles[i] = await orderedFiles[i].rename(tempFile.path);
+    }
+
+    // Step 2: final rename
+    for (int i = 0; i < orderedFiles.length; i++) {
+      final finalFile = File('$dirPath/page_${i + 1}.jpg');
+      orderedFiles[i] = await orderedFiles[i].rename(finalFile.path);
     }
   }
 }

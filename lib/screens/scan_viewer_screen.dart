@@ -8,6 +8,8 @@ import 'package:super_scan/components/scan_storage.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'reorder_pages_page.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ScanViewerScreen extends StatefulWidget {
   final Directory scanDir;
@@ -24,6 +26,8 @@ class ScanViewerScreen extends StatefulWidget {
 class _ScanViewerScreenState extends State<ScanViewerScreen> {
   late ScanMeta _meta;
   late List<File> _images;
+  bool _loading = false;
+
 
   @override
   void initState() {
@@ -53,27 +57,39 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
       appBar: AppBar(
         title: Text(_meta.name, style: kTextLetterSpacing),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _images.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: GestureDetector(
-                // 1. Use onLongPressStart to get the tap coordinates
-                onLongPressStart: (details) => _showContextMenu(context, details.globalPosition, index),
-                child: Image.file(
-                  _images[index],
-                  key: ValueKey(_images[index].lastModifiedSync().millisecondsSinceEpoch),
-                  fit: BoxFit.contain,
+      body: Stack(
+        children: [
+          ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: _images.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: GestureDetector(
+                    // 1. Use onLongPressStart to get the tap coordinates
+                    onLongPressStart: (details) => _showContextMenu(context, details.globalPosition, index),
+                    child: Image.file(
+                      _images[index],
+                      key: ValueKey(_images[index].lastModifiedSync().millisecondsSinceEpoch),
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 ),
-              ),
+              );
+            },
+          ),
+          if (_loading)
+            Container(
+              color: Colors.black45, // semi-transparent overlay
+              child: const Center(
+                child: const SpinKitDualRing(color: kAccentColor,),
+              )
             ),
-          );
-        },
+        ]
       ),
+
       bottomNavigationBar: BottomAppBar(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -148,7 +164,15 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
           value: 'edit',
           child: ListTile(
             leading: Icon(Icons.crop),
-            title: Text('Crop and Rotate'),
+            title: Text('Crop and Rotate', style: kTextLetterSpacing,),
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'reorder',
+          child: ListTile(
+            leading: Icon(Icons.reorder),
+            title: Text('Reorder', style: kTextLetterSpacing),
             contentPadding: EdgeInsets.zero,
           ),
         ),
@@ -156,7 +180,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
           value: 'delete',
           child: ListTile(
             leading: Icon(Icons.delete_outline, color: Colors.red),
-            title: Text('Delete this Page', style: TextStyle(color: Colors.red)),
+            title: Text('Delete this Page', style: TextStyle(color: Colors.red, letterSpacing: 0.0)),
             contentPadding: EdgeInsets.zero,
           ),
         ),
@@ -168,6 +192,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
 
     switch (selectedAction) {
       case 'edit':
+        setState(() => _loading = true);
         final edited = await editScanImage(_images[index]);
         if (edited != null && mounted) {
           // Replace the File object in the list
@@ -177,9 +202,12 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
           await imageCache.evict(FileImage(_images[index]));
 
           setState(() {}); // triggers rebuild
+
+          setState(() => _loading = false);
         }
         break;
       case 'delete':
+        setState(() => _loading = true);
         setState(() async {
           await ScanStorage.removePageByFile(
             imageFile: _images[index],
@@ -190,18 +218,60 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
           setState(() {
             _reloadImages();
           });
+
+          setState(() => _loading = false);
         });
+        break;
+      // case 'reorder':
+      //   // final result = Navigator.push(
+      //   //   context,
+      //   //   MaterialPageRoute(builder: (_) => ReorderPagesPage(scanDir: widget.scanDir)),
+      //   // );
+      //   // _reloadImages(refreshUI: true); // used inline maybe
+      //   await Navigator.push(
+      //     context,
+      //     MaterialPageRoute(
+      //       builder: (_) => ReorderPagesPage(scanDir: widget.scanDir),
+      //     ),
+      //   );
+      //
+      //   setState(() async {
+      //     await _reloadImages(refreshUI: true);
+      //   });
+      //   break;
+      case 'reorder':
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ReorderPagesPage(
+              scanDir: widget.scanDir,
+              onReorderDone: () {
+                _reloadImages(refreshUI: true); // <-- reload the parent UI immediately
+              },
+            ),
+          ),
+        );
         break;
     }
   }
 
-  void _reloadImages() {
+  Future<void> _reloadImages({bool refreshUI = false}) async {
+    // Load all JPG files from folder
     _images = widget.scanDir
         .listSync()
         .whereType<File>()
         .where((f) => f.path.endsWith('.jpg'))
         .toList()
       ..sort((a, b) => a.path.compareTo(b.path));
+
+    // Clear image cache so updated files are displayed
+    for (final img in _images) {
+      await imageCache.evict(FileImage(img));
+    }
+
+    if (refreshUI && mounted) {
+      setState(() {});
+    }
   }
 
   /* ───────────────── RENAME (NO POP) ───────────────── */
@@ -406,27 +476,6 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
 
   }
 
-  Future<void> _onReorder(int oldIndex, int newIndex) async {
-    setState(() {
-      if (newIndex > oldIndex) newIndex--;
-      final file = _images.removeAt(oldIndex);
-      _images.insert(newIndex, file);
-    });
-
-    // Persist order by renaming files
-    for (int i = 0; i < _images.length; i++) {
-      final newPath =
-          '${widget.scanDir.path}/page_${i + 1}.jpg';
-
-      if (_images[i].path != newPath) {
-        await _images[i].rename(newPath);
-        _images[i] = File(newPath);
-      }
-    }
-
-    setState(() {}); // refresh UI
-  }
-
   Future<void> showAddMorePagesDialog() async {
     await showDialog(
       context: context,
@@ -458,6 +507,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
 
   Future<void> _addMorePages() async {
     try {
+      setState(() => _loading = true);
       final result = await FlutterDocScanner()
           .getScannedDocumentAsImages(page: 4);
 
@@ -482,6 +532,8 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
         _reloadImages(); // same method you already use
       });
 
+      setState(() => _loading = false);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Pages added', style: kTextLetterSpacing,),
@@ -501,6 +553,8 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
 
   Future<void> _importImages() async {
     try {
+      setState(() => _loading = true);
+
       final picker = ImagePicker();
 
       final pickedImages = await picker.pickMultiImage(
@@ -526,6 +580,8 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
       setState(() {
         _reloadImages();
       });
+
+      setState(() => _loading = false);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
