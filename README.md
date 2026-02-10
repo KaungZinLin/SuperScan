@@ -33,7 +33,7 @@ Although there are many alternatives that exist, mosty notably CamScanner, I've 
 - ✅ Select pages of a scan before exporting
 - ✅ Search scanned documents
 - ✅ Reorder scan pages
-- Sync documents with Google Drive
+- ⭐ Sync documents with Google Drive (Work in Progress)
 - Implement an in-app feature, nicknamed MagicEyes
 ### What is MagicEyes?
 MagicEyes is a set of AI and algorithm-based features that improves the experience of SuperScan. In MagicEyes, you get the ability to:
