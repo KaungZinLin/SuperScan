@@ -65,6 +65,7 @@
 		98B980279DE16B3FCF7D46F6 /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		B142A3547C49B78EFDB0343D /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4DFCBBB2C55724BA87889BD /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
+		BC1B6FC12F39DAE70093F134 /* client_345114505131-25u8fbkfj78jueefhg5jp0eamdad2j71.apps.googleusercontent.com.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "client_345114505131-25u8fbkfj78jueefhg5jp0eamdad2j71.apps.googleusercontent.com.plist"; sourceTree = "<group>"; };
 		BC62813A2F306AA4005ACA3D /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		DEEC49E370D37A4D7601886F /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -139,6 +140,7 @@
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				7BA04ED25D9BC793DC582B61 /* Pods */,
 				1E9B80BC9CBBFEA52E89EEC9 /* Frameworks */,
+				BC1B6FC12F39DAE70093F134 /* client_345114505131-25u8fbkfj78jueefhg5jp0eamdad2j71.apps.googleusercontent.com.plist */,
 			);
 			sourceTree = "<group>";
 		};

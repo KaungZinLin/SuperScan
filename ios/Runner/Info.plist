@@ -18,6 +18,8 @@
 	<string>super_scan</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<key>GIDClientID</key>
+    <string>345114505131-25u8fbkfj78jueefhg5jp0eamdad2j71.apps.googleusercontent.com</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
@@ -36,6 +38,17 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>com.googleusercontent.apps.345114505131-25u8fbkfj78jueefhg5jp0eamdad2j71</string>
+            </array>
+        </dict>
+    </array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

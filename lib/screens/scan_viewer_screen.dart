@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
+import 'package:super_scan/components/platform_helper.dart';
 import 'package:super_scan/constants.dart';
 import 'package:super_scan/components/scan_meta.dart';
 import 'package:super_scan/components/scan_storage.dart';
@@ -10,6 +11,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'reorder_pages_page.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:super_scan/components/sync_controller.dart';
 
 class ScanViewerScreen extends StatefulWidget {
   final Directory scanDir;
@@ -69,7 +71,9 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                   borderRadius: BorderRadius.circular(12),
                   child: GestureDetector(
                     // 1. Use onLongPressStart to get the tap coordinates
-                    onLongPressStart: (details) => _showContextMenu(context, details.globalPosition, index),
+                    onLongPressStart: PlatformHelper.isDesktop
+                        ? null
+                        : (details) => _showContextMenu(context, details.globalPosition, index),
                     child: Image.file(
                       _images[index],
                       key: ValueKey(_images[index].lastModifiedSync().millisecondsSinceEpoch),
@@ -84,7 +88,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
             Container(
               color: Colors.black45, // semi-transparent overlay
               child: const Center(
-                child: const SpinKitDualRing(color: kAccentColor,),
+                child: SpinKitDualRing(color: kAccentColor,),
               )
             ),
         ]
@@ -95,14 +99,34 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             InkWell(
+              onTap: PlatformHelper.isDesktop ? null : () => showAddMorePagesDialog(),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.add,
+                    color: PlatformHelper.isDesktop ? Colors.grey : kAccentColor,
+                  ),
+                  Text(
+                    "Add",
+                    style: TextStyle(
+                      fontSize: 12,
+                      letterSpacing: 0.0,
+                      color: PlatformHelper.isDesktop ? Colors.grey : kAccentColor // or your default color
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            InkWell(
               onTap: () {
-                showAddMorePagesDialog();
+
               },
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.add, color: kAccentColor),
-                  Text("Add", style: TextStyle(fontSize: 12, letterSpacing: 0.0)),
+                  Icon(Icons.remove_red_eye, color: kAccentColor),
+                  Text("MagicEyes", style: TextStyle(fontSize: 12, letterSpacing: 0.0, color: kAccentColor)),
                 ],
               ),
             ),
@@ -117,14 +141,22 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
               ),
             ),
             InkWell(
-              onTap: () {
-                _renameScan();
-              },
+              onTap: PlatformHelper.isDesktop ? null : () => _renameScan(),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.drive_file_rename_outline, color: kAccentColor),
-                  Text("Rename", style: TextStyle(fontSize: 12, letterSpacing: 0.0)),
+                  Icon(
+                    Icons.edit,
+                    color: PlatformHelper.isDesktop ? Colors.grey : kAccentColor,
+                  ),
+                  Text(
+                    "Rename",
+                    style: TextStyle(
+                        fontSize: 12,
+                        letterSpacing: 0.0,
+                        color: PlatformHelper.isDesktop ? Colors.grey : kAccentColor // or your default color
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -136,7 +168,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.delete, color: kAccentColor),
-                  Text("Delete", style: TextStyle(fontSize: 12, letterSpacing: 0.0)),
+                  Text("Delete", style: TextStyle(fontSize: 12, letterSpacing: 0.0, color: kAccentColor)),
                 ],
               ),
             ),
@@ -199,7 +231,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
           _images[index] = File(edited.path);
 
           // Evict old image from memory cache
-          await imageCache.evict(FileImage(_images[index]));
+          imageCache.evict(FileImage(_images[index]));
 
           setState(() {}); // triggers rebuild
 
@@ -222,23 +254,6 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
           setState(() => _loading = false);
         });
         break;
-      // case 'reorder':
-      //   // final result = Navigator.push(
-      //   //   context,
-      //   //   MaterialPageRoute(builder: (_) => ReorderPagesPage(scanDir: widget.scanDir)),
-      //   // );
-      //   // _reloadImages(refreshUI: true); // used inline maybe
-      //   await Navigator.push(
-      //     context,
-      //     MaterialPageRoute(
-      //       builder: (_) => ReorderPagesPage(scanDir: widget.scanDir),
-      //     ),
-      //   );
-      //
-      //   setState(() async {
-      //     await _reloadImages(refreshUI: true);
-      //   });
-      //   break;
       case 'reorder':
         await Navigator.push(
           context,
@@ -266,7 +281,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
 
     // Clear image cache so updated files are displayed
     for (final img in _images) {
-      await imageCache.evict(FileImage(img));
+      imageCache.evict(FileImage(img));
     }
 
     if (refreshUI && mounted) {
@@ -348,12 +363,13 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
     if (confirmed != true) return;
 
     await ScanStorage.deleteScan(widget.scanDir);
+    await SyncController.deleteScan(widget.scanDir);
 
     if (context.mounted) {
       Navigator.pop(context, true);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Deleted permanently', style: kTextLetterSpacing,),
+          content: PlatformHelper.isDesktop ? Text('Deleted from Google Drive', style: kTextLetterSpacing,) : Text('Deleted locally and from Google Drive', style: kTextLetterSpacing,),
           behavior: SnackBarBehavior.floating,
         ),
       );

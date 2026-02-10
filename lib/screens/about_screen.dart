@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:super_scan/components/url_launcher.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:super_scan/constants.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -80,12 +79,6 @@ class AboutScreen extends StatelessWidget {
             leading: const Icon(Icons.privacy_tip_outlined),
             title: const Text('Privacy Policy', style: kTextLetterSpacing,),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: const Icon(Icons.favorite_border, color: Colors.redAccent),
-            trailing: const Icon(Icons.chevron_right),
-            title: const Text('Donate', style: kTextLetterSpacing,),
             onTap: () {},
           ),
 

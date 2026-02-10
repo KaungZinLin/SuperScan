@@ -16,6 +16,9 @@ import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:super_scan/components/scan_search_delegate.dart';
+import 'package:super_scan/components/google_drive_service.dart';
+import 'package:super_scan/components/sync_controller.dart';
+import 'package:super_scan/components/drive_scan.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
@@ -29,8 +32,12 @@ class _HomeScreenState extends State<HomeScreen> {
   dynamic _scannedDocuments;
   // List<Directory> _savedScans = [];
   List<SavedScan> _savedScans = [];
+  List<DriveScan> _driveScans = [];
+
   final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
+  final String _searchQuery = '';
+  bool _syncing = false;
+  bool _loading = false;
 
   List<SavedScan> get _filteredScans {
     if (_searchQuery.isEmpty) return _savedScans;
@@ -85,9 +92,20 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     await _loadSavedScans();
+    await _syncScans();
   }
 
   Future<void> _loadSavedScans() async {
+    if (!_isSignedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sign in first to sync your scans.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      print('Not signed in');
+    }
+
     final dir = await getApplicationDocumentsDirectory();
     final scansDir = Directory('${dir.path}/scans');
 
@@ -118,6 +136,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       _savedScans = scans;
+    });
+  }
+
+  Future<void> _loadDriveScans() async {
+    if (!_isSignedIn) return;
+
+    setState(() => _loading = true);
+    final scans = await _driveService.fetchDriveScans();
+    setState(() {
+      _driveScans = scans;
+      _loading = false;
     });
   }
 
@@ -244,10 +273,11 @@ class _HomeScreenState extends State<HomeScreen> {
     if (confirmed != true) return;
 
     await ScanStorage.deleteScan(scan.dir);
+    await SyncController.deleteScan(scan.dir);
     await _loadSavedScans();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Deleted permanently', style: kTextLetterSpacing,),
+        content: const Text('Deleted locally and from Google Drive', style: kTextLetterSpacing,),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -262,6 +292,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     await _loadSavedScans();
+    await _syncScans();
   }
 
   Future<void> _importImages() async {
@@ -288,6 +319,8 @@ class _HomeScreenState extends State<HomeScreen> {
             behavior: SnackBarBehavior.floating,
         ),
       );
+
+      await _syncScans();
     } catch (e) {
       if (!mounted) return;
 
@@ -300,14 +333,109 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _initializeHome() async {
+    // 1. Load local stuff immediately
+    await _loadSavedScans();
+
+    // 2. CRITICAL: Wait for the auth to actually restore
+    // If you don't 'await' this, _isSignedIn will be false when you check it below
+    await _driveService.restoreSignIn();
+
+    if (mounted) setState(() {});
+
+    // 3. Now check if we are signed in
+    if (_driveService.isSignedIn) {
+      // Start syncing in the background
+      await _syncScans();
+
+      // Once sync is done, fetch the cloud list for Desktop
+      if (PlatformHelper.isDesktop) {
+        await _loadDriveScans();
+      }
+    }
+  }
+
   String _formatDate(DateTime date) {
     return DateFormat.yMd().add_jm().format(date);
+  }
+
+  final _driveService = GoogleDriveService(); // Singleton instance
+
+  bool get _isSignedIn => _driveService.isSignedIn;
+
+// Refreshing Drive API if needed
+
+
+  Future<List<Directory>> _getLocalScans() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final scansDir = Directory('${dir.path}/scans');
+
+    if (!scansDir.existsSync()) return [];
+    return scansDir.listSync().whereType<Directory>().toList();
+  }
+
+  Future<void> _syncScans({bool force = false}) async {
+    if (!_isSignedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sign in first to sync your scans.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _syncing = true); // start loading
+
+    try {
+      final scans = await _getLocalScans();
+      await SyncController.syncScans(scans, force: force);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Sync failed: $e'), behavior: SnackBarBehavior.floating,),
+      );
+    } finally {
+      if (mounted) setState(() => _syncing = false); // stop loading
+    }
+  }
+
+  Future<void> _openDriveScan(DriveScan scan) async {
+    try {
+      final scanDir = await GoogleDriveService().downloadScanFolder(
+        folderId: scan.folderId,
+        folderName: scan.meta.name,
+      );
+
+      if (!mounted) return;
+
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ScanViewerScreen(scanDir: scanDir),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to open scan: $e'), behavior: .floating,),
+      );
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    _loadSavedScans();
+    _loadSavedScans(); // always load local scans
+
+    // Restore sign-in and then load Drive scans
+    GoogleDriveService().restoreSignIn().then((_) async {
+      if (!mounted) return;
+
+      setState(() {}); // refresh _isSignedIn for UI
+
+      if (PlatformHelper.isDesktop && GoogleDriveService().isSignedIn) {
+        await _loadDriveScans();
+      }
+    });
   }
 
   @override
@@ -316,6 +444,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // Completely removed FAB on desktop
       floatingActionButton: PlatformHelper.isDesktop ? null :
           ExpandableFab(
+            distance: 20,
             children: [
               ActionButton(
                 icon: Icon(Icons.photo_library, color: Colors.white,),
@@ -331,15 +460,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
             ],
-            distance: 20,
           ),
       // Changed appBar name to Sync on desktop
       appBar: AppBar(
         centerTitle: true,
         title: Text('Home', style: kTextLetterSpacing,),
         leading: IconButton(
-          icon: Icon(Icons.cloud_sync, color: kAccentColor),
-          onPressed: () {},
+          icon: _syncing || _loading // Show indicator if either local syncing or desktop loading is active
+              ? const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              color: kAccentColor,
+              strokeWidth: 2,
+            ),
+          )
+              : Icon(Icons.cloud_sync, color: kAccentColor),
+          onPressed: (_syncing || _loading)
+              ? null
+              : () async {
+            await _syncScans();
+            if (PlatformHelper.isDesktop) {
+              print('Loading drive scans on desktop');
+              await _loadDriveScans();
+            }
+          },
         ),
         actions: [
           IconButton(
@@ -353,7 +498,54 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
 
         body: SafeArea(
-          child: _filteredScans.isEmpty
+          child: IgnorePointer(
+            ignoring: PlatformHelper.isDesktop && (_syncing || _loading),
+              child: PlatformHelper.isDesktop
+                  ? _driveScans.isEmpty
+                  ? const EmptyScansPlaceholder()
+                  : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _driveScans.length,
+                itemBuilder: (context, index) {
+                  final driveScan = _driveScans[index];
+
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0.0,
+                    color: kAccentColor.withAlpha(20),
+                    child: ListTile(
+                      trailing: const Icon(Icons.chevron_right),
+                      title: Text(
+                        driveScan.meta.name,
+                        style: kTextLetterSpacing,
+                      ),
+                      subtitle: Text(
+                        '${_formatDate(driveScan.meta.createdAt)}',
+                        style: kTextLetterSpacing,
+                      ),
+                      onTap: () async {
+                        // 1. Start the loading spinner in the AppBar
+                        setState(() => _loading = true);
+
+                        try {
+                          // 2. Wait for the download and opening process
+                          await _openDriveScan(driveScan);
+                        } finally {
+                          // 3. Turn off the spinner whether it succeeded or failed
+                          if (mounted) {
+                            setState(() => _loading = false);
+                          }
+                        }
+                      },
+                    ),
+                  );
+                },
+
+              )
+              : _filteredScans.isEmpty
               ? EmptyScansPlaceholder()
               : ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -377,21 +569,25 @@ class _HomeScreenState extends State<HomeScreen> {
                 elevation: 0.0,
                 color: kAccentColor.withAlpha(20),
                 child: ListTile(
-                  // leading: const Icon(Icons.document_scanner),
                   trailing: const Icon(Icons.chevron_right),
-                  title: Text(meta.name, style: kTextLetterSpacing,),
+                  title: Text(
+                    meta.name,
+                    style: kTextLetterSpacing,
+                  ),
                   subtitle: Text(
                     '$pages page(s) • ${_formatDate(meta.createdAt)}',
                     style: kTextLetterSpacing,
                   ),
                   onLongPress: () => _showScanOptions(savedScan),
-                  onTap: () {
+                  onTap: () async {
                     _openScanViewer(scanDir);
+                    await _syncScans();
                   },
                 ),
               );
             },
           ),
+        )
         ),
     );
   }

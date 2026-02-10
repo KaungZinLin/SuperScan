@@ -14,10 +14,13 @@ import 'package:super_scan/screens/settings_screen.dart';
 
 import 'package:intl/date_symbol_data_local.dart';
 
+import 'package:super_scan/components/google_auth_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting();
   runApp(const SuperScan());
+  await GoogleAuthService.instance.tryRestoreSession();
 }
 
 class SuperScan extends StatelessWidget {
