@@ -136,7 +136,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.ios_share, color: kAccentColor),
-                  Text("Share", style: TextStyle(fontSize: 12, letterSpacing: 0.0)),
+                  Text("Share", style: TextStyle(fontSize: 12, letterSpacing: 0.0, color: kAccentColor)),
                 ],
               ),
             ),
