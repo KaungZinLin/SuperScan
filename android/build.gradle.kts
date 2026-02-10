@@ -1,12 +1,11 @@
 plugins {
-    // Change '8.1.0' to '8.11.1' to match what Flutter/Gradle is already using
-    id("com.android.application") version "8.11.1" apply false
-    id("com.android.library") version "8.11.1" apply false
+    // Only declare the ID without the version for plugins Flutter manages internally
+    id("com.android.application") apply false
+    id("com.android.library") apply false
+    id("org.jetbrains.kotlin.android") apply false
+    id("dev.flutter.flutter-gradle-plugin") apply false
 
-    // Ensure your Kotlin version is high enough (1.9.0+ is usually safe for AGP 8.x)
-    id("org.jetbrains.kotlin.android") version "1.9.22" apply false
-
-    id("dev.flutter.flutter-gradle-plugin") version "1.0.0" apply false
+    // KEEP the version for Google Services because Flutter doesn't manage this one
     id("com.google.gms.google-services") version "4.4.0" apply false
 }
 
