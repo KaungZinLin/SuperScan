@@ -4,9 +4,6 @@ plugins {
     id("com.android.library") apply false
     id("org.jetbrains.kotlin.android") apply false
     id("dev.flutter.flutter-gradle-plugin") apply false
-
-    // KEEP the version for Google Services because Flutter doesn't manage this one
-    id("com.google.gms.google-services") version "4.4.0" apply false
 }
 
 // ... the rest of your file (allprojects, subprojects, etc.)
