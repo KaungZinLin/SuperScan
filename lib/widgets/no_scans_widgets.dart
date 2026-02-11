@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:super_scan/components/platform_helper.dart';
+import 'package:super_scan/helpers/platform_helper.dart';
 import 'package:super_scan/constants.dart';
 
 class EmptyScansPlaceholder extends StatelessWidget {

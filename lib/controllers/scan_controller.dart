@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:super_scan/components/saved_scan.dart';
-import 'package:super_scan/components/scan_meta.dart';
-import 'package:super_scan/components/scan_storage.dart';
+import 'package:super_scan/models/saved_scan.dart';
+import 'package:super_scan/models/scan_meta.dart';
+import 'package:super_scan/services/scan_storage.dart';
 import 'dart:convert';
 
 class ScanController extends ChangeNotifier {

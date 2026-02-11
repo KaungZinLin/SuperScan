@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:super_scan/components/scan_meta.dart';
+import 'package:super_scan/models/scan_meta.dart';
 
 class ScanStorage {
   /// Creates a new scan folder, saves images, and writes metadata

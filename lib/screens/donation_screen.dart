@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:super_scan/constants.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:io';
-import 'package:super_scan/components/platform_helper.dart';
+import 'package:super_scan/helpers/platform_helper.dart';
 
 class DonateScreen extends StatelessWidget {
   static const String id = 'donate_screen';
 
   const DonateScreen({super.key});
 
-  // Helper to launch URLs (Coffee & KBZPay)
   Future<void> _launchURL(String url) async {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
@@ -30,7 +28,6 @@ class DonateScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // --- THANK YOU SECTION ---
               const Icon(Icons.favorite, color: Colors.red, size: 60),
               const SizedBox(height: 16),
               Text(
@@ -49,7 +46,6 @@ class DonateScreen extends StatelessWidget {
               ),
               const SizedBox(height: 40),
 
-              // --- IAP DONATION OPTIONS ---
               const Text('Select an amount to donate from the Apple App Store or the Google Play Store', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               Wrap(

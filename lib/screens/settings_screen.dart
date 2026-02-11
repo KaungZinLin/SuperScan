@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:super_scan/constants.dart';
 import 'package:super_scan/screens/about_screen.dart';
-import 'package:super_scan/components/google_auth_service.dart';
-import 'package:super_scan/components/google_drive_service.dart';
+import 'package:super_scan/services/google_auth_service.dart';
+import 'package:super_scan/services/google_drive_service.dart';
 import 'package:super_scan/screens/donation_screen.dart';
 
 class SettingsScreen extends StatefulWidget {

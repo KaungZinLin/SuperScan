@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'sync_index.dart';
-import 'google_drive_sync.dart';
-import 'package:super_scan/components/scan_utils.dart';
-import 'google_drive_service.dart';
+import '../models/sync_index.dart';
+import 'package:super_scan/services/google_drive_sync.dart';
+import 'package:super_scan/helpers/scan_utils.dart';
+import 'package:super_scan/services/google_drive_service.dart';
 
 class SyncController {
   static Future<void> syncScans(

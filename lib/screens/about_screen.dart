@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:super_scan/components/url_launcher.dart';
+import 'package:super_scan/helpers/url_launcher.dart';
 import 'package:super_scan/constants.dart';
 
 class AboutScreen extends StatelessWidget {

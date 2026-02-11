@@ -2,16 +2,16 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
-import 'package:super_scan/components/platform_helper.dart';
+import 'package:super_scan/helpers/platform_helper.dart';
 import 'package:super_scan/constants.dart';
-import 'package:super_scan/components/scan_meta.dart';
-import 'package:super_scan/components/scan_storage.dart';
+import 'package:super_scan/models/scan_meta.dart';
+import 'package:super_scan/services/scan_storage.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'reorder_pages_page.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:super_scan/components/sync_controller.dart';
+import 'package:super_scan/controllers/sync_controller.dart';
 
 class ScanViewerScreen extends StatefulWidget {
   final Directory scanDir;

@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
-import 'package:super_scan/components/action_button.dart';
-import 'package:super_scan/components/expandable_fab.dart';
-import 'package:super_scan/components/platform_helper.dart';
-import 'package:super_scan/components/saved_scan.dart';
-import 'package:super_scan/components/scan_meta.dart';
+import 'package:super_scan/widgets/action_button.dart';
+import 'package:super_scan/widgets/expandable_fab.dart';
+import 'package:super_scan/helpers/platform_helper.dart';
+import 'package:super_scan/models/saved_scan.dart';
+import 'package:super_scan/models/scan_meta.dart';
 import 'package:super_scan/constants.dart';
 import 'dart:io';
-import 'package:super_scan/components/scan_storage.dart';
+import 'package:super_scan/services/scan_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:super_scan/widgets/no_scans_widgets.dart';
 import 'scan_viewer_screen.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:super_scan/components/scan_search_delegate.dart';
-import 'package:super_scan/components/google_drive_service.dart';
-import 'package:super_scan/components/sync_controller.dart';
-import 'package:super_scan/components/drive_scan.dart';
+import 'package:super_scan/widgets/scan_search_delegate.dart';
+import 'package:super_scan/services/google_drive_service.dart';
+import 'package:super_scan/controllers/sync_controller.dart';
+import 'package:super_scan/models/drive_scan.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
@@ -30,7 +30,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   dynamic _scannedDocuments;
-  // List<Directory> _savedScans = [];
   List<SavedScan> _savedScans = [];
   List<DriveScan> _driveScans = [];
 

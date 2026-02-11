@@ -4,7 +4,7 @@ const double kDesktopBreakpoint = 600;
 
 const TextStyle kNavigationBarLabelStyle = TextStyle(letterSpacing: 0.0);
 
-const Color kAccentColor = Color(0xFF00c8ff);
+const Color kAccentColor = Color(0xFF3396D3);
 
 const kTextLetterSpacing =  TextStyle(
     letterSpacing: 0.0);

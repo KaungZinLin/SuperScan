@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:super_scan/components/scan_storage.dart';
+import 'package:super_scan/services/scan_storage.dart';
 
 class ReorderPagesPage extends StatefulWidget {
   final Directory scanDir;

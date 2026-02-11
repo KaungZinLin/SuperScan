@@ -1,20 +1,9 @@
 import 'package:flutter/material.dart';
-
 import 'constants.dart';
-
-import 'package:super_scan/components/launch_controller.dart';
-
-import 'package:super_scan/widgets/adaptive_navigation_rail.dart';
-import 'package:super_scan/widgets/adaptive_navigation_bar.dart';
-import 'package:super_scan/components/navigation_destinations.dart';
-
 import 'package:super_scan/screens/home_screen.dart';
-import 'package:super_scan/screens/loading_screen.dart';
 import 'package:super_scan/screens/settings_screen.dart';
-
 import 'package:intl/date_symbol_data_local.dart';
-
-import 'package:super_scan/components/google_auth_service.dart';
+import 'package:super_scan/services/google_auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,9 +41,7 @@ class MainLayout extends StatefulWidget {
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  int _selectedIndex = 0;
-  final LaunchController _launchController = LaunchController();
-  bool _isLoading = true;
+  int _currentPageIndex = 0;
 
   final List<Widget> _pagesByIndex = const [
     HomeScreen(), // Index 0
@@ -64,56 +51,33 @@ class _MainLayoutState extends State<MainLayout> {
   @override
   void initState() {
     super.initState();
-    _runStartupSequence();
-  }
-
-  Future<void> _runStartupSequence() async {
-    await _launchController.initializeApp();
-
-    if (!mounted) return;
-    setState(() => _isLoading = false);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const LoadingScreen();
-    }
-
-    final bool isWide =
-        MediaQuery
-            .of(context)
-            .size
-            .width >= kDesktopBreakpoint;
-
     return Scaffold(
-        body: Row(
-          children: [
-            if (isWide)
-              AdaptiveNavigationRail(
-                selectedIndex: _selectedIndex,
-                onSelected: (i) => setState(() => _selectedIndex = i),
-                destinations: railDestinations,
-              ),
-
-            if (isWide) const VerticalDivider(thickness: 1, width: 1),
-
-            Expanded(
-              child: IndexedStack(
-                index: _selectedIndex,
-                children: _pagesByIndex,
-              ),
-            ),
-          ],
-        ),
-
-        bottomNavigationBar: isWide ? null : AdaptiveBottomNavigation
-          (
-          selectedIndex: _selectedIndex,
-          onSelected: (i) => setState(() => _selectedIndex = i),
-          destinations: bottomDestinations,
-          labelStyle: kNavigationBarLabelStyle,
-        )
+      body: _pagesByIndex[_currentPageIndex],
+      bottomNavigationBar:
+      NavigationBar(
+        onDestinationSelected: (int index) {
+          setState(() {
+            _currentPageIndex = index;
+          });
+        },
+        selectedIndex: _currentPageIndex,
+        destinations: [
+          NavigationDestination(
+            selectedIcon: Icon(Icons.home),
+            icon: Icon(Icons.home_outlined),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.settings),
+            icon: Icon(Icons.settings_outlined),
+            label: 'Settings',
+          ),
+        ],
+      ),
     );
   }
 }
