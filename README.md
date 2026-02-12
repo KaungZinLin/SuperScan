@@ -34,11 +34,15 @@ Although there are many alternatives that exist, mosty notably CamScanner, I've 
 - ✅ Search scanned documents
 - ✅ Reorder scan pages
 - ⭐ Sync documents with Google Drive (Work in Progress)
+- Stability of App
 - Implement an in-app feature, nicknamed MagicEyes
 ### What is MagicEyes?
 MagicEyes is a set of AI and algorithm-based features that improves the experience of SuperScan. In MagicEyes, you get the ability to:
 - Extract text from documents using system-level OCR
 - Summarize documents using AI
+- Proofread documents using AI
+- Text completion with AI
+- Topic research with AI
 
 **How will the AI features implemented in SuperScan?**
 
@@ -68,7 +72,7 @@ I'll expand the availability to the other platforms a little while after launch.
 - iOS
 - Linux
 # Business Model
-**Freemium, technically**: I plan to give the user access to all features, with the inclusion of ads implemented in a non-intrusive way. Users will be able to donate me via In-App Purchases or other methods, which will disable ads.
+**Freemium, technically**: I plan to give the user access to all features, with the inclusion of ads implemented in a non-intrusive way. Users will be able to donate me via In-App Purchases or other methods, which will disable ads. Once I gain enough profits to afford an OpenAI AI Key, I will be integrating AI features into MagicEyes. MagicEyes AI features will only be available with a $3 monthly subscription or a $40 annual subscription.
 # License
 MIT License
 
