@@ -322,19 +322,24 @@ class ScanViewerController extends ChangeNotifier {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to share PDF: $e', style: kTextLetterSpacing,)),
+          SnackBar(
+              content: Text(
+                'Failed to share PDF: $e', style: kTextLetterSpacing,
+              ),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }
   }
 
-  Future<void> shareAsImages(BuildContext context, scanDir) async {
+  Future<void> shareAsImages(BuildContext context, Directory scanDir) async { // Specified scanDir to be a type of Directory to fix the image export issue
     try {
       // Get image files from scan folder
       final imageFiles = scanDir
           .listSync()
           .whereType<File>()
-          .where((f) => f.path.endsWith('.jpg'))
+          .where((File f) => f.path.toLowerCase().endsWith('.jpg'))
           .toList();
 
       if (imageFiles.isNotEmpty) {
@@ -347,7 +352,11 @@ class ScanViewerController extends ChangeNotifier {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to share images: $e', style: kTextLetterSpacing,)),
+          SnackBar(
+              content: Text(
+                'Failed to share images: $e', style: kTextLetterSpacing,),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }
