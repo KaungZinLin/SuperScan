@@ -51,7 +51,7 @@ I believe that the best way to implement AI features with MagicEyes is via API K
 The reason I've chosen Google Drive is because I want the user to use a cloud storage platform (which the user most likely already has), instead of buying a subscription. It's also easier for me in terms of budget as I don't need to invest in database fees.
 ## Technicial Features
 - Clean code
-- Flutter Stage Management
+- ✅ Flutter Stage Management
 # Release & Download
 As of now, SuperScan is still work in progress, and basic features are still being developed. Once I've completed the basic feautures and I'm confident that SuperScan is ready for public release, I'll publish the app to the Google Play Store, and I'll manually release the desktop versions.
 ## Expected Launch Date
