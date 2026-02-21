@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:super_scan/constants.dart';
 import 'package:super_scan/controllers/settings_controller.dart';
 import 'package:super_scan/helpers/url_launcher.dart';
 import 'package:super_scan/screens/donation_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 class SettingsScreen extends StatefulWidget {
   static const String id = 'settings_screen';
@@ -16,9 +19,29 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final _viewController = SettingsController();
 
+  bool isConnected = false; // Declare default internet connection
+  StreamSubscription? _internetConnectionStreamSubscription; // Start a stream and
+
   @override
   void initState() {
     super.initState();
+
+    // Subscribe to the stream
+    _internetConnectionStreamSubscription = InternetConnection().onStatusChange
+        .listen((event) {
+          switch (event) {
+            case InternetStatus.connected:
+              setState(() => isConnected = true);
+              break;
+            case InternetStatus.disconnected:
+              setState(() => isConnected = false);
+              break;
+            default:
+              setState(() => isConnected = false);
+              break;
+          }
+        });
+
     _viewController.addListener(() {
       if (mounted) setState(() {});
     });
@@ -34,6 +57,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ? const Center(child: CircularProgressIndicator())
           : ListView(
               children: [
+                // Added internet connection warning
+                if (!isConnected) 
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: _buildNoInternetWidget(context),
+                  ),
+          
                 const SizedBox(height: 16),
                 ListTile(
                   leading: const FaIcon(FontAwesomeIcons.google),
@@ -220,4 +250,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
     );
   }
+
+  Widget _buildNoInternetWidget(BuildContext context) {
+  // Defining a red color with transparency to match your previous style
+  final Color errorRed = Colors.red;
+
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+    decoration: BoxDecoration(
+      // Using .withOpacity or .withAlpha for that soft background look
+      color: errorRed.withOpacity(0.1), 
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: errorRed.withOpacity(0.3), width: 1), // Optional: subtle border
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min, // Keeps the box tight around the content
+      children: [
+        Icon(Icons.wifi_off_rounded, color: errorRed, size: 20),
+        const SizedBox(width: 12),
+        const Flexible(
+          child: Text(
+            'Internet is required for sync and sign in',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14, // Slightly smaller to ensure it fits on one line
+              color: Colors.red,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
+}
+

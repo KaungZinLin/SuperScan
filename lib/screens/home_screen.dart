@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
 import 'package:super_scan/controllers/home_controller.dart';
@@ -24,6 +25,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final bool _syncing = false;
   bool _loading = false;
+
+  bool isConnected = false;
 
   @override
   void initState() {

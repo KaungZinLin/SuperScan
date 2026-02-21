@@ -1,24 +1,20 @@
 import 'dart:io';
-
 import '../models/sync_index.dart';
 import '../helpers/scan_utils.dart';
-
 import '../services/google_auth_service.dart';
 import '../services/google_drive_service.dart';
 
 class SyncController {
   SyncController._();
 
-  static final GoogleDriveService _drive =
-      GoogleDriveService.instance;
+  static final GoogleDriveService _drive = GoogleDriveService.instance;
 
-  static final GoogleAuthService _auth =
-      GoogleAuthService.instance;
+  static final GoogleAuthService _auth = GoogleAuthService.instance;
 
   static Future<void> syncScans(
-      List<Directory> scans, {
-        bool force = false,
-      }) async {
+    List<Directory> scans, {
+    bool force = false,
+  }) async {
     if (!_auth.isSignedIn) return;
 
     final index = await SyncIndex.load();
@@ -28,13 +24,9 @@ class SyncController {
     for (final scan in scans) {
       final id = ScanUtils.scanId(scan);
 
-      final localTime =
-      ScanUtils.lastModified(scan);
+      final localTime = ScanUtils.lastModified(scan);
 
-      final lastSynced =
-      DateTime.fromMillisecondsSinceEpoch(
-        index[id] ?? 0,
-      );
+      final lastSynced = DateTime.fromMillisecondsSinceEpoch(index[id] ?? 0);
 
       if (!force && !localTime.isAfter(lastSynced)) {
         continue;
@@ -43,8 +35,8 @@ class SyncController {
       tasks.add(() async {
         await _drive.uploadScan(scan);
 
-        index[id] =
-            DateTime.now().millisecondsSinceEpoch;
+        // index[id] = DateTime.now().millisecondsSinceEpoch;
+        index[id] = localTime.millisecondsSinceEpoch; // Removed datetime.now as it can cause unnecessary re-syncs if the device clock changes
       }());
     }
 
@@ -55,8 +47,7 @@ class SyncController {
     await SyncIndex.save(index);
   }
 
-  static Future<void> deleteScan(
-      Directory scanDir) async {
+  static Future<void> deleteScan(Directory scanDir) async {
     if (!_auth.isSignedIn) return;
 
     final id = ScanUtils.scanId(scanDir);

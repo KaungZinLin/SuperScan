@@ -23,38 +23,91 @@ class GoogleDriveService {
 
   bool get isSignedIn => GoogleAuthService.instance.isSignedIn;
 
-  // =============================
-  // Upload Scan (SYNC)
-  // =============================
-
+  // New upload scan written by AI to check for existing files
   Future<void> uploadScan(Directory scanDir) async {
-    final api = await _api();
+  final api = await _api();
 
-    if (api == null) {
-      throw Exception("Not signed in");
-    }
-
-    final scanId = scanDir.path.split(Platform.pathSeparator).last;
-
-    final rootId = await _ensureFolder(api, "SuperScan", null);
-
-    final syncedId = await _ensureFolder(api, "synced", rootId);
-
-    final scanFolderId = await _ensureFolder(api, scanId, syncedId);
-
-    for (final entity in scanDir.listSync()) {
-      if (entity is! File) continue;
-
-      final media = drive.Media(entity.openRead(), await entity.length());
-
-      await api.files.create(
-        drive.File()
-          ..name = entity.uri.pathSegments.last
-          ..parents = [scanFolderId],
-        uploadMedia: media,
-      );
-    }
+  if (api == null) {
+    throw Exception("Not signed in");
   }
+
+  final scanId =
+      scanDir.path.split(Platform.pathSeparator).last;
+
+  // Ensure folder structure
+  final rootId = await _ensureFolder(api, "SuperScan", null);
+  final syncedId = await _ensureFolder(api, "synced", rootId);
+  final scanFolderId =
+      await _ensureFolder(api, scanId, syncedId);
+
+  // --------------------------------------------------
+  // NEW: Fetch existing files in Drive folder
+  // --------------------------------------------------
+  final existing = await api.files.list(
+    q: "'$scanFolderId' in parents and trashed=false",
+    spaces: 'drive',
+    $fields: 'files(id,name)',
+  );
+
+  final existingFiles = {
+    for (final f in existing.files ?? [])
+      if (f.name != null) f.name!: f.id!
+  };
+
+  // --------------------------------------------------
+  // Upload (overwrite behavior)
+  // --------------------------------------------------
+  for (final entity in scanDir.listSync()) {
+    if (entity is! File) continue;
+
+    final fileName = entity.uri.pathSegments.last;
+
+    // DELETE existing file with same name
+    final existingId = existingFiles[fileName];
+    if (existingId != null) {
+      await api.files.delete(existingId);
+    }
+
+    final media =
+        drive.Media(entity.openRead(), await entity.length());
+
+    await api.files.create(
+      drive.File()
+        ..name = fileName
+        ..parents = [scanFolderId],
+      uploadMedia: media,
+    );
+  }
+}
+
+  // Future<void> uploadScan(Directory scanDir) async {
+  //   final api = await _api();
+
+  //   if (api == null) {
+  //     throw Exception("Not signed in");
+  //   }
+
+  //   final scanId = scanDir.path.split(Platform.pathSeparator).last;
+
+  //   final rootId = await _ensureFolder(api, "SuperScan", null);
+
+  //   final syncedId = await _ensureFolder(api, "synced", rootId);
+
+  //   final scanFolderId = await _ensureFolder(api, scanId, syncedId);
+
+  //   for (final entity in scanDir.listSync()) {
+  //     if (entity is! File) continue;
+
+  //     final media = drive.Media(entity.openRead(), await entity.length());
+
+  //     await api.files.create(
+  //       drive.File()
+  //         ..name = entity.uri.pathSegments.last
+  //         ..parents = [scanFolderId],
+  //       uploadMedia: media,
+  //     );
+  //   }
+  // }
 
   // =============================
   // Delete scan
