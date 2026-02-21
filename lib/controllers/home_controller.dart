@@ -288,8 +288,9 @@ class HomeController extends ChangeNotifier {
 
     if (confirmed != true) return;
 
-    await ScanStorage.deleteScan(scan.dir);
-    await SyncController.deleteScan(scan.dir);
+    await SyncController.deleteScan(scan.dir); // Delete from Google Drive
+    await ScanStorage.deleteScan(scan.dir); // Delete locally
+
     await loadSavedScans(); // Reload view
 
     Fluttertoast.showToast(

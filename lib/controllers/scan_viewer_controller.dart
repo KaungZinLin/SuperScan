@@ -269,8 +269,14 @@ class ScanViewerController extends ChangeNotifier {
 
     if (confirmed != true) return;
 
-    await ScanStorage.deleteScan(scanDir);
-    await SyncController.deleteScan(scanDir);
+    isLoading = true; // Start animation
+    notifyListeners(); // Notify about animation
+
+    await SyncController.deleteScan(scanDir); // Delete from Google Drive first
+    await ScanStorage.deleteScan(scanDir); // Delete locally
+
+    isLoading = false; // Stop animation
+    notifyListeners(); // Notify about animation
 
     if (context.mounted) {
       Navigator.pop(context, true);
