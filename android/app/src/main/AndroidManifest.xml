@@ -1,10 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.kzl.super_scan">
 
-    <!-- ✅ Camera permission -->
-    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
-    <!-- ✅ Declare camera hardware (set required=false so app can install on devices without camera if needed) -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />

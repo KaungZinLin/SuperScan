@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "345114505131",
+    "project_id": "superscan-486908",
+    "storage_bucket": "superscan-486908.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:345114505131:android:76bda77a0953ba757aacee",
+        "android_client_info": {
+          "package_name": "com.kzl.super_scan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "345114505131-apvjsl69dognfrhghpni6mbeb57v22d1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWX6SPNbOBqUaUOKKBbZLReymQw5rzaFg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "345114505131-apvjsl69dognfrhghpni6mbeb57v22d1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "345114505131-25u8fbkfj78jueefhg5jp0eamdad2j71.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.kzl.superScan"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

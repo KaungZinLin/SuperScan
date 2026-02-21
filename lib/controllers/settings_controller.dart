@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:super_scan/constants.dart';
 import 'package:super_scan/services/google_auth_service.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SettingsController extends ChangeNotifier {
   final auth = GoogleAuthService.instance;
@@ -18,37 +19,35 @@ class SettingsController extends ChangeNotifier {
 
       // If result is a bool and it's true, or if it's an object and not null
       if (result == true || (result is! bool)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Signed in successfully'),
-            behavior: SnackBarBehavior.floating,
-          ),
+        Fluttertoast.showToast(
+          msg: "Signed in successfully",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Sign-in failed'),
-            behavior: SnackBarBehavior.floating,
-          ),
+        Fluttertoast.showToast(
+          msg: "Failed to sign in",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
         );
       }
 
       notifyListeners();
     } on PlatformException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Authentication error: [${e.code}] ${e.message}'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 10),
-        ),
+      Fluttertoast.showToast(
+        msg: "Authentication error: [${e.code}] ${e.message}",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Unexpected error: $e'),
-          backgroundColor: Colors.orange,
-        ),
+      Fluttertoast.showToast(
+        msg: "Unexpected error: $e",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
       );
     } finally {
       isLoading = false; // Stop animation
@@ -65,8 +64,11 @@ class SettingsController extends ChangeNotifier {
     isLoading = false; // Stop animation
     notifyListeners(); // Notify about animation
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Signed out'), behavior: .floating),
+    Fluttertoast.showToast(
+      msg: "Signed out",
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
     );
   }
 
@@ -75,7 +77,10 @@ class SettingsController extends ChangeNotifier {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Are you sure you want to sign out?', style: kTextLetterSpacing),
+          title: Text(
+            'Are you sure you want to sign out?',
+            style: kTextLetterSpacing,
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),

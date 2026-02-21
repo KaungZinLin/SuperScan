@@ -11,6 +11,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:super_scan/screens/reorder_pages_page.dart';
 import 'package:super_scan/controllers/sync_controller.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ScanViewerController extends ChangeNotifier {
   // Alternative to !mounted in the view - don't understand it yet
@@ -24,7 +25,8 @@ class ScanViewerController extends ChangeNotifier {
 
   @override
   void dispose() {
-    _isDisposed = true; // Mark as disposed - Alternative to !mounted in the view - don't understand it yet
+    _isDisposed =
+        true; // Mark as disposed - Alternative to !mounted in the view - don't understand it yet
     super.dispose();
   }
 
@@ -35,17 +37,24 @@ class ScanViewerController extends ChangeNotifier {
   }
 
   void loadImages(Directory scanDir) {
-    images = scanDir
-        .listSync()
-        .whereType<File>()
-        .where((f) => f.path.endsWith('.jpg'))
-        .toList()
-      ..sort((a, b) => a.path.compareTo(b.path));
+    images =
+        scanDir
+            .listSync()
+            .whereType<File>()
+            .where((f) => f.path.endsWith('.jpg'))
+            .toList()
+          ..sort((a, b) => a.path.compareTo(b.path));
   }
 
-  void showContextMenu(BuildContext context, Offset tapPosition, int index, scanDir) async {
+  void showContextMenu(
+    BuildContext context,
+    Offset tapPosition,
+    int index,
+    scanDir,
+  ) async {
     // 2. Identify where on the screen the menu should appear
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
 
     final String? selectedAction = await showMenu<String>(
       context: context,
@@ -59,7 +68,7 @@ class ScanViewerController extends ChangeNotifier {
           value: 'edit',
           child: ListTile(
             leading: Icon(Icons.crop),
-            title: Text('Crop and Rotate', style: kTextLetterSpacing,),
+            title: Text('Crop and Rotate', style: kTextLetterSpacing),
             contentPadding: EdgeInsets.zero,
           ),
         ),
@@ -75,7 +84,10 @@ class ScanViewerController extends ChangeNotifier {
           value: 'delete',
           child: ListTile(
             leading: Icon(Icons.delete_outline, color: Colors.red),
-            title: Text('Delete this Page', style: TextStyle(color: Colors.red, letterSpacing: 0.0)),
+            title: Text(
+              'Delete this Page',
+              style: TextStyle(color: Colors.red, letterSpacing: 0.0),
+            ),
             contentPadding: EdgeInsets.zero,
           ),
         ),
@@ -111,11 +123,9 @@ class ScanViewerController extends ChangeNotifier {
         notifyListeners(); // Notify to display animation
 
         try {
-          await ScanStorage.removePageByFile(
-            imageFile: images[index],
-          );
+          await ScanStorage.removePageByFile(imageFile: images[index]);
 
-          if (!isMounted) return ;
+          if (!isMounted) return;
 
           await reloadImages(scanDir, refreshUI: true);
         } catch (e) {
@@ -142,7 +152,10 @@ class ScanViewerController extends ChangeNotifier {
             builder: (_) => ReorderPagesPage(
               scanDir: scanDir,
               onReorderDone: () {
-                reloadImages(scanDir, refreshUI: true); // <-- reload the parent UI immediately
+                reloadImages(
+                  scanDir,
+                  refreshUI: true,
+                ); // <-- reload the parent UI immediately
               },
             ),
           ),
@@ -201,9 +214,11 @@ class ScanViewerController extends ChangeNotifier {
             child: const Text('Cancel', style: kTextLetterSpacing),
           ),
           TextButton(
-            onPressed: () =>
-                Navigator.pop(context, controller.text.trim()),
-            child: const Text('Save', style: TextStyle(fontWeight: .bold, letterSpacing: 0.0)),
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text(
+              'Save',
+              style: TextStyle(fontWeight: .bold, letterSpacing: 0.0),
+            ),
           ),
         ],
       ),
@@ -211,20 +226,17 @@ class ScanViewerController extends ChangeNotifier {
 
     if (result == null || result.isEmpty) return;
 
-    await ScanStorage.renameScan(
-      scanDir: scanDir,
-      newName: result,
-    );
+    await ScanStorage.renameScan(scanDir: scanDir, newName: result);
 
     meta = meta.copyWith(name: result);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Renamed successfully', style: kTextLetterSpacing,),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
     notifyListeners();
 
+    Fluttertoast.showToast(
+      msg: "Renamed successfully",
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+    );
   }
 
   /* ───────────────── DELETE (POP + REFRESH) ───────────────── */
@@ -246,7 +258,10 @@ class ScanViewerController extends ChangeNotifier {
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete', style: TextStyle(fontWeight: .bold, letterSpacing: 0.0)),
+            child: const Text(
+              'Delete',
+              style: TextStyle(fontWeight: .bold, letterSpacing: 0.0),
+            ),
           ),
         ],
       ),
@@ -259,11 +274,13 @@ class ScanViewerController extends ChangeNotifier {
 
     if (context.mounted) {
       Navigator.pop(context, true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: PlatformHelper.isDesktop ? Text('Deleted from Google Drive', style: kTextLetterSpacing,) : Text('Deleted locally and from Google Drive', style: kTextLetterSpacing,),
-          behavior: SnackBarBehavior.floating,
-        ),
+      Fluttertoast.showToast(
+        msg: PlatformHelper.isDesktop
+            ? 'Deleted from Google Drive'
+            : 'Deleted permanently',
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
       );
     }
   }
@@ -287,20 +304,20 @@ class ScanViewerController extends ChangeNotifier {
               Navigator.pop(context);
               await shareAsPdf(context, scanDir);
             },
-            child: const Text('PDF', style: TextStyle(
-                letterSpacing: 0.0,
-                fontWeight: .bold
-            )),
+            child: const Text(
+              'PDF',
+              style: TextStyle(letterSpacing: 0.0, fontWeight: .bold),
+            ),
           ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
               await shareAsImages(context, scanDir);
             },
-            child: const Text('Images', style: TextStyle(
-                letterSpacing: 0.0,
-                fontWeight: .bold
-            )),
+            child: const Text(
+              'Images',
+              style: TextStyle(letterSpacing: 0.0, fontWeight: .bold),
+            ),
           ),
         ],
       ),
@@ -310,30 +327,30 @@ class ScanViewerController extends ChangeNotifier {
   Future<void> shareAsPdf(BuildContext context, scanDir) async {
     try {
       // Get PDF file from your ScanStorage (it doesn't auto-save, just generates)
-      final pdfFile = await ScanStorage.generatePdf(scanDir, fileName: meta.name);
+      final pdfFile = await ScanStorage.generatePdf(
+        scanDir,
+        fileName: meta.name,
+      );
 
       if (pdfFile.existsSync()) {
-        final params = ShareParams(
-          files: [XFile(pdfFile.path)],
-        );
+        final params = ShareParams(files: [XFile(pdfFile.path)]);
 
         await SharePlus.instance.share(params);
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                'Failed to share PDF: $e', style: kTextLetterSpacing,
-              ),
-            behavior: SnackBarBehavior.floating,
-          ),
+        Fluttertoast.showToast(
+          msg: "Failed to share PDF: $e",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
         );
       }
     }
   }
 
-  Future<void> shareAsImages(BuildContext context, Directory scanDir) async { // Specified scanDir to be a type of Directory to fix the image export issue
+  Future<void> shareAsImages(BuildContext context, Directory scanDir) async {
+    // Specified scanDir to be a type of Directory to fix the image export issue
     try {
       // Get image files from scan folder
       final imageFiles = scanDir
@@ -344,19 +361,16 @@ class ScanViewerController extends ChangeNotifier {
 
       if (imageFiles.isNotEmpty) {
         final xFiles = imageFiles.map((f) => XFile(f.path)).toList();
-        final params = ShareParams(
-          files: xFiles,
-        );
+        final params = ShareParams(files: xFiles);
         await SharePlus.instance.share(params);
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                'Failed to share images: $e', style: kTextLetterSpacing,),
-            behavior: SnackBarBehavior.floating,
-          ),
+        Fluttertoast.showToast(
+          msg: "Failed to share images: $e",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
         );
       }
     }
@@ -390,35 +404,42 @@ class ScanViewerController extends ChangeNotifier {
     await editedFile.copy(imageFile.path);
 
     return imageFile;
-
   }
 
   Future<void> showAddMorePagesDialog(BuildContext context, scanDir) async {
     await showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-
-            title: const Text('How would you like to add more scans?', style: kTextLetterSpacing,),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel', style: kTextLetterSpacing,),
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            'How would you like to add more scans?',
+            style: kTextLetterSpacing,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel', style: kTextLetterSpacing),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                importImages(context, scanDir);
+              },
+              child: const Text(
+                'From Photo Library',
+                style: TextStyle(fontWeight: .bold, letterSpacing: 0.0),
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  importImages(context, scanDir);
-                },
-                child: const Text('From Photo Library', style: TextStyle(fontWeight: .bold, letterSpacing: 0.0)),
+            ),
+            TextButton(
+              onPressed: () => addMorePages(context, scanDir),
+              child: const Text(
+                'From Camera',
+                style: TextStyle(fontWeight: .bold, letterSpacing: 0.0),
               ),
-              TextButton(
-                onPressed: () => addMorePages(context, scanDir),
-                child: const Text('From Camera', style: TextStyle(fontWeight: .bold, letterSpacing: 0.0)),
-              ),
-            ],
-          );
-        }
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -427,8 +448,9 @@ class ScanViewerController extends ChangeNotifier {
       isLoading = true; // Start loading animation
       notifyListeners(); // Notify to display animation
 
-      final result = await FlutterDocScanner()
-          .getScannedDocumentAsImages(page: 4);
+      final result = await FlutterDocScanner().getScannedDocumentAsImages(
+        page: 4,
+      );
 
       List<String> images = [];
 
@@ -440,10 +462,7 @@ class ScanViewerController extends ChangeNotifier {
 
       if (images.isEmpty) return;
 
-      await ScanStorage.appendPages(
-        scanDir: scanDir,
-        imageUris: images,
-      );
+      await ScanStorage.appendPages(scanDir: scanDir, imageUris: images);
 
       if (images.isEmpty) return;
 
@@ -453,21 +472,21 @@ class ScanViewerController extends ChangeNotifier {
       isLoading = false; // End loading animation
       notifyListeners(); // Notify to stop animation
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Pages added', style: kTextLetterSpacing,),
-          behavior: SnackBarBehavior.floating,
-        ),
+      Fluttertoast.showToast(
+        msg: "Added pages",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
       );
     } catch (e) {
       if (!isMounted) return;
       isLoading = false; // End loading animation
       notifyListeners(); // Notify to stop animation
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to add pages: $e', style: kTextLetterSpacing,),
-          behavior: SnackBarBehavior.floating,
-        ),
+      Fluttertoast.showToast(
+        msg: "Failed to add images: $e",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
       );
     }
   }
@@ -479,19 +498,14 @@ class ScanViewerController extends ChangeNotifier {
 
       final picker = ImagePicker();
 
-      final pickedImages = await picker.pickMultiImage(
-        imageQuality: 100,
-      );
+      final pickedImages = await picker.pickMultiImage(imageQuality: 100);
 
       if (pickedImages.isEmpty) return;
 
       final imagePaths = pickedImages.map((e) => e.path).toList();
 
       // Append imported images to the existing scan
-      await ScanStorage.appendPages(
-        scanDir: scanDir,
-        imageUris: imagePaths,
-      );
+      await ScanStorage.appendPages(scanDir: scanDir, imageUris: imagePaths);
 
       if (!isMounted) return;
 
@@ -505,21 +519,21 @@ class ScanViewerController extends ChangeNotifier {
       isLoading = false; // End loading animation
       notifyListeners(); // Notify to stop animation
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Images imported successfully', style: kTextLetterSpacing,),
-          behavior: SnackBarBehavior.floating,
-        ),
+      Fluttertoast.showToast(
+        msg: "Imported images successfully",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
       );
     } catch (e) {
       if (!isMounted) return;
       isLoading = false; // End loading animation
       notifyListeners(); // Notify to stop animation
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to import images: $e', style: kTextLetterSpacing,),
-          behavior: SnackBarBehavior.floating,
-        ),
+      Fluttertoast.showToast(
+        msg: "Failed to import images: $e",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
       );
     }
   }
