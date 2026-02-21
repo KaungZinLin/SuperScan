@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:super_scan/models/saved_scan.dart';
 import 'package:super_scan/models/drive_scan.dart';
@@ -14,7 +15,6 @@ import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:super_scan/screens/scan_viewer_screen.dart';
 import 'package:super_scan/services/google_auth_service.dart';
-import 'package:super_scan/constants.dart';
 
 class HomeController extends ChangeNotifier {
   // Alternative to !mounted in the view - don't understand it yet
@@ -72,28 +72,22 @@ class HomeController extends ChangeNotifier {
 
       await loadSavedScans();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Imported images successfully',
-            style: kTextLetterSpacing,
-          ),
-          behavior: SnackBarBehavior.fixed,
-        ),
+      Fluttertoast.showToast(
+        msg: "Imported images successfully",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
       );
 
       await syncScans(context);
     } catch (e) {
       if (!isMounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Failed to improt images: $e',
-            style: kTextLetterSpacing,
-          ),
-          behavior: SnackBarBehavior.fixed,
-        ),
+      Fluttertoast.showToast(
+        msg: "Failed to import images: $e",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
       );
     }
   }
@@ -256,11 +250,11 @@ class HomeController extends ChangeNotifier {
 
     await loadSavedScans();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Renamed successfully', style: kTextLetterSpacing),
-        behavior: SnackBarBehavior.fixed,
-      ),
+    Fluttertoast.showToast(
+      msg: "Renamed successfully",
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
     );
   }
 
@@ -298,24 +292,12 @@ class HomeController extends ChangeNotifier {
     await SyncController.deleteScan(scan.dir);
     await loadSavedScans(); // Reload view
 
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Deleted successfully'),
-        behavior: SnackBarBehavior.fixed,
-      ),
+    Fluttertoast.showToast(
+      msg: "Deleted permanently",
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
     );
-
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(
-    //     content: const Text(
-    //       'Deleted locally and from Google Drive',
-    //       style: kTextLetterSpacing,
-    //     ),
-    //     behavior: SnackBarBehavior.fixed,
-    //   ),
-    // );
   }
 
   List<SavedScan> get filteredScans {
@@ -351,11 +333,11 @@ class HomeController extends ChangeNotifier {
       final scans = await _getLocalScans();
       await SyncController.syncScans(scans, force: force);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Sync failed: $e'),
-          behavior: SnackBarBehavior.fixed,
-        ),
+      Fluttertoast.showToast(
+        msg: "Failed to sync: $e",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
       );
     } finally {
       isSyncing = false; // Stop syncing
@@ -378,8 +360,11 @@ class HomeController extends ChangeNotifier {
         MaterialPageRoute(builder: (_) => ScanViewerScreen(scanDir: scanDir)),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to open scan: $e'), behavior: .fixed),
+      Fluttertoast.showToast(
+        msg: "Failed to open scan: $e",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
       );
     }
   }

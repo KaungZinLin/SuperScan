@@ -168,7 +168,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           onTap: () async {
                             _viewController.openScanViewer(scanDir, context);
-                            //await _syncScans(); - Disabled syncing for now
                           },
                         ),
                       );
