@@ -12,20 +12,34 @@
         <scene sceneID="EHf-IW-A2E">
             <objects>
                 <viewController id="01J-lp-oVM" sceneMemberID="viewController">
-                    <label key="view" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="SuperScan" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="ful-qf-2gf">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="12v-Re-NI4"/>
+                        <viewControllerLayoutGuide type="bottom" id="4ci-zf-5UN"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="rootView">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                        <fontDescription key="fontDescription" type="boldSystem" pointSize="50"/>
-                        <color key="textColor" systemColor="systemBackgroundColor"/>
-                        <nil key="highlightedColor"/>
-                    </label>
+                        <subviews>
+                            <imageView contentMode="scaleAspectFit" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="logo">
+                                <rect key="frame" x="102" y="351" width="189" height="150"/>
+                            </imageView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="logo" firstAttribute="leading" secondItem="rootView" secondAttribute="leadingMargin" constant="86" id="1DU-qn-Li3"/>
+                            <constraint firstItem="logo" firstAttribute="top" secondItem="12v-Re-NI4" secondAttribute="bottom" constant="233" id="VeV-Pk-4h1"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="logo" secondAttribute="trailing" constant="86" id="ltY-ZH-ka5"/>
+                            <constraint firstItem="4ci-zf-5UN" firstAttribute="top" secondItem="logo" secondAttribute="bottom" constant="283" id="qEz-Dv-nVl"/>
+                        </constraints>
+                    </view>
                 </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="80.916030534351137" y="264.08450704225356"/>
+            <point key="canvasLocation" x="136.64122137404578" y="112.67605633802818"/>
         </scene>
     </scenes>
     <resources>
+        <image name="LaunchImage" width="341.33334350585938" height="341.33334350585938"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

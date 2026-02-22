@@ -327,8 +327,8 @@ class HomeController extends ChangeNotifier {
     }
 
     isSyncing = true; // start syncing
-    isLoading = true;
-    notifyListeners(); // Notify to start suncing
+    isLoading = true; // Start loading
+    notifyListeners(); // Notify to start syncing/loading
 
     try {
       final scans = await _getLocalScans();

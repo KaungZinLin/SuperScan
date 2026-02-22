@@ -10,6 +10,7 @@ class GoogleDriveService {
   GoogleDriveService._internal();
 
   static final GoogleDriveService instance = GoogleDriveService._internal();
+  final Map<String, String> _folderCache = {}; // Cache drive folder IDs to avoid multiple network calls
 
   factory GoogleDriveService() => instance;
 
@@ -57,57 +58,55 @@ class GoogleDriveService {
   // --------------------------------------------------
   // Upload (overwrite behavior)
   // --------------------------------------------------
+  final tasks = <Future<void> Function()>[];
+
   for (final entity in scanDir.listSync()) {
     if (entity is! File) continue;
 
-    final fileName = entity.uri.pathSegments.last;
+    tasks.add(() async {
+      final fileName = entity.uri.pathSegments.last;
 
-    // DELETE existing file with same name
-    final existingId = existingFiles[fileName];
-    if (existingId != null) {
-      await api.files.delete(existingId);
-    }
+      final existingId = existingFiles[fileName];
+      if (existingId != null) {
+        await api.files.delete(existingId);
+      }
 
-    final media =
-        drive.Media(entity.openRead(), await entity.length());
+      final media =
+          drive.Media(entity.openRead(), await entity.length());
 
-    await api.files.create(
-      drive.File()
-        ..name = fileName
-        ..parents = [scanFolderId],
-      uploadMedia: media,
-    );
+      await api.files.create(
+        drive.File()
+          ..name = fileName
+          ..parents = [scanFolderId],
+        uploadMedia: media,
+      );
+    });
   }
-}
 
-  // Future<void> uploadScan(Directory scanDir) async {
-  //   final api = await _api();
+// run 3 uploads simultaneously
+await _runWithLimit(tasks, 3);
+  // for (final entity in scanDir.listSync()) {
+  //   if (entity is! File) continue;
 
-  //   if (api == null) {
-  //     throw Exception("Not signed in");
+  //   final fileName = entity.uri.pathSegments.last;
+
+  //   // DELETE existing file with same name
+  //   final existingId = existingFiles[fileName];
+  //   if (existingId != null) {
+  //     await api.files.delete(existingId);
   //   }
 
-  //   final scanId = scanDir.path.split(Platform.pathSeparator).last;
+  //   final media =
+  //       drive.Media(entity.openRead(), await entity.length());
 
-  //   final rootId = await _ensureFolder(api, "SuperScan", null);
-
-  //   final syncedId = await _ensureFolder(api, "synced", rootId);
-
-  //   final scanFolderId = await _ensureFolder(api, scanId, syncedId);
-
-  //   for (final entity in scanDir.listSync()) {
-  //     if (entity is! File) continue;
-
-  //     final media = drive.Media(entity.openRead(), await entity.length());
-
-  //     await api.files.create(
-  //       drive.File()
-  //         ..name = entity.uri.pathSegments.last
-  //         ..parents = [scanFolderId],
-  //       uploadMedia: media,
-  //     );
-  //   }
+  //   await api.files.create(
+  //     drive.File()
+  //       ..name = fileName
+  //       ..parents = [scanFolderId],
+  //     uploadMedia: media,
+  //   );
   // }
+}
 
   // =============================
   // Delete scan
@@ -235,6 +234,11 @@ class GoogleDriveService {
     String name,
     String? parentId,
   ) async {
+    final cacheKey = "$parentId/$name";
+    if (_folderCache.containsKey(cacheKey)) {
+      return _folderCache[cacheKey]!;
+    }
+
     final query = parentId == null
         ? "mimeType='application/vnd.google-apps.folder' and name='$name'"
         : "mimeType='application/vnd.google-apps.folder' and name='$name' and '$parentId' in parents";
@@ -242,7 +246,10 @@ class GoogleDriveService {
     final existing = await api.files.list(q: query);
 
     if (existing.files?.isNotEmpty ?? false) {
-      return existing.files!.first.id!;
+      // return existing.files!.first.id!;
+      final id = existing.files!.first.id!;
+      _folderCache[cacheKey] = id;
+      return id;
     }
 
     final folder = await api.files.create(
@@ -252,6 +259,32 @@ class GoogleDriveService {
         ..parents = parentId == null ? null : [parentId],
     );
 
-    return folder.id!;
+    final id = folder.id!;
+    _folderCache[cacheKey] = id;
+    return id;
+  }
+
+  Future<void> _runWithLimit(
+    List<Future<void> Function()> tasks,
+    int limit,
+  ) async {
+    final executing = <Future<void>>[];
+
+    for (final task in tasks) {
+      final future = task();
+
+      // remove when finished
+      executing.add(
+        future.whenComplete(() {
+          executing.remove(future);
+        }),
+      );
+
+      if (executing.length >= limit) {
+        await Future.any(executing);
+      }
+    }
+
+    await Future.wait(executing);
   }
 }
