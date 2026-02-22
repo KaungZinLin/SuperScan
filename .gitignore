@@ -43,3 +43,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Secrets & API Keys
+# Firebase configuration files
+**/google-services.json
+**/client_345114505131-25u8fbkfj78jueefhg5jp0eamdad2j71.apps.googleusercontent.com.plist
