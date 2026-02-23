@@ -231,11 +231,7 @@ class ScanViewerController extends ChangeNotifier {
     meta = meta.copyWith(name: result);
     notifyListeners();
 
-    WindowsToast.show(
-        'Renamed successfully',
-        context,
-        30,
-    );
+    WindowsToast.show('Renamed successfully', context, 30);
   }
 
   /* ───────────────── DELETE (POP + REFRESH) ───────────────── */
@@ -279,11 +275,11 @@ class ScanViewerController extends ChangeNotifier {
 
     if (context.mounted) {
       WindowsToast.show(
-          PlatformHelper.isDesktop
+        PlatformHelper.isDesktop
             ? 'Deleted from Google Drive'
             : 'Deleted permanently',
-          context,
-          30,
+        context,
+        30,
       );
       Navigator.pop(context, true);
     }
@@ -343,11 +339,7 @@ class ScanViewerController extends ChangeNotifier {
       }
     } catch (e) {
       if (context.mounted) {
-        WindowsToast.show(
-            'Failed to share PDF: $e',
-            context,
-            30,
-        );
+        WindowsToast.show('Failed to share PDF: $e', context, 30);
       }
     }
   }
@@ -369,11 +361,7 @@ class ScanViewerController extends ChangeNotifier {
       }
     } catch (e) {
       if (context.mounted) {
-        WindowsToast.show(
-            'Failed to share images: $e',
-            context,
-            30,
-        );
+        WindowsToast.show('Failed to share images: $e', context, 30);
       }
     }
   }
@@ -472,6 +460,7 @@ class ScanViewerController extends ChangeNotifier {
               onPressed: () {
                 Navigator.pop(context);
                 importImages(context, scanDir);
+                Navigator.pop(context);
               },
               child: const Text(
                 'From Photo Library',
@@ -479,7 +468,10 @@ class ScanViewerController extends ChangeNotifier {
               ),
             ),
             TextButton(
-              onPressed: () => addMorePages(context, scanDir),
+              onPressed: () {
+                addMorePages(context, scanDir);
+                Navigator.pop(context);
+              },
               child: const Text(
                 'From Camera',
                 style: TextStyle(fontWeight: .bold, letterSpacing: 0.0),
@@ -520,20 +512,12 @@ class ScanViewerController extends ChangeNotifier {
       isLoading = false; // End loading animation
       notifyListeners(); // Notify to stop animation
 
-      WindowsToast.show(
-          'Added pages',
-          context,
-          30,
-      );
+      WindowsToast.show('Added pages', context, 30);
     } catch (e) {
       if (!isMounted) return;
       isLoading = false; // End loading animation
       notifyListeners(); // Notify to stop animation
-      WindowsToast.show(
-          'Failed to shaaddre images: $e',
-          context,
-          30,
-      );
+      WindowsToast.show('Failed to shaaddre images: $e', context, 30);
     }
   }
 
@@ -565,20 +549,12 @@ class ScanViewerController extends ChangeNotifier {
       isLoading = false; // End loading animation
       notifyListeners(); // Notify to stop animation
 
-      WindowsToast.show(
-          'Imported images successfully',
-          context,
-          30,
-      );
+      WindowsToast.show('Imported images successfully', context, 30);
     } catch (e) {
       if (!isMounted) return;
       isLoading = false; // End loading animation
       notifyListeners(); // Notify to stop animation
-      WindowsToast.show(
-          'Failed to import images: $e',
-          context,
-          30,
-      );
+      WindowsToast.show('Failed to import images: $e', context, 30);
     }
   }
 }

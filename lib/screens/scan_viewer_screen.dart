@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:super_scan/controllers/scan_viewer_controller.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
 import 'package:super_scan/constants.dart';
+import 'package:super_scan/screens/magie_eyes_screen.dart';
 
 class ScanViewerScreen extends StatefulWidget {
   final Directory scanDir;
@@ -110,7 +111,12 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
               ),
             ),
             InkWell(
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MagicEyesScreen(scanDir: widget.scanDir,)),
+                );
+              },
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

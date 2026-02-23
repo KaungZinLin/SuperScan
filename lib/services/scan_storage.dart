@@ -35,19 +35,6 @@ class ScanStorage {
       await source.copy(target.path);
     }
 
-    // Human-readable default name (for UI only)
-    // final displayName =
-    //     '${now.year}-${_two(now.month)}-${_two(now.day)} '
-    //     '${_two(now.hour)}:${_two(now.minute)}_SuperScan';
-
-    // Save metadata
-    // final metaFile = File('${scanDir.path}/meta.json');
-    // await metaFile.writeAsString(
-    //   jsonEncode({
-    //     'name': displayName,
-    //     'createdAt': now.millisecondsSinceEpoch,
-    //   }),
-    // );
     final meta = ScanMeta(name: defaultScanName(), createdAt: DateTime.now());
 
     final metaFile = File('${scanDir.path}/meta.json');
