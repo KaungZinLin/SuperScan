@@ -10,7 +10,8 @@ class GoogleDriveService {
   GoogleDriveService._internal();
 
   static final GoogleDriveService instance = GoogleDriveService._internal();
-  final Map<String, String> _folderCache = {}; // Cache drive folder IDs to avoid multiple network calls
+  final Map<String, String> _folderCache =
+      {}; // Cache drive folder IDs to avoid multiple network calls
 
   factory GoogleDriveService() => instance;
 
@@ -26,134 +27,201 @@ class GoogleDriveService {
 
   // New upload scan written by AI to check for existing files
   Future<void> uploadScan(Directory scanDir) async {
-  final api = await _api();
+    final api = await _api();
 
-  if (api == null) {
-    throw Exception("Not signed in");
+    if (api == null) {
+      throw Exception("Not signed in");
+    }
+
+    final scanId = scanDir.path.split(Platform.pathSeparator).last;
+
+    // Ensure folder structure
+    final rootId = await _ensureFolder(api, "SuperScan", null);
+    final syncedId = await _ensureFolder(api, "synced", rootId);
+    final scanFolderId = await _ensureFolder(api, scanId, syncedId);
+
+    // --------------------------------------------------
+    // NEW: Fetch existing files in Drive folder
+    // --------------------------------------------------
+    final existing = await api.files.list(
+      q: "'$scanFolderId' in parents and trashed=false",
+      spaces: 'drive',
+      $fields: 'files(id,name)',
+    );
+
+    final existingFiles = {
+      for (final f in existing.files ?? [])
+        if (f.name != null) f.name!: f.id!,
+    };
+
+    // --------------------------------------------------
+    // Upload (overwrite behavior)
+    // --------------------------------------------------
+    final tasks = <Future<void> Function()>[];
+
+    for (final entity in scanDir.listSync()) {
+      if (entity is! File) continue;
+
+      tasks.add(() async {
+        final fileName = entity.uri.pathSegments.last;
+
+        final existingId = existingFiles[fileName];
+        if (existingId != null) {
+          await api.files.delete(existingId);
+        }
+
+        final media = drive.Media(entity.openRead(), await entity.length());
+
+        await api.files.create(
+          drive.File()
+            ..name = fileName
+            ..parents = [scanFolderId],
+          uploadMedia: media,
+        );
+      });
+    }
+
+    // run 3 uploads simultaneously
+    await _runWithLimit(tasks, 3);
+    // for (final entity in scanDir.listSync()) {
+    //   if (entity is! File) continue;
+
+    //   final fileName = entity.uri.pathSegments.last;
+
+    //   // DELETE existing file with same name
+    //   final existingId = existingFiles[fileName];
+    //   if (existingId != null) {
+    //     await api.files.delete(existingId);
+    //   }
+
+    //   final media =
+    //       drive.Media(entity.openRead(), await entity.length());
+
+    //   await api.files.create(
+    //     drive.File()
+    //       ..name = fileName
+    //       ..parents = [scanFolderId],
+    //     uploadMedia: media,
+    //   );
+    // }
   }
-
-  final scanId =
-      scanDir.path.split(Platform.pathSeparator).last;
-
-  // Ensure folder structure
-  final rootId = await _ensureFolder(api, "SuperScan", null);
-  final syncedId = await _ensureFolder(api, "synced", rootId);
-  final scanFolderId =
-      await _ensureFolder(api, scanId, syncedId);
-
-  // --------------------------------------------------
-  // NEW: Fetch existing files in Drive folder
-  // --------------------------------------------------
-  final existing = await api.files.list(
-    q: "'$scanFolderId' in parents and trashed=false",
-    spaces: 'drive',
-    $fields: 'files(id,name)',
-  );
-
-  final existingFiles = {
-    for (final f in existing.files ?? [])
-      if (f.name != null) f.name!: f.id!
-  };
-
-  // --------------------------------------------------
-  // Upload (overwrite behavior)
-  // --------------------------------------------------
-  final tasks = <Future<void> Function()>[];
-
-  for (final entity in scanDir.listSync()) {
-    if (entity is! File) continue;
-
-    tasks.add(() async {
-      final fileName = entity.uri.pathSegments.last;
-
-      final existingId = existingFiles[fileName];
-      if (existingId != null) {
-        await api.files.delete(existingId);
-      }
-
-      final media =
-          drive.Media(entity.openRead(), await entity.length());
-
-      await api.files.create(
-        drive.File()
-          ..name = fileName
-          ..parents = [scanFolderId],
-        uploadMedia: media,
-      );
-    });
-  }
-
-// run 3 uploads simultaneously
-await _runWithLimit(tasks, 3);
-  // for (final entity in scanDir.listSync()) {
-  //   if (entity is! File) continue;
-
-  //   final fileName = entity.uri.pathSegments.last;
-
-  //   // DELETE existing file with same name
-  //   final existingId = existingFiles[fileName];
-  //   if (existingId != null) {
-  //     await api.files.delete(existingId);
-  //   }
-
-  //   final media =
-  //       drive.Media(entity.openRead(), await entity.length());
-
-  //   await api.files.create(
-  //     drive.File()
-  //       ..name = fileName
-  //       ..parents = [scanFolderId],
-  //     uploadMedia: media,
-  //   );
-  // }
-}
 
   // =============================
   // Delete scan
   // =============================
 
+  // Deletes a scan folder under SuperScan/synced by scanId - AI
   Future<void> deleteScanFolder(String scanId) async {
     final api = await _api();
-
     if (api == null) return;
 
-    final result = await api.files.list(
-      q: "name='$scanId' and mimeType='application/vnd.google-apps.folder'",
+    // 1️⃣ Get SuperScan folder
+    final rootResult = await api.files.list(
+      q: "name='SuperScan' and mimeType='application/vnd.google-apps.folder' and trashed=false",
     );
+    if (rootResult.files == null || rootResult.files!.isEmpty) return;
+    final rootId = rootResult.files!.first.id!;
 
-    if (result.files?.isEmpty ?? true) return;
+    // 2️⃣ Get synced folder
+    final syncedResult = await api.files.list(
+      q: "'$rootId' in parents and name='synced' and trashed=false",
+    );
+    if (syncedResult.files == null || syncedResult.files!.isEmpty) return;
+    final syncedId = syncedResult.files!.first.id!;
 
-    await api.files.delete(result.files!.first.id!);
+    // 3️⃣ Find the scan folder inside synced
+    final scanResult = await api.files.list(
+      q: "name='$scanId' and mimeType='application/vnd.google-apps.folder' and '$syncedId' in parents",
+    );
+    if (scanResult.files == null || scanResult.files!.isEmpty) return;
+
+    // 4️⃣ Delete
+    await api.files.delete(scanResult.files!.first.id!);
   }
 
+  // Future<void> deleteScanFolder(String scanId) async {
+  //   final api = await _api();
+
+  //   if (api == null) return;
+
+  //   final result = await api.files.list(
+  //     q: "name='$scanId' and mimeType='application/vnd.google-apps.folder'",
+  //   );
+
+  //   if (result.files?.isEmpty ?? true) return;
+
+  //   await api.files.delete(result.files!.first.id!);
+  // }
+  // Fetches all scans under SuperScan/synced: ai WRITTEN
   Future<List<DriveScan>> fetchDriveScans() async {
     final api = await _api();
     if (api == null) return [];
 
-    // 1. List scan folders
-    final folders = await api.files.list(
-      q: "mimeType = 'application/vnd.google-apps.folder' and trashed = false",
-      spaces: 'drive',
+    // Get SuperScan folder
+    final rootResult = await api.files.list(
+      q: "name='SuperScan' and mimeType='application/vnd.google-apps.folder' and trashed=false",
     );
 
-    if (folders.files == null) return [];
+    print(
+      "SuperScan folders: ${rootResult.files?.map((f) => f.name).toList()}",
+    );
+
+    // Step 2: Check synced
+    if (rootResult.files?.isNotEmpty ?? false) {
+      final superScanId = rootResult.files!.first.id!;
+      final syncedResult = await api.files.list(
+        q: "'$superScanId' in parents and name='synced' and trashed=false",
+      );
+      print(
+        "Synced folders: ${syncedResult.files?.map((f) => f.name).toList()}",
+      );
+
+      if (syncedResult.files?.isNotEmpty ?? false) {
+        final syncedId = syncedResult.files!.first.id!;
+        final scanFoldersResult = await api.files.list(
+          q: "'$syncedId' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
+        );
+        print(
+          "Scan folders under synced: ${scanFoldersResult.files?.map((f) => f.name).toList()}",
+        );
+      }
+    }
+
+    if (rootResult.files == null || rootResult.files!.isEmpty) return [];
+    final rootId = rootResult.files!.first.id!;
+
+    // Get synced folder
+    final syncedResult = await api.files.list(
+      q: "'$rootId' in parents and name='synced' and trashed=false",
+    );
+    if (syncedResult.files == null || syncedResult.files!.isEmpty) return [];
+    final syncedId = syncedResult.files!.first.id!;
+
+    // List all scan folders inside synced
+    final scanFoldersResult = await api.files.list(
+      q: "'$syncedId' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false",
+    );
+    final scanFolders = scanFoldersResult.files ?? [];
 
     final scans = <DriveScan>[];
 
-    for (final folder in folders.files!) {
+    for (final folder in scanFolders) {
       final folderId = folder.id!;
 
-      // 2. Find meta.json inside folder
+      // 4️⃣ Look for meta.json in this scan folder
       final metaResult = await api.files.list(
-        q: "'$folderId' in parents and name = 'meta.json' and trashed = false",
+        q: "'$folderId' in parents and name='meta.json' and trashed=false",
         spaces: 'drive',
       );
 
       if (metaResult.files == null || metaResult.files!.isEmpty) continue;
+      print(
+        "Folder ${folder.name} contains: ${metaResult.files?.map((f) => f.name).toList()}",
+      );
 
       final metaFile = metaResult.files!.first;
 
-      // 3. Download meta.json
+      // 5️⃣ Download meta.json
       final media =
           await api.files.get(
                 metaFile.id!,
@@ -165,12 +233,58 @@ await _runWithLimit(tasks, 3);
       final meta = ScanMeta.fromJson(jsonDecode(content));
 
       scans.add(DriveScan(folderId: folderId, meta: meta));
+      print("Added scan: ${meta.name} from folder ${folder.name}"); // Debug
     }
 
     // newest → oldest
     scans.sort((a, b) => b.meta.createdAt.compareTo(a.meta.createdAt));
     return scans;
   }
+  // Future<List<DriveScan>> fetchDriveScans() async {
+  //   final api = await _api();
+  //   if (api == null) return [];
+
+  //   // 1. List scan folders
+  //   final folders = await api.files.list(
+  //     q: "mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+  //     spaces: 'drive',
+  //   );
+
+  //   if (folders.files == null) return [];
+
+  //   final scans = <DriveScan>[];
+
+  //   for (final folder in folders.files!) {
+  //     final folderId = folder.id!;
+
+  //     // 2. Find meta.json inside folder
+  //     final metaResult = await api.files.list(
+  //       q: "'$folderId' in parents and name = 'meta.json' and trashed = false",
+  //       spaces: 'drive',
+  //     );
+
+  //     if (metaResult.files == null || metaResult.files!.isEmpty) continue;
+
+  //     final metaFile = metaResult.files!.first;
+
+  //     // 3. Download meta.json
+  //     final media =
+  //         await api.files.get(
+  //               metaFile.id!,
+  //               downloadOptions: drive.DownloadOptions.fullMedia,
+  //             )
+  //             as drive.Media;
+
+  //     final content = await media.stream.transform(utf8.decoder).join();
+  //     final meta = ScanMeta.fromJson(jsonDecode(content));
+
+  //     scans.add(DriveScan(folderId: folderId, meta: meta));
+  //   }
+
+  //   // newest → oldest
+  //   scans.sort((a, b) => b.meta.createdAt.compareTo(a.meta.createdAt));
+  //   return scans;
+  // }
 
   Future<Directory> downloadScanFolder({
     required String folderId,

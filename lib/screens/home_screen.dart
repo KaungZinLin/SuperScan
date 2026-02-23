@@ -47,10 +47,18 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
 
     setState(() => _loading = false); // Stop loading animation
+
+    // Only load drive scans on desktop
+    if (PlatformHelper.isDesktop) {
+      await _viewController.loadDriveScans();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final scansToShow = PlatformHelper.isDesktop
+        ? _viewController.filteredDesktopScans
+        : _viewController.filteredScans;
     return Scaffold(
       // Completely removed FAB on desktop
       floatingActionButton: PlatformHelper.isDesktop
@@ -136,13 +144,13 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           SafeArea(
-            child: _viewController.filteredScans.isEmpty
+            child: scansToShow.isEmpty
                 ? EmptyScansPlaceholder()
                 : ListView.builder(
                     padding: const EdgeInsets.all(16),
-                    itemCount: _viewController.filteredScans.length,
+                    itemCount: scansToShow.length,
                     itemBuilder: (context, index) {
-                      final savedScan = _viewController.filteredScans[index];
+                      final savedScan = scansToShow[index];
                       final scanDir = savedScan.dir;
                       final meta = savedScan.meta;
                       final pages = scanDir

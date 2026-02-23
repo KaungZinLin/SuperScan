@@ -26,6 +26,7 @@ class HomeController extends ChangeNotifier {
 
   List<SavedScan> savedScans = [];
   List<DriveScan> driveScans = [];
+  List<SavedScan> desktopSavedScans = [];
   dynamic _scannedDocuments;
 
   bool isLoading = false;
@@ -373,14 +374,93 @@ class HomeController extends ChangeNotifier {
   Future<void> loadDriveScans() async {
     if (!isSignedIn) return;
 
-    isLoading = true; // Start loading animation
-    notifyListeners(); // Notify about animation
+    isLoading = true;
+    notifyListeners();
 
-    final scans = await _driveService
-        .fetchDriveScans(); // Fetch scans from Drive and save them to scans
-    driveScans = scans; // Move synced documents from scans to driveScans to use
+    final driveScans = await _driveService.fetchDriveScans();
+    desktopSavedScans = [];
 
-    isLoading = false; // Stop loading animation
-    notifyListeners(); // Notify about the end of animation
+    const int concurrency = 5; // number of parallel downloads
+    final scanQueue = List<DriveScan>.from(driveScans);
+
+    while (scanQueue.isNotEmpty) {
+      // Take up to `concurrency` scans from the queue
+      final batch = scanQueue.take(concurrency).toList();
+      scanQueue.removeRange(0, batch.length);
+
+      // Download batch in fparallel
+      await Future.wait(batch.map((d) async {
+        try {
+          final folderName = d.meta.name;
+          final localDir = await _driveService.downloadScanFolder(
+            folderId: d.folderId,
+            folderName: folderName,
+          );
+
+          desktopSavedScans.add(SavedScan(dir: localDir, meta: d.meta));
+          notifyListeners(); // update UI progressively
+        } catch (e) {
+          print("Failed to download '${d.meta.name}': $e");
+        }
+      }));
+    }
+
+    isLoading = false;
+    notifyListeners();
+
+    print("Desktop scans loaded: ${desktopSavedScans.length}");
+  }
+
+    /// Load scans from Google Drive (desktop)
+  // Future<void> loadDriveScans() async {
+  //   if (!isSignedIn) return;
+
+  //   isLoading = true;
+  //   notifyListeners();
+
+  //   // Fetch DriveScan objects from Google Drive
+  //   final driveScans = await _driveService.fetchDriveScans();
+
+  //   // Clear previous desktop scans
+  //   desktopSavedScans = [];
+
+  //   for (final d in driveScans) {
+  //     try {
+  //       // Download the Drive folder to a temporary directory
+  //       final localDir = await _driveService.downloadScanFolder(
+  //         folderId: d.folderId,
+  //         folderName: d.meta.name,
+  //       );
+
+  //       // Wrap it as a SavedScan (dir is non-nullable)
+  //       final savedScan = SavedScan(
+  //         dir: localDir,
+  //         meta: d.meta,
+  //       );
+
+  //       desktopSavedScans.add(savedScan);
+
+  //       print("Added desktop scan: ${d.meta.name} from folder ${d.folderId}");
+  //     } catch (e) {
+  //       print("Failed to download Drive scan ${d.meta.name}: $e");
+  //     }
+  //   }
+
+  //   isLoading = false;
+  //   notifyListeners();
+
+  //   print("Desktop scans loaded: ${desktopSavedScans.length}");
+  // }
+
+  // /// Desktop-specific filtered getter
+  List<SavedScan> get filteredDesktopScans {
+    if (_searchQuery.isEmpty) return desktopSavedScans;
+
+    final query = _searchQuery.toLowerCase();
+
+    return desktopSavedScans.where((scan) {
+      final name = scan.meta.name.toLowerCase();
+      return name.contains(query);
+    }).toList();
   }
 }

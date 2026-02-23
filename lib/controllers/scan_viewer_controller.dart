@@ -382,14 +382,19 @@ class ScanViewerController extends ChangeNotifier {
     }
   }
 
+  // Udpdated editor
   Future<File?> editScanImage(File imageFile) async {
     final cropped = await ImageCropper().cropImage(
       sourcePath: imageFile.path,
+      compressFormat: ImageCompressFormat.jpg,
+      compressQuality: 95,
       uiSettings: [
         AndroidUiSettings(
           toolbarTitle: 'Crop & Rotate',
           toolbarColor: Colors.black,
           toolbarWidgetColor: Colors.white,
+          statusBarColor: Colors.black,
+          backgroundColor: Colors.black,
           lockAspectRatio: false,
           hideBottomControls: false,
           showCropGrid: true,
@@ -405,12 +410,53 @@ class ScanViewerController extends ChangeNotifier {
 
     if (cropped == null) return null;
 
-    // Replace original image
-    final editedFile = File(cropped.path);
-    await editedFile.copy(imageFile.path);
+    final croppedFile = File(cropped.path);
+
+    try {
+      // ALWAYS copy instead of rename (Android safe)
+      await croppedFile.copy(imageFile.path);
+
+      // optional cleanup
+      if (await croppedFile.exists()) {
+        await croppedFile.delete();
+      }
+    } catch (e) {
+      debugPrint("Crop replace failed: $e");
+      return null;
+    }
 
     return imageFile;
   }
+
+  // Future<File?> editScanImage(File imageFile) async {
+  //   final cropped = await ImageCropper().cropImage(
+  //     sourcePath: imageFile.path,
+  //     uiSettings: [
+  //       AndroidUiSettings(
+  //         toolbarTitle: 'Crop & Rotate',
+  //         toolbarColor: Colors.black,
+  //         toolbarWidgetColor: Colors.white,
+  //         lockAspectRatio: false,
+  //         hideBottomControls: false,
+  //         showCropGrid: true,
+  //       ),
+  //       IOSUiSettings(
+  //         title: 'Crop & Rotate',
+  //         aspectRatioLockEnabled: false,
+  //         rotateButtonsHidden: false,
+  //         resetAspectRatioEnabled: true,
+  //       ),
+  //     ],
+  //   );
+
+  //   if (cropped == null) return null;
+
+  //   // Replace original image
+  //   final editedFile = File(cropped.path);
+  //   await editedFile.copy(imageFile.path);
+
+  //   return imageFile;
+  // }
 
   Future<void> showAddMorePagesDialog(BuildContext context, scanDir) async {
     await showDialog(
