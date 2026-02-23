@@ -11,7 +11,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:super_scan/screens/reorder_pages_page.dart';
 import 'package:super_scan/controllers/sync_controller.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:windows_toast/windows_toast.dart';
 
 class ScanViewerController extends ChangeNotifier {
   // Alternative to !mounted in the view - don't understand it yet
@@ -231,11 +231,10 @@ class ScanViewerController extends ChangeNotifier {
     meta = meta.copyWith(name: result);
     notifyListeners();
 
-    Fluttertoast.showToast(
-      msg: "Renamed successfully",
-      toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
+    WindowsToast.show(
+        'Renamed successfully',
+        context,
+        30,
     );
   }
 
@@ -279,15 +278,14 @@ class ScanViewerController extends ChangeNotifier {
     notifyListeners(); // Notify about animation
 
     if (context.mounted) {
-      Navigator.pop(context, true);
-      Fluttertoast.showToast(
-        msg: PlatformHelper.isDesktop
+      WindowsToast.show(
+          PlatformHelper.isDesktop
             ? 'Deleted from Google Drive'
             : 'Deleted permanently',
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
+          context,
+          30,
       );
+      Navigator.pop(context, true);
     }
   }
 
@@ -345,11 +343,10 @@ class ScanViewerController extends ChangeNotifier {
       }
     } catch (e) {
       if (context.mounted) {
-        Fluttertoast.showToast(
-          msg: "Failed to share PDF: $e",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
+        WindowsToast.show(
+            'Failed to share PDF: $e',
+            context,
+            30,
         );
       }
     }
@@ -372,11 +369,10 @@ class ScanViewerController extends ChangeNotifier {
       }
     } catch (e) {
       if (context.mounted) {
-        Fluttertoast.showToast(
-          msg: "Failed to share images: $e",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
+        WindowsToast.show(
+            'Failed to share images: $e',
+            context,
+            30,
         );
       }
     }
@@ -524,21 +520,19 @@ class ScanViewerController extends ChangeNotifier {
       isLoading = false; // End loading animation
       notifyListeners(); // Notify to stop animation
 
-      Fluttertoast.showToast(
-        msg: "Added pages",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
+      WindowsToast.show(
+          'Added pages',
+          context,
+          30,
       );
     } catch (e) {
       if (!isMounted) return;
       isLoading = false; // End loading animation
       notifyListeners(); // Notify to stop animation
-      Fluttertoast.showToast(
-        msg: "Failed to add images: $e",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
+      WindowsToast.show(
+          'Failed to shaaddre images: $e',
+          context,
+          30,
       );
     }
   }
@@ -571,21 +565,19 @@ class ScanViewerController extends ChangeNotifier {
       isLoading = false; // End loading animation
       notifyListeners(); // Notify to stop animation
 
-      Fluttertoast.showToast(
-        msg: "Imported images successfully",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
+      WindowsToast.show(
+          'Imported images successfully',
+          context,
+          30,
       );
     } catch (e) {
       if (!isMounted) return;
       isLoading = false; // End loading animation
       notifyListeners(); // Notify to stop animation
-      Fluttertoast.showToast(
-        msg: "Failed to import images: $e",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
+      WindowsToast.show(
+          'Failed to import images: $e',
+          context,
+          30,
       );
     }
   }

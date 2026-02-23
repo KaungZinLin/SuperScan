@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:super_scan/models/saved_scan.dart';
 import 'package:super_scan/models/drive_scan.dart';
@@ -15,6 +14,7 @@ import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:super_scan/screens/scan_viewer_screen.dart';
 import 'package:super_scan/services/google_auth_service.dart';
+import 'package:windows_toast/windows_toast.dart';
 
 class HomeController extends ChangeNotifier {
   // Alternative to !mounted in the view - don't understand it yet
@@ -73,22 +73,20 @@ class HomeController extends ChangeNotifier {
 
       await loadSavedScans();
 
-      Fluttertoast.showToast(
-        msg: "Imported images successfully",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
+      WindowsToast.show(
+          'Imported images successfully',
+          context,
+          30,
       );
 
       await syncScans(context);
     } catch (e) {
       if (!isMounted) return;
 
-      Fluttertoast.showToast(
-        msg: "Failed to import images: $e",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
+      WindowsToast.show(
+          'Failed to import images: $e',
+          context,
+          30,
       );
     }
   }
@@ -251,11 +249,10 @@ class HomeController extends ChangeNotifier {
 
     await loadSavedScans();
 
-    Fluttertoast.showToast(
-      msg: "Renamed successfully",
-      toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
+    WindowsToast.show(
+        'Renamed successfully',
+        context,
+        30,
     );
   }
 
@@ -294,11 +291,10 @@ class HomeController extends ChangeNotifier {
 
     await loadSavedScans(); // Reload view
 
-    Fluttertoast.showToast(
-      msg: "Deleted permanently",
-      toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
+    WindowsToast.show(
+        'Deleted permanently',
+        context,
+        30,
     );
   }
 
@@ -335,11 +331,10 @@ class HomeController extends ChangeNotifier {
       final scans = await _getLocalScans();
       await SyncController.syncScans(scans, force: force);
     } catch (e) {
-      Fluttertoast.showToast(
-        msg: "Failed to sync: $e",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
+      WindowsToast.show(
+          'Failed to sync: $e',
+          context,
+          30,
       );
     } finally {
       isSyncing = false; // Stop syncing
@@ -361,12 +356,12 @@ class HomeController extends ChangeNotifier {
         context,
         MaterialPageRoute(builder: (_) => ScanViewerScreen(scanDir: scanDir)),
       );
+      
     } catch (e) {
-      Fluttertoast.showToast(
-        msg: "Failed to open scan: $e",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
+      WindowsToast.show(
+          'Failed to open scan: $e',
+          context,
+          30,
       );
     }
   }

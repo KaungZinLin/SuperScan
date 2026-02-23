@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:super_scan/constants.dart';
 import 'package:super_scan/services/google_auth_service.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:windows_toast/windows_toast.dart';
 
 class SettingsController extends ChangeNotifier {
   final auth = GoogleAuthService.instance;
@@ -19,36 +19,32 @@ class SettingsController extends ChangeNotifier {
 
       // If result is a bool and it's true, or if it's an object and not null
       if (result == true || (result is! bool)) {
-        Fluttertoast.showToast(
-          msg: "Signed in successfully",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
+        WindowsToast.show(
+            'Signed in successfully',
+            context,
+            30,
         );
       } else {
-        Fluttertoast.showToast(
-          msg: "Failed to sign in",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
+        WindowsToast.show(
+            'Signed in failed',
+            context,
+            30,
         );
       }
 
       notifyListeners();
     } on PlatformException catch (e) {
-      Fluttertoast.showToast(
-        msg: "Authentication error: [${e.code}] ${e.message}",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-      );
+      WindowsToast.show(
+            'Authentication error: ${e.code} ${e.message}',
+            context,
+            30,
+        );
     } catch (e) {
-      Fluttertoast.showToast(
-        msg: "Unexpected error: $e",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-      );
+      WindowsToast.show(
+            'Unexpected error: $e',
+            context,
+            30,
+        );
     } finally {
       isLoading = false; // Stop animation
       notifyListeners(); // Notify to stop animation
@@ -64,11 +60,10 @@ class SettingsController extends ChangeNotifier {
     isLoading = false; // Stop animation
     notifyListeners(); // Notify about animation
 
-    Fluttertoast.showToast(
-      msg: "Signed out",
-      toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
+    WindowsToast.show(
+        'Signed out',
+        context,
+        30,
     );
   }
 
