@@ -5,8 +5,9 @@ class OCRService {
   OCRService._();
   static final OCRService instance = OCRService._();
 
-  final TextRecognizer _recognizer =
-      TextRecognizer(script: TextRecognitionScript.latin);
+  final TextRecognizer _recognizer = TextRecognizer(
+    script: TextRecognitionScript.latin,
+  );
 
   // Extract text from one image
   Future<String> extractImage(File file) async {
@@ -26,7 +27,7 @@ class OCRService {
       final text = await extractImage(images[i]);
 
       buffer.writeln(text);
-      buffer.writeln("\n--- PAGE ${i + 1} ---\n");
+      buffer.writeln("\nEND OF PAGE ${i + 1}\n");
 
       onProgress?.call(i + 1, images.length);
 

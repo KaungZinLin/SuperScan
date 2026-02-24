@@ -6,8 +6,9 @@ const TextStyle kNavigationBarLabelStyle = TextStyle(letterSpacing: 0.0);
 
 const Color kAccentColor = Color(0xFF3396D3);
 
-const kTextLetterSpacing =  TextStyle(
-    letterSpacing: 0.0);
+const kTextLetterSpacing = TextStyle(letterSpacing: 0.0);
+
+const String kOpenAIApiKeyStorageName = 'openai_api_key';
 
 final ThemeData kLightThemeData = ThemeData(
   useMaterial3: true,

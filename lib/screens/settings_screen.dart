@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:super_scan/constants.dart';
 import 'package:super_scan/controllers/settings_controller.dart';
 import 'package:super_scan/helpers/url_launcher.dart';
+import 'package:super_scan/screens/api_key_screen.dart';
 import 'package:super_scan/screens/donation_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
@@ -20,7 +21,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _viewController = SettingsController();
 
   bool isConnected = false; // Declare default internet connection
-  StreamSubscription? _internetConnectionStreamSubscription; // Start a stream and
+  StreamSubscription?
+  _internetConnectionStreamSubscription; // Start a stream and
+
+  @override
+  void dispose() {
+    _internetConnectionStreamSubscription?.cancel();
+    _viewController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -58,12 +67,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           : ListView(
               children: [
                 // Added internet connection warning
-                if (!isConnected) 
+                if (!isConnected)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                     child: _buildNoInternetWidget(context),
                   ),
-          
+
                 const SizedBox(height: 16),
                 ListTile(
                   leading: const FaIcon(FontAwesomeIcons.google),
@@ -100,19 +109,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
 
                 const Divider(),
-
+                ListTile(
+                  leading: const Icon(Icons.auto_awesome_outlined),
+                  title: const Text(
+                    'AI Configuration',
+                    style: kTextLetterSpacing,
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => ApiKeyScreen()),
+                    );
+                  },
+                ),
+                const Divider(),
                 ListTile(
                   leading: const Icon(
                     Icons.favorite_border,
                     color: Colors.redAccent,
                   ),
                   trailing: const Icon(Icons.chevron_right),
-                  title: const Text(
-                    'Support SuperScan',
-                    style: kTextLetterSpacing,
-                  ),
+                  title: const Text('Donate', style: kTextLetterSpacing),
                   subtitle: const Text(
-                    'Help me cover development costs and remove ads',
+                    'Get access to AI features via MagicEyes, removed ads, and support my work',
                   ),
                   onTap: () {
                     Navigator.push(
@@ -121,7 +141,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     );
                   },
                 ),
-
                 const Divider(),
 
                 ListTile(
@@ -141,7 +160,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       applicationName: 'SuperScan',
-                      applicationVersion: '0.1 (Beta) (Build 6)',
+                      applicationVersion: '0.1 (Beta) (Build 7)',
                       applicationLegalese: '© 2026 Kaung Zin Lin',
                       children: [
                         const Padding(
@@ -252,35 +271,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildNoInternetWidget(BuildContext context) {
-  // Defining a red color with transparency to match your previous style
-  final Color errorRed = Colors.red;
+    // Defining a red color with transparency to match your previous style
+    final Color errorRed = Colors.red;
 
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-    decoration: BoxDecoration(
-      // Using .withOpacity or .withAlpha for that soft background look
-      color: errorRed.withOpacity(0.1), 
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: errorRed.withOpacity(0.3), width: 1), // Optional: subtle border
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min, // Keeps the box tight around the content
-      children: [
-        Icon(Icons.wifi_off_rounded, color: errorRed, size: 20),
-        const SizedBox(width: 12),
-        const Flexible(
-          child: Text(
-            'Internet is required for sync and sign in',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14, // Slightly smaller to ensure it fits on one line
-              color: Colors.red,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: BoxDecoration(
+        // Using .withOpacity or .withAlpha for that soft background look
+        color: errorRed.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: errorRed.withOpacity(0.3),
+          width: 1,
+        ), // Optional: subtle border
+      ),
+      child: Row(
+        mainAxisSize:
+            MainAxisSize.min, // Keeps the box tight around the content
+        children: [
+          Icon(Icons.wifi_off_rounded, color: errorRed, size: 20),
+          const SizedBox(width: 12),
+          const Flexible(
+            child: Text(
+              'Internet is required for sync and sign in',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14, // Slightly smaller to ensure it fits on one line
+                color: Colors.red,
+              ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }
-}
-

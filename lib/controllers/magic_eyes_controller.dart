@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../services/ocr_service.dart';
 import 'package:super_scan/services/scan_storage.dart';
+import 'package:super_scan/services/ai_service.dart';
 
 class MagicEyesController extends ChangeNotifier {
   bool isProcessing = false;
@@ -9,6 +10,14 @@ class MagicEyesController extends ChangeNotifier {
 
   int progressCurrent = 0;
   int progressTotal = 0;
+
+  // AI State
+  String summaryText = "";
+  bool isSummarizing = false;
+
+  // Proofread
+  String proofreadResultText = "";
+  bool isProofreading = false;
 
   // Load scan images
   Future<List<File>> loadImages(Directory scanDir) async {
@@ -40,6 +49,76 @@ class MagicEyesController extends ChangeNotifier {
     );
 
     isProcessing = false;
+    notifyListeners();
+  }
+
+  // Summarize
+  Future<void> summarizeFromScan(Directory scanDir) async {
+    if (isSummarizing) return;
+
+    isSummarizing = true;
+    summaryText = "";
+    notifyListeners();
+
+    try {
+      // Redo OCR
+      await runOCR(scanDir);
+
+      if (extractedText.trim().isEmpty) {
+        summaryText = "No text detected.";
+        isSummarizing = false;
+        notifyListeners();
+        return;
+      }
+
+      // Stram AI Summary
+      await AIService.instance.streamSummary(
+        extractedText,
+        onChunk: (chunk) {
+          summaryText += chunk;
+          notifyListeners();
+        },
+      );
+    } catch (e) {
+      summaryText = "Failed to generate summary.";
+    }
+
+    isSummarizing = false;
+    notifyListeners();
+  }
+
+  // Proofread
+  Future<void> proofreadFromScan(Directory scanDir) async {
+    if (isProofreading) return;
+
+    isProofreading = true;
+    proofreadResultText = "";
+    notifyListeners();
+
+    try {
+      // Redo OCR
+      await runOCR(scanDir);
+
+      if (extractedText.trim().isEmpty) {
+        proofreadResultText = "No text detected.";
+        isProofreading = false;
+        notifyListeners();
+        return;
+      }
+
+      // Stram AI Summary
+      await AIService.instance.streamProofread(
+        extractedText,
+        onChunk: (chunk) {
+          proofreadResultText += chunk;
+          notifyListeners();
+        },
+      );
+    } catch (e) {
+      proofreadResultText = "Failed to get proofread results.";
+    }
+
+    isProofreading = false;
     notifyListeners();
   }
 }

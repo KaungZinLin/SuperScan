@@ -11,6 +11,7 @@ import 'dart:io';
 import 'package:super_scan/widgets/no_scans_widgets.dart';
 import 'package:super_scan/widgets/scan_search_delegate.dart';
 import 'package:super_scan/widgets/ad_banner.dart';
+import 'package:windows_toast/windows_toast.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
@@ -122,6 +123,9 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: (_syncing || _loading)
                   ? null
                   : () async {
+                      if (!_viewController.auth.isSignedIn) {
+                        WindowsToast.show('Sign in to sync', context, 30);
+                      }
                       await _viewController.syncScans(context);
                       if (PlatformHelper.isDesktop) {
                         await _viewController.loadDriveScans();

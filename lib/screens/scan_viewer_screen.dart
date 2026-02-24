@@ -111,16 +111,19 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
               ),
             ),
             InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MagicEyesScreen(scanDir: widget.scanDir,)),
-                );
-              },
+              onTap: PlatformHelper.isDesktop
+                  ? null
+                  : () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            MagicEyesScreen(scanDir: widget.scanDir),
+                      ),
+                    ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.remove_red_eye, color: kAccentColor),
+                  Icon(Icons.auto_awesome_outlined, color: kAccentColor),
                   Text(
                     "MagicEyes",
                     style: TextStyle(
@@ -138,7 +141,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.ios_share, color: kAccentColor),
+                  Icon(Icons.ios_share_outlined, color: kAccentColor),
                   Text(
                     "Share",
                     style: TextStyle(
@@ -158,7 +161,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.edit,
+                    Icons.edit_outlined,
                     color: PlatformHelper.isDesktop
                         ? Colors.grey
                         : kAccentColor,
@@ -183,7 +186,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.delete, color: kAccentColor),
+                  Icon(Icons.delete_outline, color: kAccentColor),
                   Text(
                     "Delete",
                     style: TextStyle(

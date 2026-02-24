@@ -459,9 +459,7 @@ class ScanViewerController extends ChangeNotifier {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                importImages(context, scanDir);
-                Navigator.pop(context);
-              },
+                importImages(context, scanDir);              },
               child: const Text(
                 'From Photo Library',
                 style: TextStyle(fontWeight: .bold, letterSpacing: 0.0),
