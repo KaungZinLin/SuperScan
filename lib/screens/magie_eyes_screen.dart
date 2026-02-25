@@ -1,9 +1,14 @@
 import 'dart:io';
+import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
+import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
+import 'package:googleapis/chat/v1.dart';
+import 'package:super_scan/constants.dart';
 import 'package:super_scan/controllers/magic_eyes_controller.dart';
 import 'package:flutter/services.dart';
 import 'package:windows_toast/windows_toast.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:super_scan/helpers/api_key_storage.dart';
 
 enum ScreenView { extract, summarize, proofread, chat }
 
@@ -88,7 +93,7 @@ class _MagicEyesScreenState extends State<MagicEyesScreen> {
       case ScreenView.proofread:
         return _ProofreadUI(controller: controller, scanDir: widget.scanDir);
       case ScreenView.chat:
-        return _ChatUI();
+        return _ChatUI(scanDir: widget.scanDir);
     }
   }
 }
@@ -453,41 +458,123 @@ class _ProofreadUI extends StatelessWidget {
   }
 }
 
-// --- View 3: Chat UI ---
-class _ChatUI extends StatelessWidget {
+// --- View 4: Chat UI ---
+class _ChatUI extends StatefulWidget {
+  final Directory scanDir;
+  const _ChatUI({super.key, required this.scanDir});
+
+  @override
+  State<_ChatUI> createState() => _ChatUIState();
+}
+
+class _ChatUIState extends State<_ChatUI> {
+  late final OpenAI _openAI;
+  final MagicEyesController controller = MagicEyesController();
+  final ChatUser _currentUser = ChatUser(id: '1', firstName: 'You');
+  final ChatUser _gptUser = ChatUser(id: '2', firstName: 'ChatGPT');
+
+  final List<ChatMessage> _messages = [];
+  List<ChatUser> _typingUser = <ChatUser>[];
+
+  @override
+  void initState() {
+    super.initState();
+    _initOpenAI();
+  }
+
+  Future<void> _initOpenAI() async {
+    final apiKey = await ApiKeyStorage.loadApiKey();
+    _openAI = OpenAI.instance.build(
+      token: apiKey,
+      baseOption: HttpSetup(receiveTimeout: const Duration(seconds: 5)),
+      enableLog: true,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: const [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Card(
-                  child: Padding(
-                    padding: EdgeInsets.all(8),
-                    child: Text("How can I help you today?"),
-                  ),
-                ),
-              ),
-            ],
-          ),
+    return Scaffold(
+      body: DashChat(
+        currentUser: _currentUser,
+        typingUsers: _typingUser,
+        messageOptions: const MessageOptions(
+          currentUserContainerColor: kAccentColor,
+          containerColor: Colors.black,
+          textColor: Colors.white,
         ),
-        const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: TextField(
-            decoration: InputDecoration(
-              suffixIcon: Icon(Icons.send),
-              hintText: "Ask MagicEyes...",
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(30)),
-              ),
-            ),
-          ),
-        ),
-      ],
+        messages: _messages,
+        onSend: (ChatMessage message) async {
+          await getChatResponse(message);
+        },
+      ),
     );
+  }
+
+  Future<void> getChatResponse(ChatMessage message) async {
+    // 1️⃣ Add the user's message immediately
+    setState(() {
+      _messages.insert(0, message);
+      _typingUser.add(_gptUser);
+    });
+
+    // 2️⃣ Run OCR safely
+    String ocrText = "";
+    try {
+      ocrText = await controller.runOCRforChat(widget.scanDir);
+      print(ocrText);
+    } catch (e) {
+      print("OCR failed: $e");
+    }
+
+    // 3️⃣ Build combined prompt
+    final combinedPrompt =
+        """
+Please use the following OCR text andd answer the user's question accordingly.
+
+Document OCR content:
+$ocrText
+
+User question:
+${message.text}
+""";
+
+    // 4️⃣ Send prompt to GPT
+    try {
+      final request = ChatCompleteText(
+        model: Gpt4OChatModel(),
+        messages: [
+          {'role': 'user', 'content': combinedPrompt},
+        ],
+        maxToken: 400,
+      );
+
+      final response = await _openAI.onChatCompletion(request: request);
+
+      // 5️⃣ Insert GPT response safely
+      if (response != null && response.choices.isNotEmpty) {
+        final gptText = response.choices.first.message?.content ?? "";
+        setState(() {
+          _messages.insert(
+            0,
+            ChatMessage(
+              user: _gptUser,
+              createdAt: DateTime.now(),
+              text: gptText,
+            ),
+          );
+
+          _typingUser.removeWhere((u) => u.id == _gptUser.id);
+        });
+      } else {
+        setState(() {
+          _typingUser.removeWhere((u) => u.id == _gptUser.id);
+        });
+      }
+    } catch (e) {
+      print("GPT request failed: $e");
+      setState(() {
+        _typingUser.removeWhere((u) => u.id == _gptUser.id);
+      });
+    }
   }
 }

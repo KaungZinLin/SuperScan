@@ -52,6 +52,29 @@ class MagicEyesController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<String> runOCRforChat(Directory scanDir) async {
+    isProcessing = true;
+    extractedText = "";
+    progressCurrent = 0;
+    notifyListeners();
+
+    final images = await loadImages(scanDir);
+
+    extractedText = await OCRService.instance.extractBatch(
+      images,
+      onProgress: (current, total) {
+        progressCurrent = current;
+        progressTotal = total;
+        notifyListeners();
+      },
+    );
+
+    isProcessing = false;
+    notifyListeners();
+
+    return extractedText; // <--- return it
+  }
+
   // Summarize
   Future<void> summarizeFromScan(Directory scanDir) async {
     if (isSummarizing) return;

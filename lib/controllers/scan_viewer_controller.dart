@@ -110,6 +110,9 @@ class ScanViewerController extends ChangeNotifier {
 
             // Evict old image from memory cache
             imageCache.evict(FileImage(images[index]));
+
+            await Future.delayed(const Duration(seconds: 1)); // Wait
+            reloadImages(scanDir);
           }
         } catch (e) {
           debugPrint("Error editing image: $e");
