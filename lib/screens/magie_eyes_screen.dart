@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:googleapis/apigeeregistry/v1.dart';
 import 'package:super_scan/controllers/magic_eyes_controller.dart';
 import 'package:flutter/services.dart';
 import 'package:windows_toast/windows_toast.dart';

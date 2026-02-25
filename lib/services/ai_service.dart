@@ -48,13 +48,12 @@ class AIService {
 
   // Summarize single chunk
   Future<String> _summarizeChunk(String chunk, int index, int total) async {
-    final _apiKey =
-        await ApiKeyStorage.loadApiKey(); // Get API key from storage
+    final apiKey = await ApiKeyStorage.loadApiKey(); // Get API key from storage
     final response = await http.post(
       Uri.parse(_endpoint),
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer $_apiKey",
+        "Authorization": "Bearer $apiKey",
       },
       body: jsonEncode({
         "model": "gpt-4o-mini",
@@ -104,13 +103,12 @@ class AIService {
 
   // Summarize single chunk
   Future<String> _proofreadChunk(String chunk, int index, int total) async {
-    final _apiKey =
-        await ApiKeyStorage.loadApiKey(); // Get API key from storage
+    final apiKey = await ApiKeyStorage.loadApiKey(); // Get API key from storage
     final response = await http.post(
       Uri.parse(_endpoint),
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer $_apiKey",
+        "Authorization": "Bearer $apiKey",
       },
       body: jsonEncode({
         "model": "gpt-4o-mini",

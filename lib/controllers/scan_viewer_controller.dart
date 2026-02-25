@@ -412,36 +412,6 @@ class ScanViewerController extends ChangeNotifier {
     return imageFile;
   }
 
-  // Future<File?> editScanImage(File imageFile) async {
-  //   final cropped = await ImageCropper().cropImage(
-  //     sourcePath: imageFile.path,
-  //     uiSettings: [
-  //       AndroidUiSettings(
-  //         toolbarTitle: 'Crop & Rotate',
-  //         toolbarColor: Colors.black,
-  //         toolbarWidgetColor: Colors.white,
-  //         lockAspectRatio: false,
-  //         hideBottomControls: false,
-  //         showCropGrid: true,
-  //       ),
-  //       IOSUiSettings(
-  //         title: 'Crop & Rotate',
-  //         aspectRatioLockEnabled: false,
-  //         rotateButtonsHidden: false,
-  //         resetAspectRatioEnabled: true,
-  //       ),
-  //     ],
-  //   );
-
-  //   if (cropped == null) return null;
-
-  //   // Replace original image
-  //   final editedFile = File(cropped.path);
-  //   await editedFile.copy(imageFile.path);
-
-  //   return imageFile;
-  // }
-
   Future<void> showAddMorePagesDialog(BuildContext context, scanDir) async {
     await showDialog(
       context: context,
@@ -459,7 +429,8 @@ class ScanViewerController extends ChangeNotifier {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                importImages(context, scanDir);              },
+                importImages(context, scanDir);
+              },
               child: const Text(
                 'From Photo Library',
                 style: TextStyle(fontWeight: .bold, letterSpacing: 0.0),
@@ -483,8 +454,8 @@ class ScanViewerController extends ChangeNotifier {
 
   Future<void> addMorePages(BuildContext context, scanDir) async {
     try {
-      isLoading = true; // Start loading animation
-      notifyListeners(); // Notify to display animation
+      isLoading = true;
+      notifyListeners();
 
       final result = await FlutterDocScanner().getScannedDocumentAsImages(
         page: 4,
@@ -498,24 +469,37 @@ class ScanViewerController extends ChangeNotifier {
         images = List<String>.from(result);
       }
 
-      if (images.isEmpty) return;
+      // Stop early if nothing scanned
+      if (images.isEmpty) {
+        isLoading = false;
+        notifyListeners();
+        return;
+      }
 
+      // Storage layer now handles Android URI normalization
       await ScanStorage.appendPages(scanDir: scanDir, imageUris: images);
 
-      if (images.isEmpty) return;
+      // Important: new files added to same directory
+      // Flutter may reuse cached FileImages
+      imageCache.clear(); // Force clear image cache
+      imageCache.clearLiveImages();
 
-      reloadImages(scanDir); // Refresh images
-      notifyListeners(); // Notify to refresh animation
+      await Future.delayed(const Duration(seconds: 1));
 
-      isLoading = false; // End loading animation
-      notifyListeners(); // Notify to stop animation
+      reloadImages(scanDir);
 
-      WindowsToast.show('Added pages', context, 30);
+      if (context.mounted) {
+        WindowsToast.show('Added pages', context, 30);
+      }
+
+      reloadImages(scanDir); // Reload images
     } catch (e) {
       if (!isMounted) return;
-      isLoading = false; // End loading animation
-      notifyListeners(); // Notify to stop animation
-      WindowsToast.show('Failed to shaaddre images: $e', context, 30);
+      WindowsToast.show('Failed to add images: $e', context, 30);
+    } finally {
+      reloadImages(scanDir); // Reload images
+      isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -535,6 +519,10 @@ class ScanViewerController extends ChangeNotifier {
       // Append imported images to the existing scan
       await ScanStorage.appendPages(scanDir: scanDir, imageUris: imagePaths);
 
+      await Future.delayed(
+        const Duration(seconds: 1),
+      ); // Wait for new files to load
+
       if (!isMounted) return;
 
       // clear image cache so imported images show up
@@ -543,6 +531,8 @@ class ScanViewerController extends ChangeNotifier {
 
       reloadImages(scanDir); // Refresh images
       notifyListeners(); // Notify to refresh animation
+
+      reloadImages(scanDir); // Reload images
 
       isLoading = false; // End loading animation
       notifyListeners(); // Notify to stop animation
@@ -553,6 +543,9 @@ class ScanViewerController extends ChangeNotifier {
       isLoading = false; // End loading animation
       notifyListeners(); // Notify to stop animation
       WindowsToast.show('Failed to import images: $e', context, 30);
+    } finally {
+      isLoading = false; // End loading animation
+      notifyListeners(); // Notify to stop animation
     }
   }
 }

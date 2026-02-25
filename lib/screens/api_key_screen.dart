@@ -245,8 +245,9 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
     if (trimmed.isNotEmpty) {
       await ApiKeyStorage.saveApiKey(trimmed);
       await _loadKey();
-      if (mounted)
+      if (mounted) {
         WindowsToast.show('API Key Updated Successfully', context, 30);
+      }
     } else {
       if (mounted) WindowsToast.show('Please enter a valid key', context, 30);
     }

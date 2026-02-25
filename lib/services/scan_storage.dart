@@ -1,11 +1,25 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:super_scan/models/scan_meta.dart';
 
 class ScanStorage {
-  /// Creates a new scan folder, saves images, and writes metadata
+  // Future-proof helper
+  // This converts URI (returned from MLKit) -> valid file path expected by Flutter
+  // Safe for iOS as it does nothing here
+  static String _normalizePath(String uri) {
+    final parsed = Uri.parse(uri);
+
+    if (parsed.scheme == 'file') {
+      return parsed.toFilePath();
+    }
+
+    return uri;
+  }
+
+  // Creates a new scan folder, saves images, and writes metadata
   static Future<Directory> saveScanImages(List<String> imageUris) async {
     final appDir = await getApplicationDocumentsDirectory();
     final scansDir = Directory('${appDir.path}/scans');
@@ -30,9 +44,18 @@ class ScanStorage {
 
     // Copy scanned images
     for (int i = 0; i < imageUris.length; i++) {
-      final source = File(imageUris[i]);
+      // file URIs on Android but plain paths on iOS.
+      final normalizedPath = _normalizePath(imageUris[i]);
+
+      final source = File(normalizedPath);
       final target = File('${scanDir.path}/${_pageName(i + 1)}');
-      await source.copy(target.path);
+
+      // Extra safety check before copying to permanent storage
+      if (await source.exists()) {
+        await source.copy(target.path);
+      } else {
+        debugPrint('Scan image missing: $normalizedPath');
+      }
     }
 
     final meta = ScanMeta(name: defaultScanName(), createdAt: DateTime.now());
@@ -171,28 +194,48 @@ class ScanStorage {
     await imageFile.delete();
   }
 
+  // AI generated
   static Future<void> appendPages({
     required Directory scanDir,
     required List<String> imageUris,
   }) async {
-    if (imageUris.isEmpty) return;
+    // 1Get existing pages
+    final files = scanDir
+        .listSync()
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.jpg'))
+        .toList();
 
-    // Get existing pages
-    final existingImages =
-        scanDir
-            .listSync()
-            .whereType<File>()
-            .where((f) => f.path.endsWith('.jpg'))
-            .toList()
-          ..sort((a, b) => a.path.compareTo(b.path));
+    // Find highest page index
+    int nextIndex = 1;
 
-    int startIndex = existingImages.length;
+    final regex = RegExp(r'page_(\d+)\.jpg');
 
-    for (int i = 0; i < imageUris.length; i++) {
-      final source = File(imageUris[i]);
-      final target = File('${scanDir.path}/${_pageName(startIndex + i + 1)}');
+    for (final file in files) {
+      final name = file.uri.pathSegments.last;
+      final match = regex.firstMatch(name);
 
-      await source.copy(target.path);
+      if (match != null) {
+        final index = int.parse(match.group(1)!);
+        if (index >= nextIndex) {
+          nextIndex = index + 1;
+        }
+      }
+    }
+
+    // 3️⃣ Append new pages
+    for (final uri in imageUris) {
+      final normalizedPath = _normalizePath(uri);
+
+      final source = File(normalizedPath);
+      final target = File('${scanDir.path}/${_pageName(nextIndex)}');
+
+      if (await source.exists()) {
+        await source.copy(target.path);
+        nextIndex++; // IMPORTANT
+      } else {
+        debugPrint('Append page missing: $normalizedPath');
+      }
     }
   }
 

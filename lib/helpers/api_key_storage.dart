@@ -12,7 +12,7 @@ class ApiKeyStorage {
 
   static Future<String?> loadApiKey() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.get(_keyName);
+    prefs.get(_keyName);
     return prefs.getString(_keyName);
   }
 
