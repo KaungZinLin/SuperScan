@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:super_scan/constants.dart';
 import 'package:super_scan/helpers/api_key_storage.dart';
 import 'package:windows_toast/windows_toast.dart';
 
@@ -114,7 +115,7 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
                             style: ElevatedButton.styleFrom(
                               elevation: 0, // Flat button
                               padding: const EdgeInsets.symmetric(vertical: 12),
-                              backgroundColor: theme.primaryColor,
+                              backgroundColor: kAccentColor,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
@@ -232,7 +233,7 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
           const SizedBox(height: 8),
           Text(
             body,
-            style: const TextStyle(height: 1.4, color: Colors.black87),
+            style: const TextStyle(height: 1.4),
           ),
         ],
       ),

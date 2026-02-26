@@ -63,26 +63,39 @@ class _HomeScreenState extends State<HomeScreen> {
       // Completely removed FAB on desktop
       floatingActionButton: PlatformHelper.isDesktop
           ? null
-          : ExpandableFab(
-              distance: 20,
-              children: [
-                ActionButton(
-                  icon: Icon(Icons.photo_library, color: Colors.white),
-                  onPressed: () {
-                    _viewController.importImages(context);
-                  },
-                ),
-                ActionButton(
-                  icon: Icon(Icons.camera_alt, color: Colors.white),
-                  onPressed: () {
-                    _viewController.processScan(
-                      context,
-                      FlutterDocScanner().getScannedDocumentAsImages(page: 4),
-                    );
-                  },
-                ),
-              ],
-            ),
+          // Disabled custom FAB as the app is Android-only for now and the scanning screen already allows users to import images
+          // : ExpandableFab(
+          //     distance: 20,
+          //     children: [
+          //       ActionButton(
+          //         icon: Icon(Icons.photo_library, color: Colors.white),
+          //         onPressed: () {
+          //           _viewController.importImages(context);
+          //         },
+          //       ),
+          //       ActionButton(
+          //         icon: Icon(Icons.camera_alt, color: Colors.white),
+          //         onPressed: () {
+          //           _viewController.processScan(
+          //             context,
+          //             FlutterDocScanner().getScannedDocumentAsImages(page: 4),
+          //           );
+          //         },
+          //       ),
+          //     ],
+          //   ),
+      : FloatingActionButton.extended(
+        label: Text('Scan'),
+        icon: Icon(Icons.add),
+        backgroundColor: kAccentColor,
+        foregroundColor: Colors.white,
+        onPressed: () {
+          _viewController.processScan(
+            context,
+            FlutterDocScanner().getScannedDocumentAsImages(page: 4),
+          );
+        },
+      ),
       // Changed appBar name to Sync on desktop
       appBar: AppBar(
         centerTitle: true,
