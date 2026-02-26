@@ -35,7 +35,7 @@ Although there are many alternatives that exist, mosty notably CamScanner, I've 
 - ✅ Reorder scan pages
 - ⭐ Sync documents with Google Drive (Work in Progress)
 - ✅ Stability of App
-- Implement an in-app feature, nicknamed MagicEyes
+- ✅ Implement an in-app feature, nicknamed MagicEyes
 ### What is MagicEyes?
 MagicEyes is a set of AI and algorithm-based features that improves the experience of SuperScan. In MagicEyes, you get the ability to:
 - Extract text from documents using system-level OCR
@@ -53,9 +53,11 @@ The reason I've chosen Google Drive is because I want the user to use a cloud st
 - Clean code
 - ✅ Flutter Stage Management
 # Release & Download
-As of now, SuperScan is still work in progress, and basic features are still being developed. Once I've completed the basic feautures and I'm confident that SuperScan is ready for public release, I'll publish the app to the Google Play Store, and I'll manually release the desktop versions.
-## Expected Launch Date
-**As APKs on Android, macOS, and Windows**: March 1, 2026
+As of now, SuperScan is still work in progress, and basic features are still being developed. Once I've completed the basic feautures and I'm confident that SuperScan is ready for public release, I'll publish the app to the Google Play Store, and I'll manually release the desktop versions. For now, you can download and install it on Android using the APKs on the Release tab.
+## Open Beta
+As per Google Play Store's policies, new apps from new developer accounts made after November 2023 must run an open beta of their apps for 14 days with 20 people. If you're interested, you can fill out the form to become a tester yourself and the form will be released in a few days.
+## Expected Beta Launch Date
+**As APKs on Android, macOS, and Windows**: March 2026
 
 **Google Play Store on Android**: TBA
 
@@ -72,7 +74,7 @@ I'll expand the availability to the other platforms a little while after launch.
 - iOS
 - Linux
 # Business Model
-**Freemium, technically**: I plan to give the user access to all features, with the inclusion of ads implemented in a non-intrusive way. Users will be able to donate me via In-App Purchases or other methods, which will disable ads. Once I gain enough profits to afford an OpenAI AI Key, I will be integrating AI features into MagicEyes. MagicEyes AI features will only be available with a $3 monthly subscription or a $40 annual subscription.
+**Freemium**: I plan to give the user access to all features, with the inclusion of ads implemented in a non-intrusive way. Users will be able to donate me via In-App Purchases or other methods, which will disable ads. AI features use the BYOK (Bring Your Own Key) principle, meaning you'd need to have your own OpenAI API key to use MagicEyes. Please remember that the use of MagicEyes requires a recurring donation.
 # License
 MIT License
 
