@@ -1,6 +1,5 @@
 <p align="center">
   <img width="120" height="120" alt="AppleIconSuperScan" src="https://github.com/user-attachments/assets/e1be5a3f-dbda-44d1-b80f-17d9cbac70d3"/>
-" />
 </p>
 
 <h1 align="center">SuperScan</h1>
