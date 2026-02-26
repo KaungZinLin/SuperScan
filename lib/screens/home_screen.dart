@@ -24,7 +24,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _viewController = HomeController();
 
-  final bool _syncing = false;
   bool _loading = false;
 
   bool isConnected = false;
@@ -120,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     )
                   : Icon(Icons.cloud_sync, color: kAccentColor),
-              onPressed: (_syncing || _loading)
+              onPressed: (_viewController.isSyncing || _loading)
                   ? null
                   : () async {
                       if (!_viewController.auth.isSignedIn) {
@@ -172,10 +171,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: kAccentColor.withAlpha(20),
                         child: ListTile(
                           trailing: const Icon(Icons.chevron_right),
-                          title: Text(meta.name, style: kTextLetterSpacing),
+                          title: Text(meta.name),
                           subtitle: Text(
                             '$pages page(s) • ${_viewController.formatDate(meta.createdAt)}',
-                            style: kTextLetterSpacing,
                           ),
                           onLongPress: () => _viewController.showScanOptions(
                             savedScan,
@@ -202,13 +200,15 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
         ],
       ),
-      bottomNavigationBar: BottomAppBar(
-        height: 100,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 1.0),
-          child: Row(children: [Expanded(child: const AdBanner())]),
-        ),
-      ),
+      bottomNavigationBar: PlatformHelper.isDesktop
+          ? null
+          : BottomAppBar(
+              height: 100,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 1.0),
+                child: Row(children: [Expanded(child: const AdBanner())]),
+              ),
+            ),
     );
   }
 }

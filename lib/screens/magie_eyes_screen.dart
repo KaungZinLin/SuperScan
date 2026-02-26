@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
-import 'package:googleapis/chat/v1.dart';
 import 'package:super_scan/constants.dart';
 import 'package:super_scan/controllers/magic_eyes_controller.dart';
 import 'package:flutter/services.dart';
@@ -461,7 +460,7 @@ class _ProofreadUI extends StatelessWidget {
 // --- View 4: Chat UI ---
 class _ChatUI extends StatefulWidget {
   final Directory scanDir;
-  const _ChatUI({super.key, required this.scanDir});
+  const _ChatUI({required this.scanDir});
 
   @override
   State<_ChatUI> createState() => _ChatUIState();
@@ -474,7 +473,7 @@ class _ChatUIState extends State<_ChatUI> {
   final ChatUser _gptUser = ChatUser(id: '2', firstName: 'ChatGPT');
 
   final List<ChatMessage> _messages = [];
-  List<ChatUser> _typingUser = <ChatUser>[];
+  final List<ChatUser> _typingUser = <ChatUser>[];
 
   @override
   void initState() {

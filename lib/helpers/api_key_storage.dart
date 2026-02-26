@@ -1,5 +1,4 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:super_scan/constants.dart';
 
 class ApiKeyStorage {
   static const _keyName = 'openai_api_key';

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:super_scan/helpers/api_key_storage.dart';
-import 'package:super_scan/helpers/api_key_storage.dart';
 
 class AIService {
   AIService._();

@@ -47,15 +47,32 @@ class HomeController extends ChangeNotifier {
     return DateFormat.yMd().add_jm().format(date);
   }
 
+  // Future<void> openScanViewer(Directory scanDir, context) async {
+  //   await Navigator.push<bool>(
+  //     context,
+  //     MaterialPageRoute(builder: (_) => ScanViewerScreen(scanDir: scanDir)),
+  //   );
+
+  //   await loadSavedScans();
+  //   await syncScans(context);
+  // }
+  // Nrw scan viwer opener
   Future<void> openScanViewer(Directory scanDir, context) async {
-    await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(builder: (_) => ScanViewerScreen(scanDir: scanDir)),
-    );
+  final changed = await Navigator.push<bool>(
+    context,
+    MaterialPageRoute(
+      builder: (_) => ScanViewerScreen(scanDir: scanDir),
+    ),
+  );
+
+  // ONLY reload if something changed
+  if (changed == true) {
+    await Future.delayed(const Duration(milliseconds: 150));
 
     await loadSavedScans();
     await syncScans(context);
   }
+}
 
   Future<void> importImages(BuildContext context) async {
     try {
@@ -144,16 +161,14 @@ class HomeController extends ChangeNotifier {
         return AlertDialog(
           title: Text(
             'Options for “${scan.meta.name}”',
-            style: kTextLetterSpacing,
           ),
           content: const Text(
             'What would you like to do?',
-            style: kTextLetterSpacing,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: kTextLetterSpacing),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -220,7 +235,7 @@ class HomeController extends ChangeNotifier {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Rename scan', style: kTextLetterSpacing),
+          title: const Text('Rename scan'),
           content: TextField(
             controller: controller,
             autofocus: true,
@@ -229,7 +244,7 @@ class HomeController extends ChangeNotifier {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: kTextLetterSpacing),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, controller.text.trim()),
@@ -261,15 +276,14 @@ class HomeController extends ChangeNotifier {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Delete scan?', style: kTextLetterSpacing),
+          title: const Text('Delete scan?'),
           content: Text(
             '“${scan.meta.name}” will be permanently deleted.',
-            style: kTextLetterSpacing,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel', style: kTextLetterSpacing),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),

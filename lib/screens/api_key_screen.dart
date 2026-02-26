@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:super_scan/constants.dart';
 import 'package:super_scan/helpers/api_key_storage.dart';
 import 'package:windows_toast/windows_toast.dart';
 

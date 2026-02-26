@@ -11,6 +11,7 @@ class ScanController extends ChangeNotifier {
 
   List<SavedScan> get scans => List.unmodifiable(_scans);
 
+
   /// Load all scans
   Future<void> loadScans() async {
     final dir = await getApplicationDocumentsDirectory();

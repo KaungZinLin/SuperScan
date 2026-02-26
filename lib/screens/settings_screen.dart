@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:super_scan/constants.dart';
 import 'package:super_scan/controllers/settings_controller.dart';
+import 'package:super_scan/helpers/platform_helper.dart';
 import 'package:super_scan/helpers/url_launcher.dart';
 import 'package:super_scan/screens/api_key_screen.dart';
 import 'package:super_scan/screens/donation_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:super_scan/screens/platforms_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   static const String id = 'settings_screen';
@@ -78,7 +80,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   leading: const FaIcon(FontAwesomeIcons.google),
                   title: const Text(
                     'Google Account for Sync',
-                    style: kTextLetterSpacing,
                   ),
                   subtitle: user != null
                       ? Text('${user.displayName} • ${user.email}')
@@ -90,7 +91,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     leading: const Icon(Icons.login),
                     title: const Text(
                       'Sign in with Google',
-                      style: kTextLetterSpacing,
                     ),
                     onTap: () {
                       _viewController.signIn(context);
@@ -108,13 +108,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                   ),
 
+                ListTile(
+                  leading: const Icon(Icons.install_desktop),
+                  trailing: const Icon(Icons.chevron_right),
+                  title: const Text(
+                    'Get SuperScan on Desktop',
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => PlatformsScreen()),
+                    );
+                  },
+                ),
+
                 const Divider(),
                 ListTile(
+                  enabled: !PlatformHelper.isDesktop,
                   leading: const Icon(Icons.auto_awesome_outlined),
                   title: const Text(
                     'AI Configuration',
-                    style: kTextLetterSpacing,
                   ),
+                  subtitle: PlatformHelper.isDesktop
+                      ? const Text(
+                          'Due to platform limitations regarding OCR, you can only use AI features on mobile',
+                        )
+                      : null,
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     Navigator.push(
@@ -125,14 +144,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const Divider(),
                 ListTile(
+                  enabled: !PlatformHelper.isDesktop,
                   leading: const Icon(
                     Icons.favorite_border,
                     color: Colors.redAccent,
                   ),
                   trailing: const Icon(Icons.chevron_right),
-                  title: const Text('Donate', style: kTextLetterSpacing),
-                  subtitle: const Text(
-                    'Get access to AI features via MagicEyes, removed ads, and support my work',
+                  title: const Text('Donate'),
+                  subtitle: Text(
+                    PlatformHelper.isDesktop
+                        ? 'Due to platform limitations, you can only donate on mobile'
+                        : 'Support my work, remove ads, and get access to AI features',
                   ),
                   onTap: () {
                     Navigator.push(
@@ -160,7 +182,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       applicationName: 'SuperScan',
-                      applicationVersion: '0.1 (Beta) (Build 7)',
+                      applicationVersion: '0.1 (Beta) (Build 7.1)',
                       applicationLegalese: '© 2026 Kaung Zin Lin',
                       children: [
                         const Padding(
@@ -179,9 +201,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   leading: const Icon(Icons.person_outline),
                   title: const Text(
                     'Made with ❤️ by Kaung Zin Lin',
-                    style: kTextLetterSpacing,
                   ),
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: const Icon(Icons.open_in_new),
                   onTap: () async {
                     launchMyURL('https://kaung.carrd.co/');
                   },
@@ -190,7 +211,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   leading: const Icon(Icons.article_outlined),
                   title: const Text(
                     'Terms of Service',
-                    style: kTextLetterSpacing,
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {},
@@ -199,7 +219,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   leading: const Icon(Icons.privacy_tip_outlined),
                   title: const Text(
                     'Privacy Policy',
-                    style: kTextLetterSpacing,
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {},
@@ -210,7 +229,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: const Text('License'),
                   subtitle: const Text(
                     'MIT License © 2026',
-                    style: kTextLetterSpacing,
                   ), // Keep it short here
                   onTap: () {
                     showDialog(
@@ -248,7 +266,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               onPressed: () => Navigator.pop(context),
                               child: const Text(
                                 'Close',
-                                style: kTextLetterSpacing,
                               ),
                             ),
                           ],
@@ -262,7 +279,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   leading: const FaIcon(FontAwesomeIcons.flutter),
                   title: const Text(
                     'Built with Flutter',
-                    style: kTextLetterSpacing,
                   ),
                 ),
               ],

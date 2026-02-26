@@ -74,12 +74,11 @@ class SettingsController extends ChangeNotifier {
         return AlertDialog(
           title: Text(
             'Are you sure you want to sign out?',
-            style: kTextLetterSpacing,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: kTextLetterSpacing),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {

@@ -33,7 +33,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(_viewController.meta.name, style: kTextLetterSpacing),
+        title: Text(_viewController.meta.name),
       ),
       body: Stack(
         children: [
@@ -123,13 +123,20 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.auto_awesome_outlined, color: kAccentColor),
+                  Icon(
+                    Icons.auto_awesome_outlined,
+                    color: PlatformHelper.isDesktop
+                        ? Colors.grey
+                        : kAccentColor,
+                  ),
                   Text(
                     "MagicEyes",
                     style: TextStyle(
                       fontSize: 12,
                       letterSpacing: 0.0,
-                      color: kAccentColor,
+                      color: PlatformHelper.isDesktop
+                          ? Colors.grey
+                          : kAccentColor,
                     ),
                   ),
                 ],

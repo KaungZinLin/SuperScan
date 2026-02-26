@@ -21,6 +21,8 @@ class ScanViewerController extends ChangeNotifier {
   late ScanMeta meta;
   late List<File> images;
 
+  bool hasChanges = false;
+
   bool isLoading = false;
 
   @override
@@ -68,7 +70,7 @@ class ScanViewerController extends ChangeNotifier {
           value: 'edit',
           child: ListTile(
             leading: Icon(Icons.crop),
-            title: Text('Crop and Rotate', style: kTextLetterSpacing),
+            title: Text('Crop and Rotate'),
             contentPadding: EdgeInsets.zero,
           ),
         ),
@@ -76,7 +78,7 @@ class ScanViewerController extends ChangeNotifier {
           value: 'reorder',
           child: ListTile(
             leading: Icon(Icons.reorder),
-            title: Text('Reorder', style: kTextLetterSpacing),
+            title: Text('Reorder'),
             contentPadding: EdgeInsets.zero,
           ),
         ),
@@ -205,7 +207,7 @@ class ScanViewerController extends ChangeNotifier {
     final result = await showDialog<String>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Rename scan', style: kTextLetterSpacing),
+        title: const Text('Rename scan'),
         content: TextField(
           controller: controller,
           autofocus: true,
@@ -214,7 +216,7 @@ class ScanViewerController extends ChangeNotifier {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: kTextLetterSpacing),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, controller.text.trim()),
@@ -243,15 +245,14 @@ class ScanViewerController extends ChangeNotifier {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Delete scan?', style: kTextLetterSpacing),
+        title: const Text('Delete scan?'),
         content: Text(
           '“${meta.name}” will be permanently deleted.',
-          style: kTextLetterSpacing,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel', style: kTextLetterSpacing),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
@@ -292,10 +293,9 @@ class ScanViewerController extends ChangeNotifier {
     await showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('Share “${meta.name}”', style: kTextLetterSpacing),
+        title: Text('Share “${meta.name}”'),
         content: const Text(
           'How would you like to share your scan?',
-          style: kTextLetterSpacing,
         ),
         actions: [
           TextButton(
@@ -422,12 +422,11 @@ class ScanViewerController extends ChangeNotifier {
         return AlertDialog(
           title: const Text(
             'How would you like to add more scans?',
-            style: kTextLetterSpacing,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel', style: kTextLetterSpacing),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {

@@ -18,10 +18,7 @@ class DonateScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Support SuperScan'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Donate'), centerTitle: true),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -35,18 +32,19 @@ class DonateScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  letterSpacing: kTextLetterSpacing.letterSpacing,
                 ),
               ),
               const SizedBox(height: 8),
               const Text(
-                "Keeping SuperScan ad-free is the dream, but for now, those ads help me cover development costs and keep the app alive. If you want to help me out and get a cleaner, ad-free experience in return, pick a donation option below. Thanks for being awesome!",
+                "Keeping SuperScan ad-free and paywall-free is the dream, but for now, those ads help me cover development costs and keep the app alive. If you want to help me out and get a cleaner, ad-free experience with access to AI features in return, pick a donation option below. Thanks for being awesome!",
                 textAlign: TextAlign.center,
-                style: kTextLetterSpacing,
               ),
               const SizedBox(height: 40),
 
-              const Text('Select an amount to donate from the Apple App Store or the Google Play Store', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                'Select an amount to donate from the Apple App Store or the Google Play Store',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 16),
               Wrap(
                 spacing: 12,
@@ -68,14 +66,6 @@ class DonateScreen extends StatelessWidget {
               const SizedBox(height: 20),
               const Divider(),
               const SizedBox(height: 24),
-
-              // --- EXTERNAL LINKS ---
-              _buildLinkTile(
-                icon: Icons.coffee,
-                label: 'Buy Me a Coffee',
-                color: Colors.brown,
-                onTap: () => _launchURL('https://buymeacoffee.com/kaungzinlin'),
-              ),
               const SizedBox(height: 12),
               _buildLinkTile(
                 icon: Icons.account_balance_wallet,
@@ -95,9 +85,9 @@ class DonateScreen extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: kAccentColor.withAlpha(30),
         foregroundColor: kAccentColor,
-        elevation: 0,           // Removes standard shadow
+        elevation: 0, // Removes standard shadow
         shadowColor: Colors.transparent, // Removes shadow color entirely
-   // Removes lift when focused
+        // Removes lift when focused
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -116,10 +106,15 @@ class DonateScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLinkTile({required IconData icon, required String label, required Color color, required VoidCallback onTap}) {
+  Widget _buildLinkTile({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
     return ListTile(
       leading: Icon(icon, color: color),
-      title: Text(label, style: kTextLetterSpacing),
+      title: Text(label),
       trailing: const Icon(Icons.open_in_new, size: 18),
       tileColor: color.withAlpha(20),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -136,7 +131,6 @@ class DonateScreen extends StatelessWidget {
         title: const Text(
           'Scan to Donate',
           textAlign: TextAlign.center,
-          style: kTextLetterSpacing,
         ),
         content: SizedBox(
           // Limit width so it doesn't look giant on Desktop
@@ -162,9 +156,9 @@ class DonateScreen extends StatelessWidget {
                 'Save or screenshot this QR for KBZPay.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
-                    letterSpacing: 0.0
+                  fontSize: 14,
+                  color: Colors.black54,
+                  letterSpacing: 0.0,
                 ),
               ),
             ],
