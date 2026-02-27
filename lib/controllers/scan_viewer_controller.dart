@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
+import 'package:super_scan/controllers/home_controller.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
 import 'package:super_scan/constants.dart';
 import 'package:super_scan/models/scan_meta.dart';
@@ -24,6 +25,8 @@ class ScanViewerController extends ChangeNotifier {
   bool hasChanges = false;
 
   bool isLoading = false;
+
+  final _homeController = HomeController();
 
   @override
   void dispose() {
@@ -486,19 +489,17 @@ class ScanViewerController extends ChangeNotifier {
       imageCache.clear(); // Force clear image cache
       imageCache.clearLiveImages();
 
-      await Future.delayed(const Duration(seconds: 1));
-
-      reloadImages(scanDir);
-
-      if (context.mounted) {
-        WindowsToast.show('Added pages', context, 30);
-      }
-
-      reloadImages(scanDir); // Reload images
+      // await Future.delayed(const Duration(seconds: 1));
+      // notifyListeners();
+      // _homeController.loadSavedScans(); // Reload home page to make sure scan info (pages) are correct
+      // reloadImages(scanDir); // Reload images
     } catch (e) {
       if (!isMounted) return;
       WindowsToast.show('Failed to add images: $e', context, 30);
     } finally {
+      await Future.delayed(const Duration(seconds: 1));
+      notifyListeners();
+      _homeController.loadSavedScans(); // Reload home page to make sure scan info (pages) are correct
       reloadImages(scanDir); // Reload images
       isLoading = false;
       notifyListeners();

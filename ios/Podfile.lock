@@ -14,6 +14,8 @@ PODS:
   - Flutter (1.0.0)
   - flutter_doc_scanner (0.0.1):
     - Flutter
+  - flutter_native_splash (2.4.3):
+    - Flutter
   - google_mlkit_commons (0.9.0):
     - Flutter
     - MLKitVision
@@ -115,6 +117,7 @@ DEPENDENCIES:
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - Flutter (from `Flutter`)
   - flutter_doc_scanner (from `.symlinks/plugins/flutter_doc_scanner/ios`)
+  - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - google_mlkit_commons (from `.symlinks/plugins/google_mlkit_commons/ios`)
   - google_mlkit_text_recognition (from `.symlinks/plugins/google_mlkit_text_recognition/ios`)
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
@@ -154,6 +157,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_doc_scanner:
     :path: ".symlinks/plugins/flutter_doc_scanner/ios"
+  flutter_native_splash:
+    :path: ".symlinks/plugins/flutter_native_splash/ios"
   google_mlkit_commons:
     :path: ".symlinks/plugins/google_mlkit_commons/ios"
   google_mlkit_text_recognition:
@@ -183,6 +188,7 @@ SPEC CHECKSUMS:
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_doc_scanner: d930bcd7db6f69805d882330fc9b6f74a9db5c9e
+  flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
   google_mlkit_commons: 92c769cc2e0a2bfdeb3c38091a36e8a9cc8c63d4
   google_mlkit_text_recognition: d70cc1ed5064db39fce44d77b2c5449adc39a13d
   google_sign_in_ios: b48bb9af78576358a168361173155596c845f0b9

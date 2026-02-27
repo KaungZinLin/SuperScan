@@ -303,6 +303,7 @@ class HomeController extends ChangeNotifier {
     await ScanStorage.deleteScan(scan.dir); // Delete locally
 
     await loadSavedScans(); // Reload view
+    print('Reloaded save scans');
 
     WindowsToast.show(
         'Deleted permanently',
@@ -365,7 +366,7 @@ class HomeController extends ChangeNotifier {
 
       if (!isMounted) return;
 
-      await Navigator.push(
+     await Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => ScanViewerScreen(scanDir: scanDir)),
       );
