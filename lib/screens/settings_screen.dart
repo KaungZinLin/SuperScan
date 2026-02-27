@@ -101,7 +101,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     leading: const Icon(Icons.logout, color: Colors.red),
                     title: const Text(
                       'Sign out',
-                      style: TextStyle(color: Colors.red, letterSpacing: 0.0),
+                      style: TextStyle(color: Colors.red),
                     ),
                     onTap: () {
                       _viewController.showSignOutOptions(context);
@@ -257,7 +257,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               'SOFTWARE.',
                               style: TextStyle(
                                 fontSize: 12,
-                                letterSpacing: 0.0,
                               ),
                             ),
                           ),

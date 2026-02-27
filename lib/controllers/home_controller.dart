@@ -177,7 +177,7 @@ class HomeController extends ChangeNotifier {
               },
               child: const Text(
                 'Rename',
-                style: TextStyle(letterSpacing: 0.0, fontWeight: .bold),
+                style: TextStyle(letterSpacing: 0.0)
               ),
             ),
             TextButton(
@@ -189,7 +189,6 @@ class HomeController extends ChangeNotifier {
                 'Delete',
                 style: TextStyle(
                   color: Colors.red,
-                  letterSpacing: 0.0,
                   fontWeight: .bold,
                 ),
               ),
@@ -250,7 +249,7 @@ class HomeController extends ChangeNotifier {
               onPressed: () => Navigator.pop(context, controller.text.trim()),
               child: const Text(
                 'Save',
-                style: TextStyle(fontWeight: .bold, letterSpacing: 0.0),
+                style: TextStyle(fontWeight: .bold),
               ),
             ),
           ],
@@ -290,7 +289,7 @@ class HomeController extends ChangeNotifier {
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               child: const Text(
                 'Delete',
-                style: TextStyle(fontWeight: .bold, letterSpacing: 0.0),
+                style: TextStyle(fontWeight: .bold),
               ),
             ),
           ],

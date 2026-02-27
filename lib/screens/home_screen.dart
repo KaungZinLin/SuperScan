@@ -73,7 +73,8 @@ class _HomeScreenState extends State<HomeScreen> {
           //           _viewController.importImages(context);
           //         },
           //       ),
-          //       ActionButton(
+          //       ActionButto
+      //       letterSpacinn(
           //         icon: Icon(Icons.camera_alt, color: Colors.white),
           //         onPressed: () {
           //           _viewController.processScan(
@@ -101,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
         title: Text(
           'SuperScan',
-          style: TextStyle(fontWeight: .bold, letterSpacing: 0.0),
+          style: TextStyle(fontWeight: .bold),
         ),
         leadingWidth: 100,
         leading: Row(

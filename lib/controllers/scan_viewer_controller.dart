@@ -88,7 +88,7 @@ class ScanViewerController extends ChangeNotifier {
             leading: Icon(Icons.delete_outline, color: Colors.red),
             title: Text(
               'Delete this Page',
-              style: TextStyle(color: Colors.red, letterSpacing: 0.0),
+              style: TextStyle(color: Colors.red),
             ),
             contentPadding: EdgeInsets.zero,
           ),
@@ -222,7 +222,7 @@ class ScanViewerController extends ChangeNotifier {
             onPressed: () => Navigator.pop(context, controller.text.trim()),
             child: const Text(
               'Save',
-              style: TextStyle(fontWeight: .bold, letterSpacing: 0.0),
+              style: TextStyle(fontWeight: .bold),
             ),
           ),
         ],
@@ -259,7 +259,7 @@ class ScanViewerController extends ChangeNotifier {
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text(
               'Delete',
-              style: TextStyle(fontWeight: .bold, letterSpacing: 0.0),
+              style: TextStyle(fontWeight: .bold),
             ),
           ),
         ],
@@ -309,7 +309,7 @@ class ScanViewerController extends ChangeNotifier {
             },
             child: const Text(
               'PDF',
-              style: TextStyle(letterSpacing: 0.0, fontWeight: .bold),
+              style: TextStyle(fontWeight: .bold),
             ),
           ),
           TextButton(
@@ -319,7 +319,7 @@ class ScanViewerController extends ChangeNotifier {
             },
             child: const Text(
               'Images',
-              style: TextStyle(letterSpacing: 0.0, fontWeight: .bold),
+              style: TextStyle(fontWeight: .bold),
             ),
           ),
         ],
@@ -435,7 +435,7 @@ class ScanViewerController extends ChangeNotifier {
               },
               child: const Text(
                 'From Photo Library',
-                style: TextStyle(fontWeight: .bold, letterSpacing: 0.0),
+                style: TextStyle(fontWeight: .bold),
               ),
             ),
             TextButton(
@@ -445,7 +445,7 @@ class ScanViewerController extends ChangeNotifier {
               },
               child: const Text(
                 'From Camera',
-                style: TextStyle(fontWeight: .bold, letterSpacing: 0.0),
+                style: TextStyle(fontWeight: .bold),
               ),
             ),
           ],

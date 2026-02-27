@@ -133,7 +133,6 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                     "MagicEyes",
                     style: TextStyle(
                       fontSize: 12,
-                      letterSpacing: 0.0,
                       color: PlatformHelper.isDesktop
                           ? Colors.grey
                           : kAccentColor,
@@ -153,7 +152,6 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                     "Share",
                     style: TextStyle(
                       fontSize: 12,
-                      letterSpacing: 0.0,
                       color: kAccentColor,
                     ),
                   ),
@@ -177,7 +175,6 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                     "Rename",
                     style: TextStyle(
                       fontSize: 12,
-                      letterSpacing: 0.0,
                       color: PlatformHelper.isDesktop
                           ? Colors.grey
                           : kAccentColor, // or your default color
@@ -198,7 +195,6 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                     "Delete",
                     style: TextStyle(
                       fontSize: 12,
-                      letterSpacing: 0.0,
                       color: kAccentColor,
                     ),
                   ),

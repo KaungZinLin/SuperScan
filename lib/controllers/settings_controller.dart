@@ -88,7 +88,6 @@ class SettingsController extends ChangeNotifier {
               child: const Text(
                 'Sign Out',
                 style: TextStyle(
-                  letterSpacing: 0.0,
                   fontWeight: .bold,
                   color: Colors.red,
                 ),
