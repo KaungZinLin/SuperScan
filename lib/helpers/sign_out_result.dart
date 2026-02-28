@@ -1,0 +1,4 @@
+enum SignOutResult {
+  success,
+  failed,
+}

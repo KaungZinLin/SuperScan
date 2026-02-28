@@ -1,0 +1,4 @@
+enum AddMorePagesResults {
+  success,
+  failed
+}

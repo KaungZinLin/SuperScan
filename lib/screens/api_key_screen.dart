@@ -69,9 +69,9 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
               decoration: BoxDecoration(
                 color: theme.brightness == Brightness.light
                     ? Colors.grey[50]
-                    : Colors.white.withOpacity(0.05),
+                    : Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -89,7 +89,7 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
                           child: FaIcon(
                             FontAwesomeIcons.openai,
                             size: 18,
-                            color: theme.primaryColor.withOpacity(0.7),
+                            color: theme.primaryColor.withValues(alpha: 0.7),
                           ),
                         ),
                         suffixIcon: IconButton(
@@ -216,9 +216,9 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.05),
+        color: Colors.grey.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

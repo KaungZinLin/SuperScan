@@ -5,13 +5,12 @@ import 'package:super_scan/models/saved_scan.dart';
 import 'package:super_scan/models/drive_scan.dart';
 import 'package:super_scan/services/google_drive_service.dart';
 import 'package:super_scan/controllers/sync_controller.dart';
-import 'package:super_scan/constants.dart';
 import 'package:super_scan/services/scan_storage.dart';
 import 'package:flutter/services.dart';
 import 'package:super_scan/models/scan_meta.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
-import 'package:image_picker/image_picker.dart';
+// import 'package:image_picker/image_picker.dart';
 import 'package:super_scan/screens/scan_viewer_screen.dart';
 import 'package:super_scan/services/google_auth_service.dart';
 import 'package:windows_toast/windows_toast.dart';
@@ -27,6 +26,7 @@ class HomeController extends ChangeNotifier {
   List<SavedScan> savedScans = [];
   List<DriveScan> driveScans = [];
   List<SavedScan> desktopSavedScans = [];
+  // ignore: unused_field
   dynamic _scannedDocuments;
 
   bool isLoading = false;
@@ -56,7 +56,7 @@ class HomeController extends ChangeNotifier {
   //   await loadSavedScans();
   //   await syncScans(context);
   // }
-  // Nrw scan viwer opener
+  // scan viewer opener
   Future<void> openScanViewer(Directory scanDir, context) async {
   final changed = await Navigator.push<bool>(
     context,
@@ -70,43 +70,44 @@ class HomeController extends ChangeNotifier {
     await Future.delayed(const Duration(milliseconds: 150));
 
     await loadSavedScans();
-    await syncScans(context);
+    await syncScans();
   }
 }
 
-  Future<void> importImages(BuildContext context) async {
-    try {
-      final picker = ImagePicker();
-
-      final images = await picker.pickMultiImage(imageQuality: 100);
-
-      if (images.isEmpty) return;
-
-      final paths = images.map((e) => e.path).toList();
-
-      final scanDir = await ScanStorage.saveScanImages(paths);
-
-      if (!isMounted) return;
-
-      await loadSavedScans();
-
-      WindowsToast.show(
-          'Imported images successfully',
-          context,
-          30,
-      );
-
-      await syncScans(context);
-    } catch (e) {
-      if (!isMounted) return;
-
-      WindowsToast.show(
-          'Failed to import images: $e',
-          context,
-          30,
-      );
-    }
-  }
+// May cause context errors: ignored because it is not used
+  // Future<void> importImages() async {
+  //   try {
+  //     final picker = ImagePicker();
+  //
+  //     final images = await picker.pickMultiImage(imageQuality: 100);
+  //
+  //     if (images.isEmpty) return;
+  //
+  //     final paths = images.map((e) => e.path).toList();
+  //
+  //     final scanDir = await ScanStorage.saveScanImages(paths);
+  //
+  //     if (!isMounted) return;
+  //
+  //     await loadSavedScans();
+  //
+  //     WindowsToast.show(
+  //         'Imported images successfully',
+  //         context,
+  //         30,
+  //     );
+  //
+  //     await syncScans();
+  //   } catch (e) {
+  //     if (!isMounted) return;
+  //
+  //     WindowsToast.show(
+  //         'Failed to import images: $e',
+  //         context,
+  //         30,
+  //     );
+  //   }
+  // }
 
   Future<void> processScan(
     BuildContext context,
@@ -151,7 +152,7 @@ class HomeController extends ChangeNotifier {
 
     await loadSavedScans();
     notifyListeners();
-    await syncScans(context);
+    await syncScans();
   }
 
   Future<void> showScanOptions(SavedScan scan, context) async {
@@ -303,7 +304,7 @@ class HomeController extends ChangeNotifier {
     await ScanStorage.deleteScan(scan.dir); // Delete locally
 
     await loadSavedScans(); // Reload view
-    print('Reloaded save scans');
+    // print('Reloaded save scans');
 
     WindowsToast.show(
         'Deleted permanently',
@@ -332,53 +333,82 @@ class HomeController extends ChangeNotifier {
     return scansDir.listSync().whereType<Directory>().toList();
   }
 
-  Future<void> syncScans(BuildContext context, {bool force = false}) async {
-    if (!isSignedIn) {
-      return; // Retrun if not signed in without any prompts because the app doesnt force you to use an account
-    }
+  Future<String?> syncScans({bool force = false}) async {
+    if (!isSignedIn) return null;
 
-    isSyncing = true; // start syncing
-    isLoading = true; // Start loading
-    notifyListeners(); // Notify to start syncing/loading
+    isSyncing = true;
+    isLoading = true;
+    notifyListeners();
 
     try {
       final scans = await _getLocalScans();
       await SyncController.syncScans(scans, force: force);
+      return null; // success
     } catch (e) {
-      WindowsToast.show(
-          'Failed to sync: $e',
-          context,
-          30,
-      );
+      return 'Failed to sync: $e'; // Return the error
     } finally {
-      isSyncing = false; // Stop syncing
-      isLoading = false; // Stop loading
+      isSyncing = false;
+      isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> openDriveScan(DriveScan scan, BuildContext context) async {
-    try {
-      final scanDir = await _driveService.downloadScanFolder(
-        folderId: scan.folderId,
-        folderName: scan.meta.name,
-      );
+  // Future<void> syncScans(BuildContext context, {bool force = false}) async {
+  //   if (!isSignedIn) {
+  //     return; // Return if not signed in without any prompts because the app doesn't force you to use an account
+  //   }
+  //
+  //   isSyncing = true; // start syncing
+  //   isLoading = true; // Start loading
+  //   notifyListeners(); // Notify to start syncing/loading
+  //
+  //   try {
+  //     final scans = await _getLocalScans();
+  //     await SyncController.syncScans(scans, force: force);
+  //   } catch (e) {
+  //     WindowsToast.show(
+  //         'Failed to sync: $e',
+  //         context,
+  //         30,
+  //     );
+  //   } finally {
+  //     isSyncing = false; // Stop syncing
+  //     isLoading = false; // Stop loading
+  //     notifyListeners();
+  //   }
+  // }
 
-      if (!isMounted) return;
+  Future<Directory> openDriveScan(DriveScan scan) async {
+    final scanDir = await _driveService.downloadScanFolder(
+      folderId: scan.folderId,
+      folderName: scan.meta.name,
+    );
 
-     await Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => ScanViewerScreen(scanDir: scanDir)),
-      );
-      
-    } catch (e) {
-      WindowsToast.show(
-          'Failed to open scan: $e',
-          context,
-          30,
-      );
-    }
+    return scanDir;
   }
+
+  // Future<void> openDriveScan(DriveScan scan, BuildContext context) async {
+  //   try {
+  //     final scanDir = await _driveService.downloadScanFolder(
+  //       folderId: scan.folderId,
+  //       folderName: scan.meta.name,
+  //     );
+  //
+  //     if (!isMounted) return;
+  //
+  //    await Navigator.push(
+  //       context,
+  //       MaterialPageRoute(builder: (_) => ScanViewerScreen(scanDir: scanDir)),
+  //     );
+  //
+  //   } catch (e) {
+  //     WindowsToast.show(
+  //         'Failed to open scan: $e',
+  //         context,
+  //         30,
+  //     );
+  //   }
+  // }
 
   Future<void> loadDriveScans() async {
     if (!isSignedIn) return;
@@ -397,7 +427,7 @@ class HomeController extends ChangeNotifier {
       final batch = scanQueue.take(concurrency).toList();
       scanQueue.removeRange(0, batch.length);
 
-      // Download batch in fparallel
+      // Download batch in parallel
       await Future.wait(batch.map((d) async {
         try {
           final folderName = d.meta.name;
@@ -409,7 +439,7 @@ class HomeController extends ChangeNotifier {
           desktopSavedScans.add(SavedScan(dir: localDir, meta: d.meta));
           notifyListeners(); // update UI progressively
         } catch (e) {
-          print("Failed to download '${d.meta.name}': $e");
+          // print("Failed to download '${d.meta.name}': $e");
         }
       }));
     }
@@ -417,7 +447,7 @@ class HomeController extends ChangeNotifier {
     isLoading = false;
     notifyListeners();
 
-    print("Desktop scans loaded: ${desktopSavedScans.length}");
+    // print("Desktop scans loaded: ${desktopSavedScans.length}");
   }
 
     /// Load scans from Google Drive (desktop)

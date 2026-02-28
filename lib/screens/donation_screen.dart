@@ -1,19 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:super_scan/constants.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
 
 class DonateScreen extends StatelessWidget {
   static const String id = 'donate_screen';
 
   const DonateScreen({super.key});
-
-  Future<void> _launchURL(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

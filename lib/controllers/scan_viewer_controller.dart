@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
 import 'package:super_scan/controllers/home_controller.dart';
+import 'package:super_scan/helpers/add_more_pages_results.dart';
+import 'package:super_scan/helpers/import_images_result.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
-import 'package:super_scan/constants.dart';
+import 'package:super_scan/helpers/rename_result.dart';
 import 'package:super_scan/models/scan_meta.dart';
 import 'package:super_scan/services/scan_storage.dart';
 import 'package:share_plus/share_plus.dart';
@@ -204,7 +206,7 @@ class ScanViewerController extends ChangeNotifier {
 
   /* ───────────────── RENAME (NO POP) ───────────────── */
 
-  Future<void> renameScan(BuildContext context, scanDir) async {
+  Future<RenameResult> renameScan(BuildContext context, scanDir) async {
     final controller = TextEditingController(text: meta.name);
 
     final result = await showDialog<String>(
@@ -232,14 +234,14 @@ class ScanViewerController extends ChangeNotifier {
       ),
     );
 
-    if (result == null || result.isEmpty) return;
+    if (result == null || result.isEmpty) return RenameResult.failed;
 
     await ScanStorage.renameScan(scanDir: scanDir, newName: result);
 
     meta = meta.copyWith(name: result);
     notifyListeners();
 
-    WindowsToast.show('Renamed successfully', context, 30);
+    return RenameResult.success;
   }
 
   /* ───────────────── DELETE (POP + REFRESH) ───────────────── */
@@ -372,7 +374,7 @@ class ScanViewerController extends ChangeNotifier {
     }
   }
 
-  // Udpdated editor
+  // Updated editor
   Future<File?> editScanImage(File imageFile) async {
     final cropped = await ImageCropper().cropImage(
       sourcePath: imageFile.path,
@@ -383,7 +385,6 @@ class ScanViewerController extends ChangeNotifier {
           toolbarTitle: 'Crop & Rotate',
           toolbarColor: Colors.black,
           toolbarWidgetColor: Colors.white,
-          statusBarColor: Colors.black,
           backgroundColor: Colors.black,
           lockAspectRatio: false,
           hideBottomControls: false,
@@ -418,46 +419,7 @@ class ScanViewerController extends ChangeNotifier {
     return imageFile;
   }
 
-  Future<void> showAddMorePagesDialog(BuildContext context, scanDir) async {
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text(
-            'How would you like to add more scans?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                importImages(context, scanDir);
-              },
-              child: const Text(
-                'From Photo Library',
-                style: TextStyle(fontWeight: .bold),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                addMorePages(context, scanDir);
-                Navigator.pop(context);
-              },
-              child: const Text(
-                'From Camera',
-                style: TextStyle(fontWeight: .bold),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> addMorePages(BuildContext context, scanDir) async {
+  Future<AddMorePagesResults> addMorePages(Directory scanDir) async {
     try {
       isLoading = true;
       notifyListeners();
@@ -476,9 +438,7 @@ class ScanViewerController extends ChangeNotifier {
 
       // Stop early if nothing scanned
       if (images.isEmpty) {
-        isLoading = false;
-        notifyListeners();
-        return;
+        return AddMorePagesResults.failed;
       }
 
       // Storage layer now handles Android URI normalization
@@ -489,13 +449,14 @@ class ScanViewerController extends ChangeNotifier {
       imageCache.clear(); // Force clear image cache
       imageCache.clearLiveImages();
 
+      return AddMorePagesResults.success;
+
       // await Future.delayed(const Duration(seconds: 1));
       // notifyListeners();
       // _homeController.loadSavedScans(); // Reload home page to make sure scan info (pages) are correct
       // reloadImages(scanDir); // Reload images
     } catch (e) {
-      if (!isMounted) return;
-      WindowsToast.show('Failed to add images: $e', context, 30);
+      return AddMorePagesResults.failed;
     } finally {
       await Future.delayed(const Duration(seconds: 1));
       notifyListeners();
@@ -506,7 +467,7 @@ class ScanViewerController extends ChangeNotifier {
     }
   }
 
-  Future<void> importImages(BuildContext context, scanDir) async {
+  Future<ImportImagesResult> importImages(Directory scanDir) async {
     try {
       isLoading = true; // Start loading animation
       notifyListeners(); // Notify to display animation
@@ -515,7 +476,7 @@ class ScanViewerController extends ChangeNotifier {
 
       final pickedImages = await picker.pickMultiImage(imageQuality: 100);
 
-      if (pickedImages.isEmpty) return;
+      if (pickedImages.isEmpty) return ImportImagesResult.failed;
 
       final imagePaths = pickedImages.map((e) => e.path).toList();
 
@@ -526,7 +487,7 @@ class ScanViewerController extends ChangeNotifier {
         const Duration(seconds: 1),
       ); // Wait for new files to load
 
-      if (!isMounted) return;
+      if (!isMounted) return ImportImagesResult.success;
 
       // clear image cache so imported images show up
       imageCache.clear();
@@ -535,17 +496,9 @@ class ScanViewerController extends ChangeNotifier {
       reloadImages(scanDir); // Refresh images
       notifyListeners(); // Notify to refresh animation
 
-      reloadImages(scanDir); // Reload images
-
-      isLoading = false; // End loading animation
-      notifyListeners(); // Notify to stop animation
-
-      WindowsToast.show('Imported images successfully', context, 30);
+      return ImportImagesResult.success;
     } catch (e) {
-      if (!isMounted) return;
-      isLoading = false; // End loading animation
-      notifyListeners(); // Notify to stop animation
-      WindowsToast.show('Failed to import images: $e', context, 30);
+      return ImportImagesResult.failed;
     } finally {
       isLoading = false; // End loading animation
       notifyListeners(); // Notify to stop animation

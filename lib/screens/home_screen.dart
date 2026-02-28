@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
 import 'package:super_scan/controllers/home_controller.dart';
 import 'package:super_scan/screens/settings_screen.dart';
-import 'package:super_scan/widgets/action_button.dart';
-import 'package:super_scan/widgets/expandable_fab.dart';
+// import 'package:super_scan/widgets/action_button.dart';
+// import 'package:super_scan/widgets/expandable_fab.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
 import 'package:super_scan/constants.dart';
 import 'dart:io';
@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
           //         },
           //       ),
           //       ActionButto
-      //       letterSpacinn(
+      //       letterSpacing(
           //         icon: Icon(Icons.camera_alt, color: Colors.white),
           //         onPressed: () {
           //           _viewController.processScan(
@@ -139,7 +139,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (!_viewController.auth.isSignedIn) {
                         WindowsToast.show('Sign in to sync', context, 30);
                       }
-                      await _viewController.syncScans(context);
+                      // await _viewController.syncScans();
+                      final error = await _viewController.syncScans();
+
+                      if (!context.mounted) return;
+
+                      if (error != null) {
+                        WindowsToast.show(error, context, 30);
+                      }
                       if (PlatformHelper.isDesktop) {
                         await _viewController.loadDriveScans();
                       }
@@ -204,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           if (_loading)
             Container(
-              color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),
+              color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.9),
               child: const Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

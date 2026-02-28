@@ -1,0 +1,4 @@
+enum ImportImagesResult {
+  success,
+  failed
+}

@@ -56,23 +56,32 @@ class MagicEyesController extends ChangeNotifier {
     isProcessing = true;
     extractedText = "";
     progressCurrent = 0;
+    progressTotal = 0;
     notifyListeners();
 
-    final images = await loadImages(scanDir);
+    try {
+      final images = await loadImages(scanDir);
 
-    extractedText = await OCRService.instance.extractBatch(
-      images,
-      onProgress: (current, total) {
-        progressCurrent = current;
-        progressTotal = total;
-        notifyListeners();
-      },
-    );
+      extractedText = await OCRService.instance.extractBatch(
+        images,
+        onProgress: (current, total) {
+          if (current != progressCurrent ||
+              total != progressTotal) {
+            progressCurrent = current;
+            progressTotal = total;
+            notifyListeners();
+          }
+        },
+      );
 
-    isProcessing = false;
-    notifyListeners();
-
-    return extractedText; // <--- return it
+      return extractedText;
+    } catch (e) {
+      extractedText = "";
+      rethrow;
+    } finally {
+      isProcessing = false;
+      notifyListeners();
+    }
   }
 
   // Summarize
@@ -94,7 +103,7 @@ class MagicEyesController extends ChangeNotifier {
         return;
       }
 
-      // Stram AI Summary
+      // Stream AI Summary
       await AIService.instance.streamSummary(
         extractedText,
         onChunk: (chunk) {
@@ -129,7 +138,7 @@ class MagicEyesController extends ChangeNotifier {
         return;
       }
 
-      // Stram AI Summary
+      // Stream proofread results
       await AIService.instance.streamProofread(
         extractedText,
         onChunk: (chunk) {

@@ -122,7 +122,7 @@ class _ExtractUI extends StatelessWidget {
         // Text Output Area
         Expanded(
           child: Container(
-            color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: SelectableText(
@@ -133,7 +133,7 @@ class _ExtractUI extends StatelessWidget {
                   fontSize: 15,
                   height: 1.6,
                   color: controller.extractedText.isEmpty
-                      ? colorScheme.onSurfaceVariant.withOpacity(0.6)
+                      ? colorScheme.onSurfaceVariant.withValues(alpha: 0.6)
                       : colorScheme.onSurface,
                 ),
               ),
@@ -192,9 +192,10 @@ class _ExtractUI extends StatelessWidget {
                   await Clipboard.setData(
                     ClipboardData(text: controller.extractedText),
                   );
-
-                  // optional snackbar feedback
+                  if (!context.mounted) return;
+                  // optional snack bar feedback
                   WindowsToast.show('Copied to clipboard', context, 30);
+
                 },
           icon: const Icon(Icons.copy),
         ),
@@ -240,7 +241,7 @@ class _SummarizeUI extends StatelessWidget {
 
         Expanded(
           child: Container(
-            color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: SelectableText(
@@ -251,7 +252,7 @@ class _SummarizeUI extends StatelessWidget {
                   fontSize: 15,
                   height: 1.6,
                   color: controller.summaryText.isEmpty
-                      ? colorScheme.onSurfaceVariant.withOpacity(0.6)
+                      ? colorScheme.onSurfaceVariant.withValues(alpha: 0.6)
                       : colorScheme.onSurface,
                 ),
               ),
@@ -312,7 +313,8 @@ class _SummarizeUI extends StatelessWidget {
                     ClipboardData(text: controller.summaryText),
                   );
 
-                  // optional snackbar feedback
+                  // optional snack bar feedback
+                  if (!context.mounted) return;
                   WindowsToast.show('Copied to clipboard', context, 30);
                 },
           icon: const Icon(Icons.copy),
@@ -359,7 +361,7 @@ class _ProofreadUI extends StatelessWidget {
 
         Expanded(
           child: Container(
-            color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: SelectableText(
@@ -370,7 +372,7 @@ class _ProofreadUI extends StatelessWidget {
                   fontSize: 15,
                   height: 1.6,
                   color: controller.proofreadResultText.isEmpty
-                      ? colorScheme.onSurfaceVariant.withOpacity(0.6)
+                      ? colorScheme.onSurfaceVariant.withValues(alpha: 0.6)
                       : colorScheme.onSurface,
                 ),
               ),
@@ -428,10 +430,11 @@ class _ProofreadUI extends StatelessWidget {
               ? null
               : () async {
                   await Clipboard.setData(
-                    ClipboardData(text: controller.summaryText),
+                    ClipboardData(text: controller.proofreadResultText),
                   );
+                  if (!context.mounted) return;
 
-                  // optional snackbar feedback
+                  // optional snack bar feedback
                   WindowsToast.show('Copied to clipboard', context, 30);
                 },
           icon: const Icon(Icons.copy),
@@ -510,25 +513,26 @@ class _ChatUIState extends State<_ChatUI> {
   }
 
   Future<void> getChatResponse(ChatMessage message) async {
-    // 1️⃣ Add the user's message immediately
+    // Add the user's message immediately
     setState(() {
       _messages.insert(0, message);
       _typingUser.add(_gptUser);
     });
 
-    // 2️⃣ Run OCR safely
+    // Run OCR safely
     String ocrText = "";
     try {
       ocrText = await controller.runOCRforChat(widget.scanDir);
-      print(ocrText);
     } catch (e) {
-      print("OCR failed: $e");
+      // Check if the widget is still mounted before showing toast
+      if (!mounted) return; //  use mounted from the State
+      WindowsToast.show('OCR failed: $e', context, 30);
     }
 
-    // 3️⃣ Build combined prompt
+    // Build combined prompt
     final combinedPrompt =
         """
-Please use the following OCR text andd answer the user's question accordingly.
+Please use the following OCR text and answer the user's question accordingly. If the user asks a question that does not have an answer in the provided OCR test, try your best to answer it by using your own knowledge 
 
 Document OCR content:
 $ocrText
@@ -537,7 +541,7 @@ User question:
 ${message.text}
 """;
 
-    // 4️⃣ Send prompt to GPT
+    // Send prompt to GPT
     try {
       final request = ChatCompleteText(
         model: Gpt4OChatModel(),
@@ -549,7 +553,7 @@ ${message.text}
 
       final response = await _openAI.onChatCompletion(request: request);
 
-      // 5️⃣ Insert GPT response safely
+      // Insert GPT response safely
       if (response != null && response.choices.isNotEmpty) {
         final gptText = response.choices.first.message?.content ?? "";
         setState(() {
@@ -570,7 +574,6 @@ ${message.text}
         });
       }
     } catch (e) {
-      print("GPT request failed: $e");
       setState(() {
         _typingUser.removeWhere((u) => u.id == _gptUser.id);
       });

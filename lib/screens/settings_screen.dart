@@ -1,15 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:super_scan/constants.dart';
 import 'package:super_scan/controllers/settings_controller.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
+import 'package:super_scan/helpers/sign_in_result.dart';
 import 'package:super_scan/helpers/url_launcher.dart';
 import 'package:super_scan/screens/api_key_screen.dart';
 import 'package:super_scan/screens/donation_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:super_scan/screens/platforms_screen.dart';
+import 'package:windows_toast/windows_toast.dart';
 
 class SettingsScreen extends StatefulWidget {
   static const String id = 'settings_screen';
@@ -27,35 +28,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
   _internetConnectionStreamSubscription; // Start a stream and
 
   @override
-  void dispose() {
-    _internetConnectionStreamSubscription?.cancel();
-    _viewController.dispose();
-    super.dispose();
-  }
-
-  @override
   void initState() {
     super.initState();
 
-    // Subscribe to the stream
-    _internetConnectionStreamSubscription = InternetConnection().onStatusChange
-        .listen((event) {
-          switch (event) {
-            case InternetStatus.connected:
-              setState(() => isConnected = true);
-              break;
-            case InternetStatus.disconnected:
-              setState(() => isConnected = false);
-              break;
-            default:
-              setState(() => isConnected = false);
-              break;
-          }
-        });
-
-    _viewController.addListener(() {
-      if (mounted) setState(() {});
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewController.addListener(_controllerListener);
     });
+
+    _internetConnectionStreamSubscription =
+        InternetConnection().onStatusChange.listen(_internetListener);
+  }
+
+  void _controllerListener() {
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  void _internetListener(InternetStatus event) {
+    if (!mounted) return;
+    switch (event) {
+      case InternetStatus.connected:
+        setState(() => isConnected = true);
+        break;
+      case InternetStatus.disconnected:
+        setState(() => isConnected = false);
+        break;
+    }
   }
 
   @override
@@ -92,8 +90,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     title: const Text(
                       'Sign in with Google',
                     ),
-                    onTap: () {
-                      _viewController.signIn(context);
+                    onTap: () async {
+                      try {
+                        final result = await _viewController.signIn();
+
+                        if(!context.mounted) return;
+
+                        switch(result) {
+                          case SignInResult.success:
+                            WindowsToast.show('Signed in successfully', context, 30);
+                            break;
+                          case SignInResult.failed:
+                            WindowsToast.show('Signed in failed', context, 30);
+                            break;
+                          case SignInResult.cancelled:
+                            WindowsToast.show('Signed in failed', context, 30);
+                            break;
+                        }
+                      } catch (e) {
+                        if (!context.mounted) return;
+
+                        WindowsToast.show(e.toString(), context, 30);
+                      }
                     },
                   )
                 else
