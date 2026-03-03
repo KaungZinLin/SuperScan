@@ -494,23 +494,34 @@ class _ChatUIState extends State<_ChatUI> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: DashChat(
-        currentUser: _currentUser,
-        typingUsers: _typingUser,
-        messageOptions: const MessageOptions(
-          currentUserContainerColor: kAccentColor,
-          containerColor: Colors.black,
-          textColor: Colors.white,
-        ),
-        messages: _messages,
-        onSend: (ChatMessage message) async {
-          await getChatResponse(message);
-        },
+  Widget build(BuildContext context) => GestureDetector (
+    onTap: () => FocusScope.of(context).unfocus(),
+    child:  Scaffold(
+      body: SafeArea(
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification notification) {
+            if (notification is ScrollStartNotification) {
+              FocusScope.of(context).unfocus();
+            }
+            return false; // Return false to let the event continue bubbling
+          },
+          child: DashChat(
+            currentUser: _currentUser,
+            typingUsers: _typingUser,
+            messageOptions: const MessageOptions(
+              currentUserContainerColor: kAccentColor,
+              containerColor: Colors.black,
+              textColor: Colors.white,
+            ),
+            messages: _messages,
+            onSend: (ChatMessage message) async {
+              await getChatResponse(message);
+            },
+          ),
+      )
       ),
-    );
-  }
+    )
+  );
 
   Future<void> getChatResponse(ChatMessage message) async {
     // Add the user's message immediately

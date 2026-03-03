@@ -115,27 +115,27 @@ class GoogleDriveService {
     final api = await _api();
     if (api == null) return;
 
-    // 1️⃣ Get SuperScan folder
+    // Get SuperScan folder
     final rootResult = await api.files.list(
       q: "name='SuperScan' and mimeType='application/vnd.google-apps.folder' and trashed=false",
     );
     if (rootResult.files == null || rootResult.files!.isEmpty) return;
     final rootId = rootResult.files!.first.id!;
 
-    // 2️⃣ Get synced folder
+    // Get synced folder
     final syncedResult = await api.files.list(
       q: "'$rootId' in parents and name='synced' and trashed=false",
     );
     if (syncedResult.files == null || syncedResult.files!.isEmpty) return;
     final syncedId = syncedResult.files!.first.id!;
 
-    // 3️⃣ Find the scan folder inside synced
+    // Find the scan folder inside synced
     final scanResult = await api.files.list(
       q: "name='$scanId' and mimeType='application/vnd.google-apps.folder' and '$syncedId' in parents",
     );
     if (scanResult.files == null || scanResult.files!.isEmpty) return;
 
-    // 4️⃣ Delete
+    // Delete
     await api.files.delete(scanResult.files!.first.id!);
   }
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:super_scan/main.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
 import 'package:super_scan/controllers/home_controller.dart';
 import 'package:super_scan/screens/settings_screen.dart';
@@ -21,7 +22,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with RouteAware {
   final _viewController = HomeController();
 
   bool _loading = false;
@@ -37,6 +38,28 @@ class _HomeScreenState extends State<HomeScreen> {
     _viewController.addListener(() {
       if (mounted) setState(() {});
     });
+  }
+
+  // Subscribe to route changes
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+  // Dispose
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  // Reload when search is closed
+  @override
+  void didPopNext() async {
+    await _viewController.loadSavedScans();
+
+    if (!mounted) return;
+    setState(() {});
   }
 
   Future<void> _initialize() async {
@@ -159,18 +182,20 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.search, color: kAccentColor),
             onPressed: () => showSearch(
               context: context,
-              delegate: ScanSearchDelegate(_viewController.savedScans),
-            ),
-          ),
-        ],
+              delegate: ScanSearchDelegate(scansToShow),
+          ).then((_) {
+            _viewController.loadSavedScans();
+            }),
+          )],
       ),
 
       body: Stack(
         children: [
           SafeArea(
             child: scansToShow.isEmpty
-                ? EmptyScansPlaceholder()
+                ? EmptyScansPlaceHolder()
                 : ListView.builder(
+              key: UniqueKey(),
                     padding: const EdgeInsets.all(16),
                     itemCount: scansToShow.length,
                     itemBuilder: (context, index) {
@@ -201,7 +226,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             context,
                           ),
                           onTap: () async {
-                            _viewController.openScanViewer(scanDir, context);
+                            _viewController.openScanViewer(scanDir, context).then((_) {
+                              _viewController.loadSavedScans();
+                            });
                           },
                         ),
                       );

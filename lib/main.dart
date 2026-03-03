@@ -5,6 +5,9 @@ import 'package:super_scan/screens/settings_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:super_scan/services/google_auth_service.dart';
 
+final RouteObserver<ModalRoute<void>> routeObserver =
+RouteObserver<ModalRoute<void>>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -24,6 +27,7 @@ class SuperScan extends StatelessWidget {
       theme: kLightThemeData,
       darkTheme: kDarkThemeData,
       themeMode: ThemeMode.system,
+      navigatorObservers: [routeObserver],
 
       initialRoute: '/',
       routes: {

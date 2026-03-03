@@ -14,7 +14,7 @@ class AdBanner extends StatelessWidget {
         color: Colors.grey[200], // Placeholder color while loading
         borderRadius: BorderRadius.circular(12),
         image: const DecorationImage(
-          image: AssetImage('assets/images/ad_test_atom_mm.jpg'),
+          image: AssetImage('assets/images/lha_sponsor.jpg'),
           fit: BoxFit.cover, // Ensures the image fills the container
         ),
         boxShadow: [

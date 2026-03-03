@@ -56,6 +56,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  // Dispose the subscription to prevent memory leak
+  @override
+  void dispose() {
+    _internetConnectionStreamSubscription?.cancel();
+    _internetConnectionStreamSubscription = null;
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = _viewController.auth.currentUser;
@@ -127,6 +135,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
 
                 ListTile(
+                  enabled: !PlatformHelper.isDesktop,
                   leading: const Icon(Icons.install_desktop),
                   trailing: const Icon(Icons.chevron_right),
                   title: const Text(
@@ -316,7 +325,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         border: Border.all(
           color: errorRed.withOpacity(0.3),
           width: 1,
-        ), // Optional: subtle border
+        ),
       ),
       child: Row(
         mainAxisSize:

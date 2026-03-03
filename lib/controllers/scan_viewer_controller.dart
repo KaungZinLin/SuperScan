@@ -33,7 +33,7 @@ class ScanViewerController extends ChangeNotifier {
   @override
   void dispose() {
     _isDisposed =
-        true; // Mark as disposed - Alternative to !mounted in the view - don't understand it yet
+    true; // Mark as disposed - Alternative to !mounted in the view - don't understand it yet
     super.dispose();
   }
 
@@ -45,23 +45,23 @@ class ScanViewerController extends ChangeNotifier {
 
   void loadImages(Directory scanDir) {
     images =
-        scanDir
-            .listSync()
-            .whereType<File>()
-            .where((f) => f.path.endsWith('.jpg'))
-            .toList()
-          ..sort((a, b) => a.path.compareTo(b.path));
+    scanDir
+        .listSync()
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.jpg'))
+        .toList()
+      ..sort((a, b) => a.path.compareTo(b.path));
   }
 
   void showContextMenu(
-    BuildContext context,
-    Offset tapPosition,
-    int index,
-    scanDir,
-  ) async {
+      BuildContext context,
+      Offset tapPosition,
+      int index,
+      scanDir,
+      ) async {
     // 2. Identify where on the screen the menu should appear
     final RenderBox overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
+    Overlay.of(context).context.findRenderObject() as RenderBox;
 
     final String? selectedAction = await showMenu<String>(
       context: context,
