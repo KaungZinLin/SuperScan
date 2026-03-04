@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'google_auth_service.dart';
 import 'package:super_scan/models/drive_scan.dart';
@@ -55,8 +56,12 @@ class GoogleDriveService {
     };
 
     // --------------------------------------------------
-    // Upload (overwrite behavior)
+    // Upload (overwrite behavior) OLD UPLOAD
     // --------------------------------------------------
+    // --------------------------------------------------
+    // SMART SYNC (MD5 based)
+    // --------------------------------------------------
+
     final tasks = <Future<void> Function()>[];
 
     for (final entity in scanDir.listSync()) {
@@ -65,11 +70,30 @@ class GoogleDriveService {
       tasks.add(() async {
         final fileName = entity.uri.pathSegments.last;
 
+        final localBytes = await entity.readAsBytes();
+        final localMd5 = base64.encode(md5.convert(localBytes).bytes);
+
         final existingId = existingFiles[fileName];
+
         if (existingId != null) {
+          // Fetch Drive file metadata including checksum
+          final driveFile = await api.files.get(
+            existingId,
+            $fields: 'id,name,md5Checksum',
+          ) as drive.File;
+
+          final driveMd5 = driveFile.md5Checksum;
+
+          if (driveMd5 == localMd5) {
+            //  File is identical → skip
+            return;
+          }
+
+          // File changed → delete and reupload
           await api.files.delete(existingId);
         }
 
+        // Upload new or changed file
         final media = drive.Media(entity.openRead(), await entity.length());
 
         await api.files.create(
@@ -81,8 +105,34 @@ class GoogleDriveService {
       });
     }
 
-    // run 3 uploads simultaneously
+// run 3 uploads simultaneously
     await _runWithLimit(tasks, 3);
+    // final tasks = <Future<void> Function()>[];
+    //
+    // for (final entity in scanDir.listSync()) {
+    //   if (entity is! File) continue;
+    //
+    //   tasks.add(() async {
+    //     final fileName = entity.uri.pathSegments.last;
+    //
+    //     final existingId = existingFiles[fileName];
+    //     if (existingId != null) {
+    //       await api.files.delete(existingId);
+    //     }
+    //
+    //     final media = drive.Media(entity.openRead(), await entity.length());
+    //
+    //     await api.files.create(
+    //       drive.File()
+    //         ..name = fileName
+    //         ..parents = [scanFolderId],
+    //       uploadMedia: media,
+    //     );
+    //   });
+    // }
+    //
+    // // run 3 uploads simultaneously
+    // await _runWithLimit(tasks, 3);
     // for (final entity in scanDir.listSync()) {
     //   if (entity is! File) continue;
 

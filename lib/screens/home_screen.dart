@@ -185,6 +185,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               delegate: ScanSearchDelegate(scansToShow),
           ).then((_) {
             _viewController.loadSavedScans();
+            _viewController.syncScans();
             }),
           )],
       ),
@@ -228,6 +229,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                           onTap: () async {
                             _viewController.openScanViewer(scanDir, context).then((_) {
                               _viewController.loadSavedScans();
+                              _viewController.syncScans();
                             });
                           },
                         ),
