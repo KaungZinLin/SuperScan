@@ -6,6 +6,10 @@
 		<true/>
 		<key>NSCameraUsageDescription</key>
 		<string>SuperScan needs access to your camera to scan documents</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+        <string>SuperScan needs photo library access to import images.</string>
+        <key>NSPhotoLibraryAddUsageDescription</key>
+        <string>SuperScan may save scanned documents to your photo library.</string>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>

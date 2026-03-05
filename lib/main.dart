@@ -4,6 +4,7 @@ import 'package:super_scan/screens/home_screen.dart';
 import 'package:super_scan/screens/settings_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:super_scan/services/google_auth_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 final RouteObserver<ModalRoute<void>> routeObserver =
 RouteObserver<ModalRoute<void>>();
@@ -46,14 +47,88 @@ class MainLayout extends StatefulWidget {
   State<MainLayout> createState() => _MainLayoutState();
 }
 
-class _MainLayoutState extends State<MainLayout> {
+class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    _getPermissions();
+  }
+
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // 3. Clean up
+    super.dispose();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // 4. If the user comes back from Settings, refresh!
+    if (state == AppLifecycleState.resumed) {
+      setState(() {});
+    }
+  }
+
+
+  @override
   Widget build(BuildContext context) {
-    return HomeScreen();
+    return FutureBuilder<bool>(
+        future: _getPermissions(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          if (snapshot.data == true) {
+            return HomeScreen();
+          }
+
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image(image: AssetImage('assets/images/app_icon.png'), height: 100,),
+                  SizedBox(height: 16),
+                  Text(
+                    'Welcome to SuperScan',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'In order to use SuperScan, you need to give the app access to your camera.',
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 30,),
+                  FilledButton.tonalIcon(
+                    onPressed: openAppSettings,
+                    label: const Text('Open Settings'), // This makes the text appear
+                  ),
+                ]
+              ),
+            ),
+          );
+        }
+    );
+  }
+
+  Future<bool> _getPermissions() async {
+    var cameraStatus = await Permission.camera.status;
+
+    bool cameraOk = cameraStatus.isGranted;
+
+    if (cameraOk) {
+      print('okay');
+      return true;
+    }
+
+    print('denied');
+    return false;
   }
 }

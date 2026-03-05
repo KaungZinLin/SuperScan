@@ -209,7 +209,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       applicationName: 'SuperScan',
-                      applicationVersion: '0.1 (Beta) (Build 7.3)',
+                      applicationVersion: '0.1 (Beta) (Build 7.4)',
                       applicationLegalese: '© 2026 Kaung Zin Lin',
                       children: [
                         const Padding(
