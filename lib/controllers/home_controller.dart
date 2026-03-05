@@ -263,12 +263,7 @@ class HomeController extends ChangeNotifier {
     await ScanStorage.renameScan(scanDir: scan.dir, newName: result);
 
     await loadSavedScans();
-
-    WindowsToast.show(
-        'Renamed successfully',
-        context,
-        30,
-    );
+    await syncScans();
   }
 
   Future<void> deleteScan(SavedScan scan, context) async {
