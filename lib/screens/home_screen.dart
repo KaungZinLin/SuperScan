@@ -180,13 +180,19 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         actions: [
           IconButton(
             icon: Icon(Icons.search, color: kAccentColor),
-            onPressed: () => showSearch(
-              context: context,
-              delegate: ScanSearchDelegate(scansToShow),
-          ).then((_) {
-            _viewController.loadSavedScans();
-            _viewController.syncScans();
-            }),
+              onPressed: () async {
+                await showSearch(
+                  context: context,
+                  delegate: ScanSearchDelegate(scansToShow),
+                );
+
+                await _viewController.loadSavedScans();
+
+                // Wait until the UI has fully returned to the home screen
+                await WidgetsBinding.instance.endOfFrame;
+
+                await _viewController.syncScans();
+              }
           )],
       ),
 

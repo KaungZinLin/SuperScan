@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:super_scan/models/saved_scan.dart';
+import 'package:super_scan/screens/home_screen.dart';
 import 'package:super_scan/screens/scan_viewer_screen.dart';
+import 'package:intl/intl.dart';
 
 class ScanSearchDelegate extends SearchDelegate<SavedScan?> {
-  final List<SavedScan> allScans;
-
+  List<SavedScan> allScans;
   ScanSearchDelegate(this.allScans);
 
   @override
@@ -35,6 +36,10 @@ class ScanSearchDelegate extends SearchDelegate<SavedScan?> {
     return _buildList(context, _filtered());
   }
 
+  String formatDate(DateTime date) {
+    return DateFormat.yMd().add_jm().format(date);
+  }
+
   List<SavedScan> _filtered() {
     final q = query.toLowerCase();
     return allScans
@@ -49,14 +54,16 @@ class ScanSearchDelegate extends SearchDelegate<SavedScan?> {
         final scan = scans[index];
         return ListTile(
           title: Text(scan.meta.name),
-          onTap: () {
-            close(context, scan);
+          subtitle: Text(formatDate(scan.meta.createdAt)),
+          onTap: () async { // Async
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => ScanViewerScreen(scanDir: scan.dir),
               ),
             );
+
+            showSuggestions(context); // Rebuild UI
           },
         );
       },
