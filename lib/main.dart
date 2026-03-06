@@ -154,11 +154,9 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
     bool cameraOk = cameraStatus.isGranted;
 
     if (cameraOk) {
-      print('okay');
       return true;
     }
 
-    print('denied');
     return false;
   }
 }
