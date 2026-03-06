@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'package:super_scan/services/scan_storage.dart';
+import 'dart:convert';
+import 'package:super_scan/models/scan_meta.dart';
 import '../models/sync_index.dart';
 import '../helpers/scan_utils.dart';
 import '../services/google_auth_service.dart';
@@ -35,6 +38,8 @@ class SyncController {
       tasks.add(() async {
         await _drive.uploadScan(scan);
 
+        await ScanStorage.markAsSynced(scanDir: scan);
+
         // index[id] = DateTime.now().millisecondsSinceEpoch;
         index[id] = localTime.millisecondsSinceEpoch; // Removed datetime.now as it can cause unnecessary re-syncs if the device clock changes
       }());
@@ -50,8 +55,34 @@ class SyncController {
   static Future<void> deleteScan(Directory scanDir) async {
     if (!_auth.isSignedIn) return;
 
-    final id = ScanUtils.scanId(scanDir);
+    // Try to get the Drive folder ID from local meta.json
+    String? driveFolderId;
+    final metaFile = File('${scanDir.path}/meta.json');
+    if (await metaFile.exists()) {
+      try {
+        final json = jsonDecode(await metaFile.readAsString());
+        final meta = ScanMeta.fromJson(json);
+        driveFolderId = meta.driveFolderId;
+      } catch (e) {
+        print('Error reading meta.json: $e');
+      }
+    }
 
-    await _drive.deleteScanFolder(id);
+    if (driveFolderId != null && driveFolderId.isNotEmpty) {
+      // Use the stored ID – direct and reliable
+      await _drive.deleteScanFolderById(driveFolderId);
+    } else {
+      // Fallback to old name‑based deletion (for scans synced before this change)
+      final id = ScanUtils.scanId(scanDir);
+      await _drive.deleteScanFolder(id);
+    }
   }
+
+  // static Future<void> deleteScan(Directory scanDir) async {
+  //   if (!_auth.isSignedIn) return;
+  //
+  //   final id = ScanUtils.scanId(scanDir);
+  //
+  //   await _drive.deleteScanFolder(id);
+  // }
 }

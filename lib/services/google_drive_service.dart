@@ -6,6 +6,7 @@ import 'google_auth_service.dart';
 import 'package:super_scan/models/drive_scan.dart';
 import 'package:super_scan/models/scan_meta.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:super_scan/services/scan_storage.dart';
 
 class GoogleDriveService {
   GoogleDriveService._internal();
@@ -40,6 +41,8 @@ class GoogleDriveService {
     final rootId = await _ensureFolder(api, "SuperScan", null);
     final syncedId = await _ensureFolder(api, "synced", rootId);
     final scanFolderId = await _ensureFolder(api, scanId, syncedId);
+
+    await ScanStorage.updateDriveId(scanDir: scanDir, folderId: scanFolderId);
 
     // --------------------------------------------------
     // NEW: Fetch existing files in Drive folder
@@ -165,29 +168,79 @@ class GoogleDriveService {
     final api = await _api();
     if (api == null) return;
 
-    // Get SuperScan folder
-    final rootResult = await api.files.list(
-      q: "name='SuperScan' and mimeType='application/vnd.google-apps.folder' and trashed=false",
-    );
-    if (rootResult.files == null || rootResult.files!.isEmpty) return;
-    final rootId = rootResult.files!.first.id!;
+    try {
+      // Get SuperScan folder
+      final rootResult = await api.files.list(
+        q: "name='SuperScan' and mimeType='application/vnd.google-apps.folder' and trashed=false",
+      );
 
-    // Get synced folder
-    final syncedResult = await api.files.list(
-      q: "'$rootId' in parents and name='synced' and trashed=false",
-    );
-    if (syncedResult.files == null || syncedResult.files!.isEmpty) return;
-    final syncedId = syncedResult.files!.first.id!;
+      if (rootResult.files == null || rootResult.files!.isEmpty) {
+        print("Delete failed: SuperScan folder not found");
+        return;
+      }
 
-    // Find the scan folder inside synced
-    final scanResult = await api.files.list(
-      q: "name='$scanId' and mimeType='application/vnd.google-apps.folder' and '$syncedId' in parents",
-    );
-    if (scanResult.files == null || scanResult.files!.isEmpty) return;
+      final rootId = rootResult.files!.first.id!;
 
-    // Delete
-    await api.files.delete(scanResult.files!.first.id!);
+      // Get synced folder
+      final syncedResult = await api.files.list(
+        q: "'$rootId' in parents and name='synced' and trashed=false",
+      );
+
+      if (syncedResult.files == null || syncedResult.files!.isEmpty) {
+        print("Delete failed: synced folder not found");
+        return;
+      }
+
+      final syncedId = syncedResult.files!.first.id!;
+
+      // Find the scan folder inside synced
+      final scanResult = await api.files.list(
+        q: "name='$scanId' and mimeType='application/vnd.google-apps.folder' and '$syncedId' in parents and trashed=false",
+      );
+
+      if (scanResult.files == null || scanResult.files!.isEmpty) {
+        print("Delete failed: scan folder '$scanId' not found");
+        return;
+      }
+
+      final folderId = scanResult.files!.first.id!;
+
+      // Delete
+      await api.files.delete(folderId);
+
+      print("Deleted scan folder from Drive: $scanId ($folderId)");
+    } catch (e, stack) {
+      print("Drive deleteScanFolder error: $e");
+      print(stack);
+    }
   }
+  // Future<void> deleteScanFolder(String scanId) async {
+  //   final api = await _api();
+  //   if (api == null) return;
+  //
+  //   // Get SuperScan folder
+  //   final rootResult = await api.files.list(
+  //     q: "name='SuperScan' and mimeType='application/vnd.google-apps.folder' and trashed=false",
+  //   );
+  //   if (rootResult.files == null || rootResult.files!.isEmpty) return;
+  //   final rootId = rootResult.files!.first.id!;
+  //
+  //   // Get synced folder
+  //   final syncedResult = await api.files.list(
+  //     q: "'$rootId' in parents and name='synced' and trashed=false",
+  //   );
+  //   if (syncedResult.files == null || syncedResult.files!.isEmpty) return;
+  //   final syncedId = syncedResult.files!.first.id!;
+  //
+  //   // Find the scan folder inside synced
+  //   final scanResult = await api.files.list(
+  //     q: "name='$scanId' and mimeType='application/vnd.google-apps.folder' and '$syncedId' in parents",
+  //   );
+  //   if (scanResult.files == null || scanResult.files!.isEmpty) return;
+  //
+  //   // Delete
+  //   await api.files.delete(scanResult.files!.first.id!);
+  // }
 
   // Future<void> deleteScanFolder(String scanId) async {
   //   final api = await _api();
@@ -450,5 +503,19 @@ class GoogleDriveService {
     }
 
     await Future.wait(executing);
+  }
+
+  Future<void> deleteScanFolderById(String folderId) async {
+    final api = await _api();
+    if (api == null) return;
+
+    try {
+      await api.files.delete(folderId);
+      print("Deleted Drive folder: $folderId");
+    } catch (e, stack) {
+      print("Drive delete by ID error: $e");
+      print(stack);
+      // Optionally rethrow if you want the caller to handle it
+    }
   }
 }

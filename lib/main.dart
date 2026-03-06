@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:super_scan/helpers/platform_helper.dart';
 import 'constants.dart';
 import 'package:super_scan/screens/home_screen.dart';
 import 'package:super_scan/screens/settings_screen.dart';
@@ -149,6 +150,10 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
   }
 
   Future<bool> _getPermissions() async {
+    if (PlatformHelper.isDesktop) {
+      return true;
+    }
+
     var cameraStatus = await Permission.camera.status;
 
     bool cameraOk = cameraStatus.isGranted;
