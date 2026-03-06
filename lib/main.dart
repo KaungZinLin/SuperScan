@@ -87,30 +87,60 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
 
           return Scaffold(
             body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Image(image: AssetImage('assets/images/app_icon.png'), height: 100,),
-                  SizedBox(height: 16),
-                  Text(
-                    'Welcome to SuperScan',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image(image: AssetImage('assets/images/app_icon.png'), height: 100,),
+                    SizedBox(height: 16),
+                    Text(
+                      'Welcome to SuperScan',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'In order to use SuperScan, you need to give the app access to your camera.',
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 30,),
-                  FilledButton.tonalIcon(
-                    onPressed: openAppSettings,
-                    label: const Text('Open Settings'), // This makes the text appear
-                  ),
-                ]
+                    Text(
+                      'In order to use SuperScan, you need to give the app access to your camera.',
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 30,),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: FilledButton.tonalIcon(
+                            onPressed: openAppSettings,
+                            label: const Text('Open Settings'),
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton.tonalIcon(
+                            onPressed: () {
+                              setState(() {});
+                            },
+                            label: const Text('Refresh'),
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  ]
+                ),
               ),
             ),
           );
