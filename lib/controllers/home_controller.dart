@@ -14,7 +14,7 @@ import 'dart:convert';
 import 'package:super_scan/screens/scan_viewer_screen.dart';
 import 'package:super_scan/services/google_auth_service.dart';
 import 'package:windows_toast/windows_toast.dart';
-
+import 'package:image/image.dart' as img;
 class HomeController extends ChangeNotifier {
   // Alternative to !mounted in the view - don't understand it yet
   bool _isDisposed = false;
@@ -109,10 +109,11 @@ class HomeController extends ChangeNotifier {
   //   }
   // }
 
+
   Future<void> processScan(
-    BuildContext context,
-    Future<dynamic> scanTask,
-  ) async {
+      BuildContext context,
+      Future<dynamic> scanTask,
+      ) async {
     try {
       final result = await scanTask;
 
@@ -135,6 +136,29 @@ class HomeController extends ChangeNotifier {
         _scannedDocuments = 'No images returned.';
         notifyListeners();
         return;
+      }
+
+      // Compress PNG images (overwrite originals)
+      for (final path in images) {
+        try {
+          final file = File(path);
+
+          final bytes = await file.readAsBytes();
+          final decoded = img.decodeImage(bytes);
+
+          if (decoded == null) continue;
+
+          // Resize only if extremely large
+          final optimized = decoded.width > 2200
+              ? img.copyResize(decoded, width: 2200)
+              : decoded;
+
+          final compressed = img.encodePng(optimized, level: 9);
+
+          await file.writeAsBytes(compressed, flush: true);
+        } catch (e) {
+          debugPrint('Image compression failed for $path: $e');
+        }
       }
 
       final scanDir = await ScanStorage.saveScanImages(images);
