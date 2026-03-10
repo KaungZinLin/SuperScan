@@ -58,7 +58,7 @@ class ScanStorage {
       }
     }
 
-    final meta = ScanMeta(name: defaultScanName(), createdAt: DateTime.now(), driveFolderId: '');
+    final meta = ScanMeta(name: defaultScanName(), createdAt: DateTime.now());
 
     final metaFile = File('${scanDir.path}/meta.json');
     await metaFile.writeAsString(jsonEncode(meta.toJson()));
@@ -89,7 +89,10 @@ class ScanStorage {
     final json = jsonDecode(await metaFile.readAsString());
     final meta = ScanMeta.fromJson(json);
 
-    final updatedMeta = meta.copyWith(name: newName);
+    final updatedMeta = ScanMeta(
+      name: newName,
+      createdAt: meta.createdAt, // keep original date
+    );
 
     await metaFile.writeAsString(jsonEncode(updatedMeta.toJson()));
   }
@@ -253,36 +256,5 @@ class ScanStorage {
       final finalFile = File('$dirPath/page_${i + 1}.jpg');
       orderedFiles[i] = await orderedFiles[i].rename(finalFile.path);
     }
-  }
-
-  static Future<void> updateDriveId({
-    required Directory scanDir,
-    required String folderId,
-  }) async {
-    final metaFile = File('${scanDir.path}/meta.json');
-    if (!metaFile.existsSync()) return;
-
-    final json = jsonDecode(await metaFile.readAsString());
-    final meta = ScanMeta.fromJson(json);
-
-    // Update the ID
-    final updatedMeta = meta.copyWith(driveFolderId: folderId);
-
-    await metaFile.writeAsString(jsonEncode(updatedMeta.toJson()));
-  }
-
-  static Future<void> markAsSynced({required Directory scanDir}) async {
-    final metaFile = File('${scanDir.path}/meta.json');
-    if (!await metaFile.exists()) return;
-
-    // Read existing data so we don't lose anything
-    final String content = await metaFile.readAsString();
-    final Map<String, dynamic> data = jsonDecode(content);
-
-    // If your GoogleDriveService doesn't give you the ID back,
-    // you can at least update the local state here.
-    // data['driveFolderId'] = "synced_on_${DateTime.now().millisecondsSinceEpoch}";
-
-    await metaFile.writeAsString(jsonEncode(data));
   }
 }

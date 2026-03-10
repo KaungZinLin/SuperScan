@@ -280,7 +280,6 @@ class ScanViewerController extends ChangeNotifier {
     notifyListeners(); // Notify about animation
 
     await SyncController.deleteScan(scanDir); // Delete from Google Drive first
-    print('Deleted drive scan');
     await ScanStorage.deleteScan(scanDir); // Delete locally
 
     isLoading = false; // Stop animation
