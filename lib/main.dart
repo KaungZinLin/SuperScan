@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
 import 'constants.dart';
 import 'package:super_scan/screens/home_screen.dart';
@@ -12,6 +13,8 @@ RouteObserver<ModalRoute<void>>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  MobileAds.instance.initialize();
 
   await initializeDateFormatting();
   await GoogleAuthService.instance.initialize();

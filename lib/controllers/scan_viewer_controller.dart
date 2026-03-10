@@ -15,6 +15,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:super_scan/screens/reorder_pages_page.dart';
 import 'package:super_scan/controllers/sync_controller.dart';
 import 'package:windows_toast/windows_toast.dart';
+import 'package:super_scan/screens/after_sharing_screen.dart';
 
 class ScanViewerController extends ChangeNotifier {
   // Alternative to !mounted in the view - don't understand it yet
@@ -156,6 +157,8 @@ class ScanViewerController extends ChangeNotifier {
         notifyListeners(); // Notify to stop animation
         break;
       case 'reorder':
+        if (!context.mounted) return;
+
         await Navigator.push(
           context,
           MaterialPageRoute(
@@ -312,6 +315,13 @@ class ScanViewerController extends ChangeNotifier {
             onPressed: () async {
               Navigator.pop(context);
               await shareAsPdf(context, scanDir);
+
+              if (!context.mounted) return;
+
+              showModalBottomSheet<void>(
+                  context: context,
+                  builder: (BuildContext context) => AfterSharingScreen(),
+              );
             },
             child: const Text(
               'PDF',
@@ -322,6 +332,12 @@ class ScanViewerController extends ChangeNotifier {
             onPressed: () async {
               Navigator.pop(context);
               await shareAsImages(context, scanDir);
+              if (!context.mounted) return;
+
+              showModalBottomSheet<void>(
+                context: context,
+                builder: (BuildContext context) => AfterSharingScreen(),
+              );
             },
             child: const Text(
               'Images',

@@ -1,21 +1,71 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+// Ensure this path is correct for your project
+import 'package:super_scan/helpers/ad_helper.dart';
 
-class AdBanner extends StatelessWidget {
+class AdBanner extends StatefulWidget {
   const AdBanner({super.key});
 
   @override
+  State<AdBanner> createState() => _AdBannerState();
+}
+
+class _AdBannerState extends State<AdBanner> {
+  BannerAd? _bannerAd;
+  bool _showAd = false; // Controls the 1-second delay logic
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBanner();
+  }
+
+  void _loadBanner() {
+    BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+          // Start the 1-second timer once the ad is actually ready
+          Timer(const Duration(seconds: 1), () {
+            if (mounted) {
+              setState(() {
+                _showAd = true;
+              });
+            }
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint('BannerAd failed to load: $error');
+          ad.dispose();
+        },
+      ),
+    ).load();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // ai generated code for temporary banner
     return Container(
-      // margin: const EdgeInsets.all(16), // Optional: Add space around the ad
       width: double.infinity,
-      height: 100, // Fixed height for the banner
+      height: 100,
+      clipBehavior: Clip.antiAlias, // Ensures the ad doesn't bleed over corners
       decoration: BoxDecoration(
-        color: Colors.grey[200], // Placeholder color while loading
+        color: Colors.grey[200],
         borderRadius: BorderRadius.circular(12),
         image: const DecorationImage(
           image: AssetImage('assets/images/lha_sponsor.jpg'),
-          fit: BoxFit.cover, // Ensures the image fills the container
+          fit: BoxFit.cover,
         ),
         boxShadow: [
           BoxShadow(
@@ -25,6 +75,17 @@ class AdBanner extends StatelessWidget {
           ),
         ],
       ),
+      // If the ad is loaded and the 1 second has passed, show the AdWidget
+      child: (_bannerAd != null && _showAd)
+          ? Align(
+        alignment: Alignment.center,
+        child: SizedBox(
+          width: _bannerAd!.size.width.toDouble(),
+          height: _bannerAd!.size.height.toDouble(),
+          child: AdWidget(ad: _bannerAd!),
+        ),
+      )
+          : const SizedBox.shrink(), // Shows nothing over the background image
     );
   }
 }
