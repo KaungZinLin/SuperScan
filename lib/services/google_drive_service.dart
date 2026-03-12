@@ -161,32 +161,24 @@ class GoogleDriveService {
   // =============================
 
   // Deletes a scan folder under SuperScan/synced by scanId - AI
-  Future<void> deleteScanFolder(String scanId) async {
+  Future<void> deleteScanFolder(Directory scanDir) async {
     final api = await _api();
     if (api == null) return;
 
-    // Get SuperScan folder
-    final rootResult = await api.files.list(
-      q: "name='SuperScan' and mimeType='application/vnd.google-apps.folder' and trashed=false",
-    );
-    if (rootResult.files == null || rootResult.files!.isEmpty) return;
-    final rootId = rootResult.files!.first.id!;
+    final scanId = scanDir.path.split(Platform.pathSeparator).last;
 
-    // Get synced folder
-    final syncedResult = await api.files.list(
-      q: "'$rootId' in parents and name='synced' and trashed=false",
+    final result = await api.files.list(
+      q: "name='$scanId' and mimeType='application/vnd.google-apps.folder' and trashed=false",
+      $fields: "files(id,name)",
     );
-    if (syncedResult.files == null || syncedResult.files!.isEmpty) return;
-    final syncedId = syncedResult.files!.first.id!;
 
-    // Find the scan folder inside synced
-    final scanResult = await api.files.list(
-      q: "name='$scanId' and mimeType='application/vnd.google-apps.folder' and '$syncedId' in parents",
-    );
-    if (scanResult.files == null || scanResult.files!.isEmpty) return;
+    if (result.files == null || result.files!.isEmpty) {
+      print("Drive delete: folder $scanId not found");
+      return;
+    }
 
-    // Delete
-    await api.files.delete(scanResult.files!.first.id!);
+    final folderId = result.files!.first.id!;
+    await api.files.delete(folderId);
   }
 
   // Future<void> deleteScanFolder(String scanId) async {
@@ -338,23 +330,29 @@ class GoogleDriveService {
 
   Future<Directory> downloadScanFolder({
     required String folderId,
-    required String folderName,
   }) async {
     final api = await _api();
     if (api == null) {
       throw Exception('Drive API not initialized');
     }
 
+    // Get the real Drive folder name (scan_123456)
+    final folder = await api.files.get(
+      folderId,
+      $fields: 'id,name',
+    ) as drive.File;
+
+    final driveFolderName = folder.name!;
+
     final tempDir = await getTemporaryDirectory();
-    final scanDir = Directory('${tempDir.path}/$folderName');
+    final scanDir = Directory('${tempDir.path}/$driveFolderName');
 
     if (!await scanDir.exists()) {
       await scanDir.create(recursive: true);
     }
 
-    // List all files inside the Drive folder
     final result = await api.files.list(
-      q: "'$folderId' in parents and trashed = false",
+      q: "'$folderId' in parents and trashed=false",
       spaces: 'drive',
       $fields: 'files(id,name,mimeType)',
     );
@@ -364,7 +362,6 @@ class GoogleDriveService {
     for (final file in files) {
       if (file.mimeType?.startsWith('image/') != true &&
           file.mimeType != 'application/json') {
-        // skip non-image / non-json files
         continue;
       }
 
@@ -373,12 +370,10 @@ class GoogleDriveService {
         downloadOptions: drive.DownloadOptions.fullMedia,
       );
 
-      // Cast to Media to access the stream
-      final mediaStream = (media as drive.Media).stream;
+      final stream = (media as drive.Media).stream;
 
-      // Read all bytes
       final bytes = <int>[];
-      await for (final chunk in mediaStream) {
+      await for (final chunk in stream) {
         bytes.addAll(chunk);
       }
 

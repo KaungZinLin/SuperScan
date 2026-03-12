@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:super_scan/constants.dart';
-import 'package:super_scan/helpers/platform_helper.dart';
 
 class DonateScreen extends StatelessWidget {
   static const String id = 'donate_screen';
@@ -17,14 +16,11 @@ class DonateScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.favorite, color: Colors.red, size: 60),
+              const Icon(Icons.favorite_rounded, color: Colors.red, size: 60),
               const SizedBox(height: 16),
               Text(
                 'Thank You!',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               const Text(
@@ -35,19 +31,57 @@ class DonateScreen extends StatelessWidget {
 
               const Text(
                 'Select an amount to donate from the Apple App Store or the Google Play Store',
+                textAlign: TextAlign.center,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                alignment: WrapAlignment.center,
+              Column(
                 children: [
-                  _buildDonationButton(context, '\$5'),
-                  _buildDonationButton(context, '\$10'),
-                  _buildDonationButton(context, '\$25'),
-                  _buildDonationButton(context, '\$60'),
-                  _buildDonationButton(context, '\$100'),
+                  const Text(
+                    'Recurring Donations',
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.center,
+                    children: _buildAmountList(context, [
+                      '\$5',
+                      '\$10',
+                      '\$25',
+                      '\$60',
+                      '\$100',
+                    ]),
+                  ),
+
+                  const SizedBox(height: 32), // Clearer gap between sections
+                  // Section 2: One-time
+                  const Text(
+                    'One-time Donations',
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.center,
+                    children: _buildAmountList(context, [
+                      '\$5',
+                      '\$10',
+                      '\$25',
+                      '\$60',
+                      '\$100',
+                    ]),
+                  ),
                 ],
               ),
 
@@ -60,10 +94,10 @@ class DonateScreen extends StatelessWidget {
               const SizedBox(height: 24),
               const SizedBox(height: 12),
               _buildLinkTile(
-                icon: Icons.account_balance_wallet,
+                icon: Icons.account_balance_wallet_rounded,
                 label: 'Donate via KBZPay (Myanmar)',
                 color: const Color(0xFF1044A4),
-                onTap: () => _showKbzQr(context),
+                onTap: () => null,
               ),
             ],
           ),
@@ -77,8 +111,10 @@ class DonateScreen extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: kAccentColor.withAlpha(30),
         foregroundColor: kAccentColor,
-        elevation: 0, // Removes standard shadow
-        shadowColor: Colors.transparent, // Removes shadow color entirely
+        elevation: 0,
+        // Removes standard shadow
+        shadowColor: Colors.transparent,
+        // Removes shadow color entirely
         // Removes lift when focused
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -107,67 +143,16 @@ class DonateScreen extends StatelessWidget {
     return ListTile(
       leading: Icon(icon, color: color),
       title: Text(label),
-      trailing: const Icon(Icons.open_in_new, size: 18),
+      trailing: const Icon(Icons.open_in_new_rounded, size: 18),
       tileColor: color.withAlpha(20),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onTap: onTap,
     );
   }
 
-  void _showKbzQr(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        contentPadding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-        title: const Text(
-          'Scan to Donate',
-          textAlign: TextAlign.center,
-        ),
-        content: SizedBox(
-          // Limit width so it doesn't look giant on Desktop
-          width: PlatformHelper.isDesktop ? 400 : double.maxFinite,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  // Limit height to 50% of screen so the Close button stays visible
-                  maxHeight: MediaQuery.of(context).size.height * 0.5,
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    'assets/images/kbzdonation.png',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Save or screenshot this QR for KBZPay.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black54,
-                  letterSpacing: 0.0,
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          Center(
-            child: TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'Done',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  List<Widget> _buildAmountList(BuildContext context, List<String> amounts) {
+    return amounts
+        .map((amount) => _buildDonationButton(context, amount))
+        .toList();
   }
 }

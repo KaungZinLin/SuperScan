@@ -51,28 +51,36 @@ class MainLayout extends StatefulWidget {
   State<MainLayout> createState() => _MainLayoutState();
 }
 
+// ... existing imports ...
+
 class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    _getPermissions();
+    WidgetsBinding.instance.addObserver(this); // Added missing observer initialization
+    _requestInitialPermission();
   }
 
+  // Trigger the popup as soon as the app opens
+  Future<void> _requestInitialPermission() async {
+    if (!PlatformHelper.isDesktop) {
+      await Permission.camera.request();
+      setState(() {}); // Refresh to show HomeScreen if granted
+    }
+  }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // 3. Clean up
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // 4. If the user comes back from Settings, refresh!
     if (state == AppLifecycleState.resumed) {
       setState(() {});
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -168,4 +176,21 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
 
     return false;
   }
+}
+
+Future<bool> _getPermissions() async {
+  if (PlatformHelper.isDesktop) {
+    // Always return true on desktop as camera permissions aren't required
+    return true;
+  }
+
+  var cameraStatus = await Permission.camera.status;
+
+  bool cameraOk = cameraStatus.isGranted;
+
+  if (cameraOk) {
+    return true;
+  }
+
+  return false;
 }

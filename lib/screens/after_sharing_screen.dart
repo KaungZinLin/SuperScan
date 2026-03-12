@@ -22,7 +22,7 @@ class _AfterSharingScreenState extends State<AfterSharingScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(
-                Icons.check,
+                Icons.check_rounded,
                 color: Colors.green,
                 size: 60,
                 fontWeight: FontWeight.bold,
@@ -80,7 +80,8 @@ class _AfterSharingScreenState extends State<AfterSharingScreen> {
                     ),
                   ),
                 ],
-              )
+              ),
+              SizedBox(height: 16)
             ],
           ),
         ),

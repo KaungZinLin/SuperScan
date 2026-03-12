@@ -50,8 +50,6 @@ class SyncController {
   static Future<void> deleteScan(Directory scanDir) async {
     if (!_auth.isSignedIn) return;
 
-    final id = ScanUtils.scanId(scanDir);
-
-    await _drive.deleteScanFolder(id);
+    await _drive.deleteScanFolder(scanDir);
   }
 }

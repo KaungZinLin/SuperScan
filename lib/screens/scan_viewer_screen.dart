@@ -93,7 +93,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.add,
+                    Icons.add_rounded,
                     color: PlatformHelper.isDesktop
                         ? Colors.grey
                         : kAccentColor,
@@ -125,7 +125,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.auto_awesome_outlined,
+                    Icons.auto_awesome_rounded,
                     color: PlatformHelper.isDesktop
                         ? Colors.grey
                         : kAccentColor,
@@ -148,7 +148,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.ios_share_outlined, color: kAccentColor),
+                  Icon(Icons.ios_share_rounded, color: kAccentColor),
                   Text(
                     "Share",
                     style: TextStyle(
@@ -173,7 +173,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.edit_outlined,
+                    Icons.edit_rounded,
                     color: PlatformHelper.isDesktop
                         ? Colors.grey
                         : kAccentColor,
@@ -197,7 +197,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.delete_outline, color: kAccentColor),
+                  Icon(Icons.delete_rounded, color: kAccentColor),
                   Text(
                     "Delete",
                     style: TextStyle(

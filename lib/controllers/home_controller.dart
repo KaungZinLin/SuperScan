@@ -123,11 +123,9 @@ class HomeController extends ChangeNotifier {
         if (result['images'] != null) {
           images = List<String>.from(result['images']);
         } else if (result['Uri'] != null) {
-          // iOS legacy keys
           images = List<String>.from(result['Uri']);
         }
       } else if (result is List) {
-        // Some iOS versions return List<String>
         images = List<String>.from(result);
       }
 
@@ -138,7 +136,10 @@ class HomeController extends ChangeNotifier {
         return;
       }
 
-      // Compress PNG images (overwrite originals)
+      // Normalize paths
+      images = images.map((p) => Uri.parse(p).toFilePath()).toList();
+
+      // Compress images
       for (final path in images) {
         try {
           final file = File(path);
@@ -148,7 +149,6 @@ class HomeController extends ChangeNotifier {
 
           if (decoded == null) continue;
 
-          // Resize only if extremely large
           final optimized = decoded.width > 2200
               ? img.copyResize(decoded, width: 2200)
               : decoded;
@@ -175,7 +175,6 @@ class HomeController extends ChangeNotifier {
     }
 
     await loadSavedScans();
-    notifyListeners();
     await syncScans();
   }
 
@@ -400,7 +399,6 @@ class HomeController extends ChangeNotifier {
   Future<Directory> openDriveScan(DriveScan scan) async {
     final scanDir = await _driveService.downloadScanFolder(
       folderId: scan.folderId,
-      folderName: scan.meta.name,
     );
 
     return scanDir;
@@ -452,7 +450,6 @@ class HomeController extends ChangeNotifier {
           final folderName = d.meta.name;
           final localDir = await _driveService.downloadScanFolder(
             folderId: d.folderId,
-            folderName: folderName,
           );
 
           desktopSavedScans.add(SavedScan(dir: localDir, meta: d.meta));

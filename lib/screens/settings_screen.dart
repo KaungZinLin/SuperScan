@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:super_scan/controllers/settings_controller.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
@@ -9,7 +8,6 @@ import 'package:super_scan/screens/api_key_screen.dart';
 import 'package:super_scan/screens/donation_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
-import 'package:super_scan/screens/platforms_screen.dart';
 import 'package:windows_toast/windows_toast.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -94,7 +92,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                 if (user == null)
                   ListTile(
-                    leading: const Icon(Icons.login),
+                    leading: const Icon(Icons.login_rounded),
                     title: const Text(
                       'Sign in with Google',
                     ),
@@ -124,7 +122,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   )
                 else
                   ListTile(
-                    leading: const Icon(Icons.logout, color: Colors.red),
+                    leading: const Icon(Icons.logout_rounded, color: Colors.red),
                     title: const Text(
                       'Sign out',
                       style: TextStyle(color: Colors.red),
@@ -136,23 +134,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                 ListTile(
                   enabled: !PlatformHelper.isDesktop,
-                  leading: const Icon(Icons.install_desktop),
-                  trailing: const Icon(Icons.chevron_right),
+                  leading: const Icon(Icons.install_desktop_rounded),
+                  trailing: const Icon(Icons.open_in_new_rounded),
                   title: const Text(
                     'Get SuperScan on Desktop',
                   ),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => PlatformsScreen()),
-                    );
+                    launchMyURL('https://github.com/KaungZinLin/SuperScan');
                   },
                 ),
 
                 const Divider(),
                 ListTile(
                   enabled: !PlatformHelper.isDesktop,
-                  leading: const Icon(Icons.auto_awesome_outlined),
+                  leading: const Icon(Icons.auto_awesome_rounded),
                   title: const Text(
                     'AI Configuration',
                   ),
@@ -161,7 +156,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           'Due to platform limitations regarding OCR, you can only use AI features on mobile',
                         )
                       : null,
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -173,10 +168,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ListTile(
                   enabled: !PlatformHelper.isDesktop,
                   leading: const Icon(
-                    Icons.favorite_border,
+                    Icons.favorite_border_rounded,
                     color: Colors.redAccent,
                   ),
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: const Icon(Icons.chevron_right_rounded),
                   title: const Text('Donate'),
                   subtitle: Text(
                     PlatformHelper.isDesktop
@@ -193,8 +188,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const Divider(),
 
                 ListTile(
-                  leading: const Icon(Icons.info_outline),
-                  trailing: const Icon(Icons.chevron_right),
+                  leading: const Icon(Icons.info_rounded),
+                  trailing: const Icon(Icons.chevron_right_rounded),
                   title: const Text('About'),
                   onTap: () {
                     showAboutDialog(
@@ -225,34 +220,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
 
                 ListTile(
-                  leading: const Icon(Icons.person_outline),
+                  leading: const Icon(Icons.person_rounded),
                   title: const Text(
                     'Made with ❤️ by Kaung Zin Lin',
                   ),
-                  trailing: const Icon(Icons.open_in_new),
+                  trailing: const Icon(Icons.open_in_new_rounded),
                   onTap: () async {
                     launchMyURL('https://kaung.carrd.co/');
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.article_outlined),
+                  leading: const Icon(Icons.article_rounded),
                   title: const Text(
                     'Terms of Service',
                   ),
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () {},
                 ),
                 ListTile(
-                  leading: const Icon(Icons.privacy_tip_outlined),
+                  leading: const Icon(Icons.privacy_tip_rounded),
                   title: const Text(
                     'Privacy Policy',
                   ),
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () {},
                 ),
 
                 ListTile(
-                  leading: const Icon(Icons.medical_information_outlined),
+                  leading: const Icon(Icons.medical_information_rounded),
                   title: const Text('License'),
                   subtitle: const Text(
                     'MIT License © 2026',

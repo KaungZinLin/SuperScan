@@ -56,14 +56,14 @@ class _EmptyScansPlaceHolderState extends State<EmptyScansPlaceHolder> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (!isConnected) ...[
-              const Icon(Icons.wifi_off_outlined, size: 80, color: Colors.red),
+              const Icon(Icons.wifi_off_rounded, size: 80, color: Colors.red),
               const SizedBox(height: 16),
               const Text(
                 'No Internet Connection',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
             ] else if (user == null) ...[
-              const Icon(Icons.person_add, size: 80, color: kAccentColor),
+              const Icon(Icons.person_add_rounded, size: 80, color: kAccentColor),
               const SizedBox(height: 16),
               const Text(
                 'Not Signed In',
@@ -77,12 +77,10 @@ class _EmptyScansPlaceHolderState extends State<EmptyScansPlaceHolder> {
                 ),
               ),
             ] else ... [
-              CircularProgressIndicator(
-                color: kAccentColor,
-              ),
+              Icon(Icons.document_scanner_rounded, size: 80, color: kAccentColor),
               const SizedBox(height: 16),
               const Text(
-                "Please wait while we're loading your scans",
+                "No Scans Yet",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               )
             ],
@@ -95,7 +93,7 @@ class _EmptyScansPlaceHolderState extends State<EmptyScansPlaceHolder> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.document_scanner_outlined, size: 80, color: kAccentColor),
+          Icon(Icons.document_scanner_rounded, size: 80, color: kAccentColor),
           const SizedBox(height: 16),
           Text(
             'No Scans Yet',

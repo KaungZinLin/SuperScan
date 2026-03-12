@@ -317,7 +317,7 @@ class _SummarizeUI extends StatelessWidget {
                   if (!context.mounted) return;
                   WindowsToast.show('Copied to clipboard', context, 30);
                 },
-          icon: const Icon(Icons.copy),
+          icon: const Icon(Icons.copy_rounded),
         ),
 
         const SizedBox(width: 8),
@@ -331,7 +331,7 @@ class _SummarizeUI extends StatelessWidget {
                   final params = ShareParams(text: controller.summaryText);
                   await SharePlus.instance.share(params);
                 },
-          icon: const Icon(Icons.ios_share_outlined),
+          icon: const Icon(Icons.ios_share_rounded),
         ),
       ],
     );
@@ -410,7 +410,7 @@ class _ProofreadUI extends StatelessWidget {
         Expanded(
           child: FilledButton.tonalIcon(
             onPressed: () => controller.proofreadFromScan(scanDir),
-            icon: const Icon(Icons.search),
+            icon: const Icon(Icons.search_rounded),
             label: const Text("Proofread Document"),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -437,7 +437,7 @@ class _ProofreadUI extends StatelessWidget {
                   // optional snack bar feedback
                   WindowsToast.show('Copied to clipboard', context, 30);
                 },
-          icon: const Icon(Icons.copy),
+          icon: const Icon(Icons.copy_rounded),
         ),
 
         const SizedBox(width: 8),
@@ -453,7 +453,7 @@ class _ProofreadUI extends StatelessWidget {
                   );
                   await SharePlus.instance.share(params);
                 },
-          icon: const Icon(Icons.ios_share_outlined),
+          icon: const Icon(Icons.ios_share_rounded),
         ),
       ],
     );

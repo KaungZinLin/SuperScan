@@ -95,8 +95,8 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscureText
-                                ? Icons.visibility
-                                : Icons.visibility_off,
+                                ? Icons.visibility_rounded
+                                : Icons.visibility_off_rounded,
                             size: 20,
                           ),
                           onPressed: () =>
@@ -159,17 +159,17 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
 
             // --- Info Cards (Already Flat) ---
             _infoTile(
-              Icons.help_outline,
+              Icons.help_rounded,
               "What is this?",
               "An OpenAI API key allows MagicEyes to securely use AI to summarize and analyze your documents. It works like a private access token for your personal OpenAI account.",
             ),
             _infoTile(
-              Icons.privacy_tip_outlined,
+              Icons.privacy_tip_rounded,
               "Privacy First",
               "We never see your key. Documents are sent directly from your device to OpenAI. You only pay for what you use, directly to OpenAI.",
             ),
             _infoTile(
-              Icons.account_balance_wallet_outlined,
+              Icons.account_balance_wallet_rounded,
               "How to get one?",
               "1. Sign in to platform.openai.com\n2. Navigate to API Keys\n3. Create a 'Secret Key' and paste it above.",
             ),
@@ -185,7 +185,7 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
       children: [
         Row(
           children: [
-            const Icon(Icons.auto_awesome, color: Colors.amber, size: 28),
+            const Icon(Icons.auto_awesome_rounded, color: Colors.amber, size: 28),
             const SizedBox(width: 8),
             Text(
               "MagicEyes AI",

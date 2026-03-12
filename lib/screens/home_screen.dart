@@ -79,9 +79,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    final scansToShow = PlatformHelper.isDesktop
+    final scansToShow = (PlatformHelper.isDesktop
         ? _viewController.filteredDesktopScans
-        : _viewController.filteredScans;
+        : _viewController.filteredScans).where((s) => s.dir.existsSync()).toList();
     return Scaffold(
       // Completely removed FAB on desktop
       floatingActionButton: PlatformHelper.isDesktop
@@ -110,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           //   ),
       : FloatingActionButton.extended(
         label: Text('Scan'),
-        icon: Icon(Icons.add),
+        icon: Icon(Icons.add_rounded),
         backgroundColor: kAccentColor,
         foregroundColor: Colors.white,
         onPressed: () {
@@ -132,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: Icon(Icons.settings, color: kAccentColor),
+              icon: Icon(Icons.settings_rounded, color: kAccentColor),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -155,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                         strokeWidth: 2,
                       ),
                     )
-                  : Icon(Icons.cloud_sync, color: kAccentColor),
+                  : Icon(Icons.cloud_sync_rounded, color: kAccentColor),
               onPressed: (_viewController.isSyncing || _loading)
                   ? null
                   : () async {
@@ -179,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.search, color: kAccentColor),
+            icon: Icon(Icons.search_rounded, color: kAccentColor),
               onPressed: () async {
                 await showSearch(
                   context: context,
@@ -209,6 +209,11 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                       final savedScan = scansToShow[index];
                       final scanDir = savedScan.dir;
                       final meta = savedScan.meta;
+
+                      if (!scanDir.existsSync()) {
+                        return SizedBox.shrink(); // Return nothing or in this case a shrunk sized box when the folder no longer exists
+                      }
+
                       final pages = scanDir
                           .listSync()
                           .whereType<File>()
@@ -223,7 +228,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                         elevation: 0.0,
                         color: kAccentColor.withAlpha(20),
                         child: ListTile(
-                          trailing: const Icon(Icons.chevron_right),
+                          trailing: const Icon(Icons.chevron_right_rounded),
                           title: Text(meta.name),
                           subtitle: Text(
                             '$pages page(s) • ${_viewController.formatDate(meta.createdAt)}',

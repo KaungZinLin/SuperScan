@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
+import 'package:super_scan/constants.dart';
 import 'package:super_scan/controllers/home_controller.dart';
 import 'package:super_scan/helpers/add_more_pages_results.dart';
 import 'package:super_scan/helpers/import_images_result.dart';
@@ -403,6 +404,7 @@ class ScanViewerController extends ChangeNotifier {
           toolbarWidgetColor: Colors.white,
           backgroundColor: Colors.black,
           lockAspectRatio: false,
+          activeControlsWidgetColor: kAccentColor,
           hideBottomControls: false,
           showCropGrid: true,
         ),

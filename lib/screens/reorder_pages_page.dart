@@ -80,7 +80,7 @@ class _ReorderPagesPageState extends State<ReorderPagesPage> {
       appBar: AppBar(
         title: const Text('Reorder'),
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const Icon(Icons.close_rounded),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -121,7 +121,7 @@ class _ReorderPagesPageState extends State<ReorderPagesPage> {
                     height: 140,
                     fit: BoxFit.contain,
                   ),
-                  trailing: const Icon(Icons.drag_handle),
+                  trailing: const Icon(Icons.drag_handle_rounded),
                 ),
               ),
             ),
