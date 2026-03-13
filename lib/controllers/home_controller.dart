@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:super_scan/helpers/toast_helper.dart';
 import 'package:super_scan/models/saved_scan.dart';
 import 'package:super_scan/models/drive_scan.dart';
 import 'package:super_scan/services/google_drive_service.dart';
@@ -13,7 +14,6 @@ import 'dart:convert';
 // import 'package:image_picker/image_picker.dart';
 import 'package:super_scan/screens/scan_viewer_screen.dart';
 import 'package:super_scan/services/google_auth_service.dart';
-import 'package:windows_toast/windows_toast.dart';
 import 'package:image/image.dart' as img;
 class HomeController extends ChangeNotifier {
   // Alternative to !mounted in the view - don't understand it yet
@@ -324,10 +324,8 @@ class HomeController extends ChangeNotifier {
     await loadSavedScans(); // Reload view
     // print('Reloaded save scans');
 
-    WindowsToast.show(
+    ToastHelper.show(
         'Deleted permanently',
-        context,
-        30,
     );
   }
 

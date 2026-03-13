@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:super_scan/constants.dart';
+import 'package:super_scan/widgets/universal_webview.dart';
 
 class DonateScreen extends StatelessWidget {
   static const String id = 'donate_screen';
@@ -92,12 +93,16 @@ class DonateScreen extends StatelessWidget {
               const SizedBox(height: 20),
               const Divider(),
               const SizedBox(height: 24),
-              const SizedBox(height: 12),
               _buildLinkTile(
-                icon: Icons.account_balance_wallet_rounded,
+                icon: Icons.wallet_rounded,
                 label: 'Donate via KBZPay (Myanmar)',
                 color: const Color(0xFF1044A4),
-                onTap: () => null,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                      MaterialPageRoute(builder: (_) => UniversalWebView(url: 'https://zennon-devhouse.blogspot.com/2026/03/donate-via-kbzpay-superscan.html', title: 'Donate via KBZPay'))
+                  );
+                },
               ),
             ],
           ),
@@ -143,7 +148,7 @@ class DonateScreen extends StatelessWidget {
     return ListTile(
       leading: Icon(icon, color: color),
       title: Text(label),
-      trailing: const Icon(Icons.open_in_new_rounded, size: 18),
+      trailing: const Icon(Icons.chevron_right_rounded, size: 18),
       tileColor: color.withAlpha(20),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onTap: onTap,

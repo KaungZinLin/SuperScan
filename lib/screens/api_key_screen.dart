@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:super_scan/constants.dart';
 import 'package:super_scan/helpers/api_key_storage.dart';
-import 'package:windows_toast/windows_toast.dart';
+import 'package:super_scan/helpers/toast_helper.dart';
 
 class ApiKeyScreen extends StatefulWidget {
   const ApiKeyScreen({super.key});
@@ -246,16 +246,16 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
       await ApiKeyStorage.saveApiKey(trimmed);
       await _loadKey();
       if (mounted) {
-        WindowsToast.show('API Key Updated Successfully', context, 30);
+        ToastHelper.show('API Key Updated Successfully');
       }
     } else {
-      if (mounted) WindowsToast.show('Please enter a valid key', context, 30);
+      if (mounted) ToastHelper.show('Please enter a valid key');
     }
   }
 
   Future<void> _deleteKey() async {
     await ApiKeyStorage.deleteApiKey();
     await _loadKey();
-    if (mounted) WindowsToast.show('API Key Removed', context, 30);
+    if (mounted) ToastHelper.show('API Key Removed');
   }
 }

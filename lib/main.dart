@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
+import 'package:super_scan/helpers/toast_helper.dart';
 import 'constants.dart';
 import 'package:super_scan/screens/home_screen.dart';
 import 'package:super_scan/screens/settings_screen.dart';
@@ -59,6 +60,7 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this); // Added missing observer initialization
     _requestInitialPermission();
+    ToastHelper.init(context);
   }
 
   // Trigger the popup as soon as the app opens
@@ -176,21 +178,4 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
 
     return false;
   }
-}
-
-Future<bool> _getPermissions() async {
-  if (PlatformHelper.isDesktop) {
-    // Always return true on desktop as camera permissions aren't required
-    return true;
-  }
-
-  var cameraStatus = await Permission.camera.status;
-
-  bool cameraOk = cameraStatus.isGranted;
-
-  if (cameraOk) {
-    return true;
-  }
-
-  return false;
 }

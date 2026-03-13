@@ -8,6 +8,7 @@ import 'package:super_scan/helpers/add_more_pages_results.dart';
 import 'package:super_scan/helpers/import_images_result.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
 import 'package:super_scan/helpers/rename_result.dart';
+import 'package:super_scan/helpers/toast_helper.dart';
 import 'package:super_scan/models/scan_meta.dart';
 import 'package:super_scan/services/scan_storage.dart';
 import 'package:share_plus/share_plus.dart';
@@ -15,7 +16,6 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:super_scan/screens/reorder_pages_page.dart';
 import 'package:super_scan/controllers/sync_controller.dart';
-import 'package:windows_toast/windows_toast.dart';
 import 'package:super_scan/screens/after_sharing_screen.dart';
 
 class ScanViewerController extends ChangeNotifier {
@@ -287,12 +287,10 @@ class ScanViewerController extends ChangeNotifier {
     notifyListeners(); // Notify about animation
 
     if (context.mounted) {
-      WindowsToast.show(
+      ToastHelper.show(
         PlatformHelper.isDesktop
             ? 'Deleted from Google Drive'
             : 'Deleted permanently',
-        context,
-        30,
       );
       Navigator.pop(context, true);
     }
@@ -364,7 +362,7 @@ class ScanViewerController extends ChangeNotifier {
       }
     } catch (e) {
       if (context.mounted) {
-        WindowsToast.show('Failed to share PDF: $e', context, 30);
+        ToastHelper.show('Failed to share PDF: $e');
       }
     }
   }
@@ -386,7 +384,7 @@ class ScanViewerController extends ChangeNotifier {
       }
     } catch (e) {
       if (context.mounted) {
-        WindowsToast.show('Failed to share images: $e', context, 30);
+        ToastHelper.show('Failed to share images: $e');
       }
     }
   }

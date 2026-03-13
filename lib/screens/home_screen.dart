@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:super_scan/helpers/toast_helper.dart';
 import 'package:super_scan/main.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
 import 'package:super_scan/controllers/home_controller.dart';
@@ -12,7 +13,6 @@ import 'dart:io';
 import 'package:super_scan/widgets/no_scans_widgets.dart';
 import 'package:super_scan/widgets/scan_search_delegate.dart';
 import 'package:super_scan/widgets/ad_banner.dart';
-import 'package:windows_toast/windows_toast.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
@@ -160,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                   ? null
                   : () async {
                       if (!_viewController.auth.isSignedIn) {
-                        WindowsToast.show('Sign in to sync', context, 30);
+                        ToastHelper.show('Sign in to sync');
                       }
                       // await _viewController.syncScans();
                       final error = await _viewController.syncScans();
@@ -168,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                       if (!context.mounted) return;
 
                       if (error != null) {
-                        WindowsToast.show(error, context, 30);
+                        ToastHelper.show(error);
                       }
                       if (PlatformHelper.isDesktop) {
                         await _viewController.loadDriveScans();

@@ -5,8 +5,8 @@ import 'package:super_scan/helpers/add_more_pages_results.dart';
 import 'package:super_scan/helpers/import_images_result.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
 import 'package:super_scan/constants.dart';
+import 'package:super_scan/helpers/toast_helper.dart';
 import 'package:super_scan/screens/magic_eyes_screen.dart';
-import 'package:windows_toast/windows_toast.dart';
 
 class ScanViewerScreen extends StatefulWidget {
   final Directory scanDir;
@@ -166,7 +166,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                 try {
                   _viewController.renameScan(context, widget.scanDir);
                 } catch (e) {
-                  WindowsToast.show('Failed to rename', context, 30);
+                  ToastHelper.show('Failed to rename');
                 }
               },
               child: Column(
@@ -237,13 +237,13 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                   if (!mounted) return;
 
                   if (result == ImportImagesResult.success) {
-                    WindowsToast.show('Images imported successfully', context, 30);
+                    ToastHelper.show('Images imported successfully');
                   } else {
-                    WindowsToast.show('Failed to import images', context, 30);
+                    ToastHelper.show('Failed to import images');
                   }
                 } catch (e) {
                   if (!mounted) return;
-                  WindowsToast.show('Unexpected error: $e', context, 30);
+                  ToastHelper.show('Unexpected error: $e');
                 }
               },
               child: const Text(
@@ -260,13 +260,13 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                   if (!mounted) return;
 
                   if (result == AddMorePagesResults.success) {
-                    WindowsToast.show('Pages added successfully', context, 30);
+                    ToastHelper.show('Pages added successfully');
                   } else {
-                    WindowsToast.show('Failed to add pages', context, 30);
+                    ToastHelper.show('Failed to add pages');
                   }
                 } catch (e) {
                   if (!mounted) return;
-                  WindowsToast.show('Unexpected error: $e', context, 30);
+                  ToastHelper.show('Unexpected error: $e');
                 }
               },
               child: const Text(

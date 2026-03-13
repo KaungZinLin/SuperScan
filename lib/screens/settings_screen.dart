@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:super_scan/controllers/settings_controller.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
 import 'package:super_scan/helpers/sign_in_result.dart';
+import 'package:super_scan/helpers/toast_helper.dart';
 import 'package:super_scan/helpers/url_launcher.dart';
 import 'package:super_scan/screens/api_key_screen.dart';
 import 'package:super_scan/screens/donation_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
-import 'package:windows_toast/windows_toast.dart';
+import 'package:super_scan/widgets/universal_webview.dart';
 
 class SettingsScreen extends StatefulWidget {
   static const String id = 'settings_screen';
@@ -104,19 +105,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                         switch(result) {
                           case SignInResult.success:
-                            WindowsToast.show('Signed in successfully', context, 30);
+                            ToastHelper.show('Signed in successfully');
                             break;
                           case SignInResult.failed:
-                            WindowsToast.show('Signed in failed', context, 30);
+                            ToastHelper.show('Signed in failed');
                             break;
                           case SignInResult.cancelled:
-                            WindowsToast.show('Signed in failed', context, 30);
+                            ToastHelper.show('Signed in failed');
                             break;
                         }
                       } catch (e) {
                         if (!context.mounted) return;
 
-                        WindowsToast.show(e.toString(), context, 30);
+                        ToastHelper.show(e.toString());
                       }
                     },
                   )
@@ -232,10 +233,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ListTile(
                   leading: const Icon(Icons.article_rounded),
                   title: const Text(
-                    'Terms of Service',
+                    'Terms of Use',
                   ),
                   trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                        MaterialPageRoute(
+                            builder: (_) => const UniversalWebView(
+                              url: 'https://zennon-devhouse.blogspot.com/2026/03/terms-of-use.html',
+                              title: 'Terms of Use',
+                            )
+                        )
+                    );
+                  },
                 ),
                 ListTile(
                   leading: const Icon(Icons.privacy_tip_rounded),
@@ -243,7 +254,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     'Privacy Policy',
                   ),
                   trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const UniversalWebView(
+                          url: 'https://zennon-devhouse.blogspot.com/2026/03/privacy-policy-superscan.html',
+                          title: 'Privacy Policy',
+                        )
+                      )
+                    );
+                  },
                 ),
 
                 ListTile(

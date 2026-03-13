@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:super_scan/models/saved_scan.dart';
-import 'package:super_scan/screens/home_screen.dart';
 import 'package:super_scan/screens/scan_viewer_screen.dart';
 import 'package:intl/intl.dart';
 

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:super_scan/constants.dart';
 import 'package:super_scan/controllers/magic_eyes_controller.dart';
 import 'package:flutter/services.dart';
-import 'package:windows_toast/windows_toast.dart';
+import 'package:super_scan/helpers/toast_helper.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:super_scan/helpers/api_key_storage.dart';
 
@@ -194,7 +194,7 @@ class _ExtractUI extends StatelessWidget {
                   );
                   if (!context.mounted) return;
                   // optional snack bar feedback
-                  WindowsToast.show('Copied to clipboard', context, 30);
+                  ToastHelper.show('Copied to clipboard');
 
                 },
           icon: const Icon(Icons.copy),
@@ -315,7 +315,7 @@ class _SummarizeUI extends StatelessWidget {
 
                   // optional snack bar feedback
                   if (!context.mounted) return;
-                  WindowsToast.show('Copied to clipboard', context, 30);
+                  ToastHelper.show('Copied to clipboard');
                 },
           icon: const Icon(Icons.copy_rounded),
         ),
@@ -435,7 +435,7 @@ class _ProofreadUI extends StatelessWidget {
                   if (!context.mounted) return;
 
                   // optional snack bar feedback
-                  WindowsToast.show('Copied to clipboard', context, 30);
+                  ToastHelper.show('Copied to clipboard');
                 },
           icon: const Icon(Icons.copy_rounded),
         ),
@@ -537,7 +537,7 @@ class _ChatUIState extends State<_ChatUI> {
     } catch (e) {
       // Check if the widget is still mounted before showing toast
       if (!mounted) return; //  use mounted from the State
-      WindowsToast.show('OCR failed: $e', context, 30);
+      ToastHelper.show('OCR failed: $e');
     }
 
     // Build combined prompt

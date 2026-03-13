@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:super_scan/helpers/sign_in_result.dart';
 import 'package:super_scan/helpers/sign_out_result.dart';
+import 'package:super_scan/helpers/toast_helper.dart';
 import 'package:super_scan/services/google_auth_service.dart';
 import 'package:flutter/services.dart';
-import 'package:windows_toast/windows_toast.dart';
 
 class SettingsController extends ChangeNotifier {
   final auth = GoogleAuthService.instance;
@@ -118,9 +118,9 @@ class SettingsController extends ChangeNotifier {
                 if (!context.mounted) return;
 
                 if (result == SignOutResult.success) {
-                  WindowsToast.show('Signed out', context, 30);
+                  ToastHelper.show('Signed out');
                 } else {
-                  WindowsToast.show('Sign out failed', context, 30);
+                  ToastHelper.show('Sign out failed');
                 }
               },
               child: const Text(

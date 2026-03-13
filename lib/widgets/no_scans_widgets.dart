@@ -69,6 +69,7 @@ class _EmptyScansPlaceHolderState extends State<EmptyScansPlaceHolder> {
                 'Not Signed In',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
+              const SizedBox(height: 3),
               const Opacity(
                 opacity: 0.6,
                 child: Text(
