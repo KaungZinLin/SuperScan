@@ -8,6 +8,7 @@ import 'package:super_scan/screens/settings_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:super_scan/services/google_auth_service.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
 
 final RouteObserver<ModalRoute<void>> routeObserver =
 RouteObserver<ModalRoute<void>>();
@@ -169,13 +170,36 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
     }
 
     var cameraStatus = await Permission.camera.status;
-
     bool cameraOk = cameraStatus.isGranted;
 
-    if (cameraOk) {
+    // Check for camera if not granted yet
+    if (!cameraOk) {
+      cameraStatus = await Permission.camera.request();
+      cameraOk = cameraStatus.isGranted;
+    }
+
+    // Check if it is still NOT granted
+    if (!cameraOk) {
+      return false;
+    }
+
+    // Android only needs camera
+    if (Platform.isAndroid) {
       return true;
     }
 
+    // Photo permissions for iOS only
+    if (Platform.isIOS) {
+      var photoStatus = await Permission.photos.status;
+      bool photosOk = photoStatus.isGranted || photoStatus.isLimited;
+
+      if (!photosOk) {
+        photoStatus = await Permission.photos.request();
+        photosOk = photoStatus.isGranted || photoStatus.isLimited;
+      }
+
+      return photosOk;
+    }
     return false;
   }
 }

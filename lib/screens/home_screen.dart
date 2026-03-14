@@ -5,6 +5,7 @@ import 'package:super_scan/main.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
 import 'package:super_scan/controllers/home_controller.dart';
 import 'package:super_scan/screens/settings_screen.dart';
+
 // import 'package:super_scan/widgets/action_button.dart';
 // import 'package:super_scan/widgets/expandable_fab.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
@@ -16,6 +17,7 @@ import 'package:super_scan/widgets/ad_banner.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
+
   const HomeScreen({super.key});
 
   @override
@@ -46,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     super.didChangeDependencies();
     routeObserver.subscribe(this, ModalRoute.of(context)!);
   }
+
   // Dispose
   @override
   void dispose() {
@@ -79,9 +82,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    final scansToShow = (PlatformHelper.isDesktop
-        ? _viewController.filteredDesktopScans
-        : _viewController.filteredScans).where((s) => s.dir.existsSync()).toList();
+    final scansToShow =
+        (PlatformHelper.isDesktop
+                ? _viewController.filteredDesktopScans
+                : _viewController.filteredScans)
+            .where((s) => s.dir.existsSync())
+            .toList();
     return Scaffold(
       // Completely removed FAB on desktop
       floatingActionButton: PlatformHelper.isDesktop
@@ -97,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           //         },
           //       ),
           //       ActionButto
-      //       letterSpacing(
+          //       letterSpacing(
           //         icon: Icon(Icons.camera_alt, color: Colors.white),
           //         onPressed: () {
           //           _viewController.processScan(
@@ -108,25 +114,64 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
           //       ),
           //     ],
           //   ),
-      : FloatingActionButton.extended(
-        label: Text('Scan'),
-        icon: Icon(Icons.add_rounded),
-        backgroundColor: kAccentColor,
-        foregroundColor: Colors.white,
-        onPressed: () {
-          _viewController.processScan(
-            context,
-            FlutterDocScanner().getScannedDocumentAsImages(page: 4),
-          );
-        },
-      ),
+          : FloatingActionButton.extended(
+              label: Text('Scan'),
+              icon: Icon(Icons.add_rounded),
+              backgroundColor: kAccentColor,
+              foregroundColor: Colors.white,
+              onPressed: () async {
+                if (Platform.isAndroid) {
+                  _viewController.processScan(
+                    context,
+                    FlutterDocScanner().getScannedDocumentAsImages(page: 4),
+                  );
+                } else {
+                  await showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text(
+                          'How would you like to scan your documents?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              _viewController.importImages();
+                            },
+                            child: const Text(
+                              'From Photo Library',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              _viewController.processScan(
+                                context,
+                                FlutterDocScanner().getScannedDocumentAsImages(page: 4),
+                              );
+                            },
+                            child: const Text(
+                              'From Camera',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+              },
+            ),
       // Changed appBar name to Sync on desktop
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
-          'SuperScan',
-          style: TextStyle(fontWeight: .bold),
-        ),
+        title: Text('SuperScan', style: TextStyle(fontWeight: .bold)),
         leadingWidth: 100,
         leading: Row(
           mainAxisSize: MainAxisSize.min,
@@ -180,20 +225,21 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         actions: [
           IconButton(
             icon: Icon(Icons.search_rounded, color: kAccentColor),
-              onPressed: () async {
-                await showSearch(
-                  context: context,
-                  delegate: ScanSearchDelegate(scansToShow),
-                );
+            onPressed: () async {
+              await showSearch(
+                context: context,
+                delegate: ScanSearchDelegate(scansToShow),
+              );
 
-                await _viewController.loadSavedScans();
+              await _viewController.loadSavedScans();
 
-                // Wait until the UI has fully returned to the home screen
-                await WidgetsBinding.instance.endOfFrame;
+              // Wait until the UI has fully returned to the home screen
+              await WidgetsBinding.instance.endOfFrame;
 
-                await _viewController.syncScans();
-              }
-          )],
+              await _viewController.syncScans();
+            },
+          ),
+        ],
       ),
 
       body: Stack(
@@ -202,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
             child: scansToShow.isEmpty
                 ? EmptyScansPlaceHolder()
                 : ListView.builder(
-              key: UniqueKey(),
+                    key: UniqueKey(),
                     padding: const EdgeInsets.all(16),
                     itemCount: scansToShow.length,
                     itemBuilder: (context, index) {
@@ -238,10 +284,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                             context,
                           ),
                           onTap: () async {
-                            _viewController.openScanViewer(scanDir, context).then((_) {
-                              _viewController.loadSavedScans();
-                              _viewController.syncScans();
-                            });
+                            _viewController
+                                .openScanViewer(scanDir, context)
+                                .then((_) {
+                                  _viewController.loadSavedScans();
+                                  _viewController.syncScans();
+                                });
                           },
                         ),
                       );
@@ -251,7 +299,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
           if (_loading)
             Container(
-              color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.9),
+              color: Theme.of(
+                context,
+              ).scaffoldBackgroundColor.withValues(alpha: 0.9),
               child: const Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

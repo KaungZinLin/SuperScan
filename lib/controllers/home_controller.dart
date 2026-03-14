@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:super_scan/helpers/toast_helper.dart';
 import 'package:super_scan/models/saved_scan.dart';
@@ -74,40 +75,31 @@ class HomeController extends ChangeNotifier {
   }
 }
 
-// May cause context errors: ignored because it is not used
-  // Future<void> importImages() async {
-  //   try {
-  //     final picker = ImagePicker();
-  //
-  //     final images = await picker.pickMultiImage(imageQuality: 100);
-  //
-  //     if (images.isEmpty) return;
-  //
-  //     final paths = images.map((e) => e.path).toList();
-  //
-  //     final scanDir = await ScanStorage.saveScanImages(paths);
-  //
-  //     if (!isMounted) return;
-  //
-  //     await loadSavedScans();
-  //
-  //     WindowsToast.show(
-  //         'Imported images successfully',
-  //         context,
-  //         30,
-  //     );
-  //
-  //     await syncScans();
-  //   } catch (e) {
-  //     if (!isMounted) return;
-  //
-  //     WindowsToast.show(
-  //         'Failed to import images: $e',
-  //         context,
-  //         30,
-  //     );
-  //   }
-  // }
+  Future<void> importImages() async {
+    try {
+      final picker = ImagePicker();
+
+      final images = await picker.pickMultiImage(imageQuality: 100);
+
+      if (images.isEmpty) return;
+
+      final paths = images.map((e) => e.path).toList();
+
+      final scanDir = await ScanStorage.saveScanImages(paths);
+
+      if (!isMounted) return;
+
+      await loadSavedScans();
+
+      ToastHelper.show('Imported images successfully');
+
+      await syncScans();
+    } catch (e) {
+      if (!isMounted) return;
+
+      ToastHelper.show('Failed to import images');
+    }
+  }
 
 
   Future<void> processScan(

@@ -43,6 +43,10 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>SuperScan needs access to your camera to scan documents</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+    <string>SuperScan needs access to your photos to import images</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>This app needs permission to save scans.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
