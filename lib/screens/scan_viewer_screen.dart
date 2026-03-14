@@ -34,10 +34,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(_viewController.meta.name),
-      ),
+      appBar: AppBar(centerTitle: true, title: Text(_viewController.meta.name)),
       body: Stack(
         children: [
           ListView.builder(
@@ -52,11 +49,11 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                     onLongPressStart: PlatformHelper.isDesktop
                         ? null
                         : (details) => _viewController.showContextMenu(
-                      context,
-                      details.globalPosition,
-                      index,
-                      widget.scanDir,
-                    ),
+                            context,
+                            details.globalPosition,
+                            index,
+                            widget.scanDir,
+                          ),
                     child: Image.file(
                       _viewController.images[index],
                       key: ValueKey(
@@ -85,10 +82,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
             InkWell(
               onTap: PlatformHelper.isDesktop
                   ? null
-                  : () => showAddMorePagesDialog(
-                context,
-                widget.scanDir,
-              ),
+                  : () => showAddMorePagesDialog(context, widget.scanDir),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -115,12 +109,12 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
               onTap: PlatformHelper.isDesktop
                   ? null
                   : () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      MagicEyesScreen(scanDir: widget.scanDir),
-                ),
-              ),
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            MagicEyesScreen(scanDir: widget.scanDir),
+                      ),
+                    ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -151,10 +145,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                   Icon(Icons.ios_share_rounded, color: kAccentColor),
                   Text(
                     "Share",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: kAccentColor,
-                    ),
+                    style: TextStyle(fontSize: 12, color: kAccentColor),
                   ),
                 ],
               ),
@@ -163,12 +154,12 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
               onTap: PlatformHelper.isDesktop
                   ? null
                   : () {
-                try {
-                  _viewController.renameScan(context, widget.scanDir);
-                } catch (e) {
-                  ToastHelper.show('Failed to rename');
-                }
-              },
+                      try {
+                        _viewController.renameScan(context, widget.scanDir);
+                      } catch (e) {
+                        ToastHelper.show('Failed to rename');
+                      }
+                    },
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -200,10 +191,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                   Icon(Icons.delete_rounded, color: kAccentColor),
                   Text(
                     "Delete",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: kAccentColor,
-                    ),
+                    style: TextStyle(fontSize: 12, color: kAccentColor),
                   ),
                 ],
               ),
@@ -215,68 +203,85 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
   }
 
   Future<void> showAddMorePagesDialog(
-      BuildContext context, Directory scanDir) async {
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text(
-            'How would you like to add more scans?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(context);
-                try {
-                  final result = await _viewController.importImages(scanDir);
+    BuildContext context,
+    Directory scanDir,
+  ) async {
+    if (!Platform.isIOS) {
+      try {
+        final result = await _viewController.addMorePages(scanDir);
 
-                  if (!mounted) return;
+        if (!mounted) return;
 
-                  if (result == ImportImagesResult.success) {
-                    ToastHelper.show('Images imported successfully');
-                  } else {
-                    ToastHelper.show('Failed to import images');
-                  }
-                } catch (e) {
-                  if (!mounted) return;
-                  ToastHelper.show('Unexpected error: $e');
-                }
-              },
-              child: const Text(
-                'From Photo Library',
-                style: TextStyle(fontWeight: FontWeight.bold),
+        if (result == AddMorePagesResults.success) {
+          ToastHelper.show('Pages added successfully');
+        } else {
+          ToastHelper.show('Failed to add pages');
+        }
+      } catch (e) {
+        if (!mounted) return;
+        ToastHelper.show('Unexpected error: $e');
+      }
+    } else {
+      await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('How would you like to add more scans?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
               ),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(context);
-                try {
-                  final result = await _viewController.addMorePages(scanDir);
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  try {
+                    final result = await _viewController.importImages(scanDir);
 
-                  if (!mounted) return;
+                    if (!mounted) return;
 
-                  if (result == AddMorePagesResults.success) {
-                    ToastHelper.show('Pages added successfully');
-                  } else {
-                    ToastHelper.show('Failed to add pages');
+                    if (result == ImportImagesResult.success) {
+                      ToastHelper.show('Images imported successfully');
+                    } else {
+                      ToastHelper.show('Failed to import images');
+                    }
+                  } catch (e) {
+                    if (!mounted) return;
+                    ToastHelper.show('Unexpected error: $e');
                   }
-                } catch (e) {
-                  if (!mounted) return;
-                  ToastHelper.show('Unexpected error: $e');
-                }
-              },
-              child: const Text(
-                'From Camera',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                },
+                child: const Text(
+                  'From Photo Library',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-          ],
-        );
-      },
-    );
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  try {
+                    final result = await _viewController.addMorePages(scanDir);
+
+                    if (!mounted) return;
+
+                    if (result == AddMorePagesResults.success) {
+                      ToastHelper.show('Pages added successfully');
+                    } else {
+                      ToastHelper.show('Failed to add pages');
+                    }
+                  } catch (e) {
+                    if (!mounted) return;
+                    ToastHelper.show('Unexpected error: $e');
+                  }
+                },
+                child: const Text(
+                  'From Camera',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 }
