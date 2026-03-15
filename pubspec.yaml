@@ -59,6 +59,7 @@ dependencies:
   fluttertoast: ^9.0.0
   webview_flutter: ^4.13.1
   google_sign_in_all_platforms: ^2.0.2
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_test:

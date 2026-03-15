@@ -48,3 +48,4 @@ app.*.map.json
 # Firebase configuration files
 **/google-services.json
 **/client_345114505131-25u8fbkfj78jueefhg5jp0eamdad2j71.apps.googleusercontent.com.plist
+*.env

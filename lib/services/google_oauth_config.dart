@@ -1,18 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'dart:io';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GoogleOAuthConfig {
   GoogleOAuthConfig._();
 
-  static const clientId =
-      '345114505131-apvjsl69dognfrhghpni6mbeb57v22d1.apps.googleusercontent.com';
+  // We read from the .env file instead of hardcoding
+  static String get clientId => dotenv.env['GOOGLE_CLIENT_ID'] ?? 'YOUR_CLIENT_ID_HERE';
 
-  // 345114505131-apvjsl69dognfrhghpni6mbeb57v22d1.apps.googleusercontent.com
-
-  // Only used on desktop platforms
-  static const clientSecret = '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';
+  static String get clientSecret => dotenv.env['GOOGLE_CLIENT_SECRET'] ?? 'YOUR_CLIENT_SECRET_HERE';
 
   static bool get isDesktop =>
-      !kIsWeb &&
-          (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
+      !kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
 }
