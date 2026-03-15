@@ -16,7 +16,11 @@ RouteObserver<ModalRoute<void>>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  MobileAds.instance.initialize();
+  if (!PlatformHelper.isDesktop) {
+    await MobileAds.instance.initialize();
+  } else {
+    debugPrint('Ads are not supported on desktop');
+  }
 
   await initializeDateFormatting();
   await GoogleAuthService.instance.initialize();
