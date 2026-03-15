@@ -1,48 +1,49 @@
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart';
 import 'package:http/http.dart' as http;
 import 'google_oauth_config.dart';
+import 'dart:convert';
 
 class GoogleAuthService {
   GoogleAuthService._internal();
 
-  static final GoogleAuthService instance =
-  GoogleAuthService._internal();
-
-  factory GoogleAuthService() => instance;
+  static final GoogleAuthService instance = GoogleAuthService._internal();
 
   late final GoogleSignIn _googleSignIn = GoogleSignIn(
-    serverClientId: GoogleOAuthConfig.serverClientId,
-    scopes: const [
-      'email',
-      'profile',
-      'https://www.googleapis.com/auth/drive.file',
-    ],
+    params: GoogleSignInParams(
+      clientId: GoogleOAuthConfig.clientId,
+      clientSecret: GoogleOAuthConfig.clientSecret,
+      scopes: const [
+        'openid',
+        'email',
+        'profile',
+        'https://www.googleapis.com/auth/drive.file',
+      ],
+    ),
   );
 
-  GoogleSignInAccount? _user;
+  GoogleUser? _user;
 
-  GoogleSignInAccount? get currentUser => _user;
-
+  GoogleUser? get currentUser => _user;
   bool get isSignedIn => _user != null;
 
-  // Call once at app startup
-  Future<void> initialize() async {
-    await restoreSession();
-  }
+  Future<void> initialize() async => restoreSession();
 
   Future<bool> signIn() async {
     try {
-      final account = await _googleSignIn.signIn();
-
-      if (account == null) {
+      final creds = await _googleSignIn.signIn();
+      if (creds == null) {
         _user = null;
         return false;
       }
 
-      _user = account;
+      final profile = await _fetchProfile(creds.accessToken);
+      _user = GoogleUser(
+        accessToken: creds.accessToken,
+        email: profile['email'],
+        displayName: profile['name'],
+      );
       return true;
     } catch (e) {
-      print('Google Sign-In error: $e');
       _user = null;
       return false;
     }
@@ -55,19 +56,38 @@ class GoogleAuthService {
 
   Future<void> restoreSession() async {
     try {
-      _user = await _googleSignIn.signInSilently();
+      final creds = await _googleSignIn.silentSignIn();
+      if (creds != null) {
+        final profile = await _fetchProfile(creds.accessToken);
+        _user = GoogleUser(
+          accessToken: creds.accessToken,
+          email: profile['email'],
+          displayName: profile['name'],
+        );
+      }
     } catch (_) {
       _user = null;
     }
   }
 
-  /// THIS replaces your old getHttpClient
+  Future<Map<String, dynamic>> _fetchProfile(String token) async {
+    final response = await http.get(
+      Uri.parse('https://www.googleapis.com/oauth2/v3/userinfo'),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    }
+
+    return {};
+  }
+
   Future<http.Client?> getAuthenticatedClient() async {
     if (_user == null) return null;
-
-    final headers = await _user!.authHeaders;
-
-    return _GoogleHttpClient(headers);
+    return _GoogleHttpClient({'Authorization': 'Bearer ${_user!.accessToken}'});
   }
 }
 
@@ -78,9 +98,60 @@ class _GoogleHttpClient extends http.BaseClient {
   _GoogleHttpClient(this.headers);
 
   @override
-  Future<http.StreamedResponse> send(
-      http.BaseRequest request) {
+  Future<http.StreamedResponse> send(http.BaseRequest request) {
     request.headers.addAll(headers);
     return base.send(request);
+  }
+}
+
+class GoogleUser {
+  final String accessToken;
+  final String? idToken;
+
+  final String? email;
+  final String? displayName;
+
+  GoogleUser({
+    required this.accessToken,
+    this.idToken,
+    this.email,
+    this.displayName,
+  });
+
+  /// Decode the ID token manually to extract email and displayName
+  factory GoogleUser.fromIdToken(String accessToken, String? idToken) {
+    String? email;
+    String? displayName;
+
+    if (idToken != null) {
+      try {
+        // JWT format: header.payload.signature
+        final parts = idToken.split('.');
+        if (parts.length == 3) {
+          final payload = parts[1];
+          final normalized = base64Url.normalize(payload);
+          final decoded = utf8.decode(base64Url.decode(normalized));
+          final Map<String, dynamic> data = json.decode(decoded);
+          email = data['email'] as String?;
+          displayName = data['name'] as String?;
+        }
+      } catch (_) {
+        // silently fail, keep email & name null
+      }
+    }
+
+    return GoogleUser(
+      accessToken: accessToken,
+      idToken: idToken,
+      email: email,
+      displayName: displayName,
+    );
+  }
+
+  /// Simple helper to get auth headers
+  Future<Map<String, String>> get authHeaders async {
+    return {
+      'Authorization': 'Bearer $accessToken',
+    };
   }
 }

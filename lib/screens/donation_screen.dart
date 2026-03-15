@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:super_scan/constants.dart';
+import 'package:super_scan/helpers/platform_helper.dart';
 import 'package:super_scan/widgets/universal_webview.dart';
 
 class DonateScreen extends StatelessWidget {
@@ -100,7 +101,7 @@ class DonateScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                      MaterialPageRoute(builder: (_) => UniversalWebView(url: 'https://zennon-devhouse.blogspot.com/2026/03/donate-via-kbzpay-superscan.html', title: 'Donate via KBZPay'))
+                      MaterialPageRoute(builder: (_) => UniversalWebView(url: kKbzPayDonationMethodUrl, title: 'Donate via KBZPay'))
                   );
                 },
               ),
@@ -125,12 +126,21 @@ class DonateScreen extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       onPressed: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Processing $amount donation...'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        if (!PlatformHelper.isDesktop) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Coming soon...'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Due to platform limitations, you can only donate from alternative methods on desktop.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
       },
       child: Text(
         amount,

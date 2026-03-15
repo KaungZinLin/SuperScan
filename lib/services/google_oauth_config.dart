@@ -1,21 +1,18 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'dart:io';
 
 class GoogleOAuthConfig {
   GoogleOAuthConfig._();
 
-  static const webClientId =
+  static const clientId =
       '345114505131-apvjsl69dognfrhghpni6mbeb57v22d1.apps.googleusercontent.com';
 
-  static String? get serverClientId {
-    if (kIsWeb) return webClientId;
+  // 345114505131-apvjsl69dognfrhghpni6mbeb57v22d1.apps.googleusercontent.com
 
-    if (Platform.isAndroid ||
-        Platform.isWindows ||
-        Platform.isLinux) {
-      return webClientId;
-    }
+  // Only used on desktop platforms
+  static const clientSecret = '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';
 
-    return null;
-  }
+  static bool get isDesktop =>
+      !kIsWeb &&
+          (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
 }

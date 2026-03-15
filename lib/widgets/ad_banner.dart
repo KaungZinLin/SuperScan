@@ -59,14 +59,10 @@ class _AdBannerState extends State<AdBanner> {
     return Container(
       width: double.infinity,
       height: 100,
-      clipBehavior: Clip.antiAlias, // Ensures the ad doesn't bleed over corners
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(12),
-        image: const DecorationImage(
-          image: AssetImage('assets/images/lha_sponsor.jpg'),
-          fit: BoxFit.cover,
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -75,17 +71,23 @@ class _AdBannerState extends State<AdBanner> {
           ),
         ],
       ),
-      // If the ad is loaded and the 1 second has passed, show the AdWidget
       child: (_bannerAd != null && _showAd)
-          ? Align(
-        alignment: Alignment.center,
+          ? Center(
         child: SizedBox(
           width: _bannerAd!.size.width.toDouble(),
           height: _bannerAd!.size.height.toDouble(),
           child: AdWidget(ad: _bannerAd!),
         ),
       )
-          : const SizedBox.shrink(), // Shows nothing over the background image
+          : ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.asset(
+          'assets/images/lha_sponsor.jpg',
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+        ),
+      ),
     );
   }
 }

@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:super_scan/constants.dart';
 import 'package:super_scan/controllers/settings_controller.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
 import 'package:super_scan/helpers/sign_in_result.dart';
@@ -167,7 +169,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const Divider(),
                 ListTile(
-                  enabled: !PlatformHelper.isDesktop,
                   leading: const Icon(
                     Icons.favorite_border_rounded,
                     color: Colors.redAccent,
@@ -175,9 +176,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   trailing: const Icon(Icons.chevron_right_rounded),
                   title: const Text('Donate'),
                   subtitle: Text(
-                    PlatformHelper.isDesktop
-                        ? 'Due to platform limitations, you can only donate on mobile'
-                        : 'Support my work, remove ads, and get access to AI features',
+                    'Support my work, remove ads, and get access to AI features on mobile',
                   ),
                   onTap: () {
                     Navigator.push(
@@ -205,7 +204,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       applicationName: 'SuperScan',
-                      applicationVersion: '0.1 (Beta) (Build 7.4)',
+                      applicationVersion: '1.0 (Pre-release)',
                       applicationLegalese: '© 2026 Kaung Zin Lin',
                       children: [
                         const Padding(
@@ -227,7 +226,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   trailing: const Icon(Icons.open_in_new_rounded),
                   onTap: () async {
-                    launchMyURL('https://kaung.carrd.co/');
+                    null;
+                    //launchMyURL('https://kaung.carrd.co/');
                   },
                 ),
                 ListTile(
@@ -237,15 +237,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                        MaterialPageRoute(
-                            builder: (_) => const UniversalWebView(
-                              url: 'https://zennon-devhouse.blogspot.com/2026/03/terms-of-use.html',
-                              title: 'Terms of Use',
-                            )
-                        )
-                    );
+                    if (!Platform.isWindows || !Platform.isLinux) {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const UniversalWebView(
+                                url: kTermsAndConditionsUrl,
+                                title: 'Terms of Use',
+                              )
+                          )
+                      );
+                    } else {
+                      launchMyURL(kTermsAndConditionsUrl);
+                    }
                   },
                 ),
                 ListTile(
@@ -255,15 +259,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const UniversalWebView(
-                          url: 'https://zennon-devhouse.blogspot.com/2026/03/privacy-policy-superscan.html',
-                          title: 'Privacy Policy',
-                        )
-                      )
-                    );
+                    if (!Platform.isWindows || !Platform.isLinux) {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const UniversalWebView(
+                                url: kPrivacyPolicyUrl,
+                                title: 'Privacy Policy',
+                              )
+                          )
+                      );
+                    } else {
+                      launchMyURL(kPrivacyPolicyUrl);
+                    }
                   },
                 ),
 
