@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:super_scan/helpers/auth_restore_result.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
 import 'package:super_scan/helpers/toast_helper.dart';
 import 'constants.dart';
@@ -18,6 +19,7 @@ void main() async {
 
   if (!PlatformHelper.isDesktop) {
     await MobileAds.instance.initialize();
+
   } else {
     debugPrint('Ads are not supported on desktop');
   }
@@ -66,6 +68,7 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this); // Added missing observer initialization
     _requestInitialPermission();
     ToastHelper.init(context);
+    _checkAuth();
   }
 
   // Trigger the popup as soon as the app opens
@@ -205,5 +208,17 @@ class _MainLayoutState extends State<MainLayout> with WidgetsBindingObserver {
       return photosOk;
     }
     return false;
+  }
+
+  Future<void> _checkAuth() async {
+    final result = await GoogleAuthService.instance.initialize();
+
+    if (!mounted) return;
+
+    if (result == AuthRestoreResult.expired) {
+      ToastHelper.show(
+        'Your Google session expired. Please sign in again.',
+      );
+    }
   }
 }
