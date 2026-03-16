@@ -36,7 +36,7 @@ Although there are many alternatives that exist, mosty notably CamScanner, I've 
 - ✅ Sync documents with Google Drive
 - ✅ Stability of App
 - ✅ Implement an in-app feature, nicknamed MagicEyes
-- Implement Ads
+- ✅ Implement Ads
 ### What is MagicEyes?
 MagicEyes is a set of AI and algorithm-based features that improves the experience of SuperScan. In MagicEyes, you get the ability to:
 - Extract text from documents using system-level OCR
