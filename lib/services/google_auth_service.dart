@@ -1,9 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart';
 import 'package:http/http.dart' as http;
+import 'package:super_scan/helpers/auth_restore_result.dart';
 import 'package:super_scan/helpers/toast_helper.dart';
 import 'google_oauth_config.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
 class GoogleAuthService {
   GoogleAuthService._internal();
@@ -28,7 +31,9 @@ class GoogleAuthService {
   GoogleUser? get currentUser => _user;
   bool get isSignedIn => _user != null;
 
-  Future<void> initialize() async => restoreSession();
+  Future<AuthRestoreResult> initialize() async {
+    return await restoreSession();
+  }
 
   Future<bool> signIn() async {
     try {
@@ -61,24 +66,25 @@ class GoogleAuthService {
     _user = null;
   }
 
-  Future<void> restoreSession() async {
+  Future<AuthRestoreResult> restoreSession() async {
     try {
       final creds = await _googleSignIn.silentSignIn();
 
       if (creds == null) {
         _user = null;
-        ToastHelper.show('Google session expired. Please sign in again.');
-        return;
+        return AuthRestoreResult.none;
       }
 
       _user = GoogleUser.fromIdToken(creds.accessToken, creds.idToken);
 
       if (_user?.email == null || _user?.displayName == null) {
-        ToastHelper.show('Google session expired. Please sign in again.');
+        return AuthRestoreResult.expired;
       }
+
+      return AuthRestoreResult.restored;
     } catch (_) {
       _user = null;
-      ToastHelper.show('Google session expired. Please sign in again.');
+      return AuthRestoreResult.expired;
     }
   }
 
