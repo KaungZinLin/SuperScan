@@ -1,7 +1,9 @@
 import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart';
 import 'package:http/http.dart' as http;
+import 'package:super_scan/helpers/toast_helper.dart';
 import 'google_oauth_config.dart';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GoogleAuthService {
   GoogleAuthService._internal();
@@ -36,12 +38,12 @@ class GoogleAuthService {
         return false;
       }
 
-      final profile = await _fetchProfile(creds.accessToken);
-      _user = GoogleUser(
-        accessToken: creds.accessToken,
-        email: profile['email'],
-        displayName: profile['name'],
-      );
+      _user = GoogleUser.fromIdToken(creds.accessToken, creds.idToken);
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('google_email', _user?.email ?? '');
+      await prefs.setString('google_name', _user?.displayName ?? '');
+
       return true;
     } catch (e) {
       _user = null;
@@ -51,22 +53,32 @@ class GoogleAuthService {
 
   Future<void> signOut() async {
     await _googleSignIn.signOut();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('google_email');
+    await prefs.remove('google_name');
+
     _user = null;
   }
 
   Future<void> restoreSession() async {
     try {
       final creds = await _googleSignIn.silentSignIn();
-      if (creds != null) {
-        final profile = await _fetchProfile(creds.accessToken);
-        _user = GoogleUser(
-          accessToken: creds.accessToken,
-          email: profile['email'],
-          displayName: profile['name'],
-        );
+
+      if (creds == null) {
+        _user = null;
+        ToastHelper.show('Google session expired. Please sign in again.');
+        return;
+      }
+
+      _user = GoogleUser.fromIdToken(creds.accessToken, creds.idToken);
+
+      if (_user?.email == null || _user?.displayName == null) {
+        ToastHelper.show('Google session expired. Please sign in again.');
       }
     } catch (_) {
       _user = null;
+      ToastHelper.show('Google session expired. Please sign in again.');
     }
   }
 
