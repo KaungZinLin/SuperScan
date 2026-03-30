@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-// Ensure this path is correct for your project
 import 'package:super_scan/helpers/ad_helper.dart';
 
 class AdBanner extends StatefulWidget {
@@ -13,7 +12,7 @@ class AdBanner extends StatefulWidget {
 
 class _AdBannerState extends State<AdBanner> {
   BannerAd? _bannerAd;
-  bool _showAd = false; // Controls the 1-second delay logic
+  bool _showAd = false;
 
   @override
   void initState() {
@@ -31,7 +30,8 @@ class _AdBannerState extends State<AdBanner> {
           setState(() {
             _bannerAd = ad as BannerAd;
           });
-          // Start the 1-second timer once the ad is actually ready
+
+          // Delay showing ad slightly
           Timer(const Duration(seconds: 1), () {
             if (mounted) {
               setState(() {
@@ -56,27 +56,38 @@ class _AdBannerState extends State<AdBanner> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final bool isAdReady = _bannerAd != null && _showAd;
+
     return Container(
       width: double.infinity,
       height: 100,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: isAdReady
+            ? (isDark ? Colors.black : Colors.white) // ad background
+            : theme.colorScheme.surfaceVariant,     // placeholder background
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withOpacity(isDark ? 0.4 : 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: (_bannerAd != null && _showAd)
+      child: isAdReady
           ? Center(
         child: SizedBox(
           width: _bannerAd!.size.width.toDouble(),
           height: _bannerAd!.size.height.toDouble(),
-          child: AdWidget(ad: _bannerAd!),
+          child: ColoredBox(
+            // prevents white flash mismatch
+            color: isDark ? Colors.black : Colors.white,
+            child: AdWidget(ad: _bannerAd!),
+          ),
         ),
       )
           : ClipRRect(

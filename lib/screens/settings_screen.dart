@@ -28,6 +28,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   StreamSubscription?
   _internetConnectionStreamSubscription; // Start a stream and
 
+  late final InternetConnection _checker;
+
+
   @override
   void initState() {
     super.initState();
@@ -36,8 +39,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _viewController.addListener(_controllerListener);
     });
 
+    _checkInitialConnection();
+
     _internetConnectionStreamSubscription =
         InternetConnection().onStatusChange.listen(_internetListener);
+  }
+
+  Future<void> _checkInitialConnection() async {
+    final result = await _checker.hasInternetAccess;
+    if (!mounted) return;
+    setState(() => isConnected = result);
   }
 
   void _controllerListener() {
@@ -204,7 +215,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       applicationName: 'SuperScan',
-                      applicationVersion: '1.0 (Pre-release) (Build 2)',
+                      applicationVersion: 'v1.0 (Build 4)',
                       applicationLegalese: '© 2026 Kaung Zin Lin',
                       children: [
                         const Padding(
@@ -226,8 +237,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   trailing: const Icon(Icons.open_in_new_rounded),
                   onTap: () async {
-                    null;
-                    //launchMyURL('https://kaung.carrd.co/');
+                    launchMyURL('https://github.com/KaungZinLin');
                   },
                 ),
                 ListTile(
@@ -237,7 +247,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () {
-                    if (!Platform.isWindows || !Platform.isLinux) {
+                    if (!Platform.isWindows && !Platform.isLinux) {
                       Navigator.push(
                           context,
                           MaterialPageRoute(

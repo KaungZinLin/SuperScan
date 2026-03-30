@@ -510,8 +510,27 @@ class _ChatUIState extends State<_ChatUI> {
             typingUsers: _typingUser,
             messageOptions: const MessageOptions(
               currentUserContainerColor: kAccentColor,
-              containerColor: Colors.black,
-              textColor: Colors.white,
+            ),
+            inputOptions: InputOptions(
+              inputDecoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.grey[900],
+                hintText: "Type a message...",
+                hintStyle: TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              inputTextStyle: TextStyle(
+                color: Colors.white,
+              ),
+              sendButtonBuilder: (onSend) {
+                return IconButton(
+                  icon: Icon(Icons.send, color: kAccentColor),
+                  onPressed: onSend,
+                );
+              },
             ),
             messages: _messages,
             onSend: (ChatMessage message) async {

@@ -1,12 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart';
 import 'package:http/http.dart' as http;
 import 'package:super_scan/helpers/auth_restore_result.dart';
-import 'package:super_scan/helpers/toast_helper.dart';
 import 'google_oauth_config.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io';
 
 class GoogleAuthService {
   GoogleAuthService._internal();

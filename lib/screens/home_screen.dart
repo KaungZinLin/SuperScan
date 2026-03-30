@@ -10,10 +10,10 @@ import 'package:super_scan/screens/settings_screen.dart';
 // import 'package:super_scan/widgets/expandable_fab.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
 import 'package:super_scan/constants.dart';
+import 'package:super_scan/widgets/ad_banner.dart';
 import 'dart:io';
 import 'package:super_scan/widgets/no_scans_widgets.dart';
 import 'package:super_scan/widgets/scan_search_delegate.dart';
-import 'package:super_scan/widgets/ad_banner.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
