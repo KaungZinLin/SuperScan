@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:super_scan/constants.dart';
 import 'package:super_scan/controllers/home_controller.dart';
 import 'package:super_scan/helpers/add_more_pages_results.dart';
@@ -9,6 +10,7 @@ import 'package:super_scan/helpers/import_images_result.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
 import 'package:super_scan/helpers/rename_result.dart';
 import 'package:super_scan/helpers/toast_helper.dart';
+import 'package:super_scan/localization/locales.dart';
 import 'package:super_scan/models/scan_meta.dart';
 import 'package:super_scan/services/scan_storage.dart';
 import 'package:share_plus/share_plus.dart';
@@ -16,7 +18,9 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:super_scan/screens/reorder_pages_page.dart';
 import 'package:super_scan/controllers/sync_controller.dart';
-import 'package:super_scan/screens/after_sharing_screen.dart';
+import 'package:super_scan/screens/half_popup_screen.dart';
+
+import '../models/singletons_data.dart';
 
 class ScanViewerController extends ChangeNotifier {
   // Alternative to !mounted in the view - don't understand it yet
@@ -73,28 +77,28 @@ class ScanViewerController extends ChangeNotifier {
         Offset.zero & overlay.size,
       ),
       items: [
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'edit',
           child: ListTile(
             leading: Icon(Icons.crop),
-            title: Text('Crop and Rotate'),
+            title: Text(LocaleData.crop_and_rotate.getString(context)),
             contentPadding: EdgeInsets.zero,
           ),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'reorder',
           child: ListTile(
             leading: Icon(Icons.reorder),
-            title: Text('Reorder'),
+            title: Text(LocaleData.reorder.getString(context)),
             contentPadding: EdgeInsets.zero,
           ),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'delete',
           child: ListTile(
             leading: Icon(Icons.delete_outline, color: Colors.red),
             title: Text(
-              'Delete this Page',
+              LocaleData.delete_page.getString(context),
               style: TextStyle(color: Colors.red),
             ),
             contentPadding: EdgeInsets.zero,
@@ -216,21 +220,21 @@ class ScanViewerController extends ChangeNotifier {
     final result = await showDialog<String>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Rename scan'),
+        title: Text(LocaleData.rename_text.getString(context)),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(hintText: 'Scan name'),
+          decoration: InputDecoration(hintText: LocaleData.rename_hint.getString(context)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(LocaleData.cancel.getString(context)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, controller.text.trim()),
-            child: const Text(
-              'Save',
+            child: Text(
+              LocaleData.save.getString(context),
               style: TextStyle(fontWeight: .bold),
             ),
           ),
@@ -254,20 +258,20 @@ class ScanViewerController extends ChangeNotifier {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Delete scan?'),
+        title: Text(LocaleData.delete_question.getString(context)),
         content: Text(
-          '“${meta.name}” will be permanently deleted.',
+          '“${meta.name}” ${LocaleData.delete_text.getString(context)}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(LocaleData.cancel.getString(context)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text(
-              'Delete',
+            child: Text(
+              LocaleData.delete.getString(context),
               style: TextStyle(fontWeight: .bold),
             ),
           ),
@@ -289,8 +293,8 @@ class ScanViewerController extends ChangeNotifier {
     if (context.mounted) {
       ToastHelper.show(
         PlatformHelper.isDesktop
-            ? 'Deleted from Google Drive'
-            : 'Deleted permanently',
+            ? LocaleData.deleted_drive.getString(context)
+            : LocaleData.deleted.getString(context),
       );
       Navigator.pop(context, true);
     }
@@ -300,14 +304,14 @@ class ScanViewerController extends ChangeNotifier {
     await showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('Share “${meta.name}”'),
-        content: const Text(
-          'How would you like to share your scan?',
+        title: Text('${LocaleData.share_alert.getString(context)}“${meta.name}”'),
+        content: Text(
+          LocaleData.share_question.getString(context),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(LocaleData.cancel.getString(context)),
           ),
           TextButton(
             onPressed: () async {
@@ -316,13 +320,20 @@ class ScanViewerController extends ChangeNotifier {
 
               if (!context.mounted) return;
 
-              showModalBottomSheet<void>(
+              if (!appData.entitlementIsActive) {
+                showModalBottomSheet<void>(
                   context: context,
-                  builder: (BuildContext context) => AfterSharingScreen(),
-              );
+                  builder: (BuildContext context) => HalfPopupScreen(
+                    title: LocaleData.success.getString(context),
+                    subtitle: LocaleData.success_subtitle.getString(context),
+                    body: LocaleData.success_body.getString(context),
+                    iconData: Icons.check_rounded,
+                  ),
+                );
+              }
             },
-            child: const Text(
-              'PDF',
+            child: Text(
+              LocaleData.pdf.getString(context),
               style: TextStyle(fontWeight: .bold),
             ),
           ),
@@ -332,13 +343,20 @@ class ScanViewerController extends ChangeNotifier {
               await shareAsImages(context, scanDir);
               if (!context.mounted) return;
 
-              showModalBottomSheet<void>(
-                context: context,
-                builder: (BuildContext context) => AfterSharingScreen(),
-              );
+              if (!appData.entitlementIsActive) {
+                showModalBottomSheet<void>(
+                  context: context,
+                  builder: (BuildContext context) => HalfPopupScreen(
+                    title: LocaleData.success.getString(context),
+                    subtitle: LocaleData.success_subtitle.getString(context),
+                    body: LocaleData.success_body.getString(context),
+                    iconData: Icons.check_rounded,
+                  ),
+                );
+              }
             },
-            child: const Text(
-              'Images',
+            child: Text(
+              LocaleData.images.getString(context),
               style: TextStyle(fontWeight: .bold),
             ),
           ),
@@ -362,7 +380,7 @@ class ScanViewerController extends ChangeNotifier {
       }
     } catch (e) {
       if (context.mounted) {
-        ToastHelper.show('Failed to share PDF: $e');
+        ToastHelper.show('${LocaleData.failed_share_pdf.getString(context)} $e');
       }
     }
   }
@@ -384,7 +402,7 @@ class ScanViewerController extends ChangeNotifier {
       }
     } catch (e) {
       if (context.mounted) {
-        ToastHelper.show('Failed to share images: $e');
+        ToastHelper.show('${LocaleData.failed_share_images.getString(context)} $e');
       }
     }
   }

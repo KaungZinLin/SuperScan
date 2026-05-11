@@ -49,3 +49,5 @@ app.*.map.json
 **/google-services.json
 **/client_345114505131-25u8fbkfj78jueefhg5jp0eamdad2j71.apps.googleusercontent.com.plist
 *.env
+/lib/store_config.dart
+/lib/iap_constants.dart

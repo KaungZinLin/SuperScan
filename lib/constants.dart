@@ -15,6 +15,7 @@ const String kKbzPayDonationMethodUrl = 'https://zennon-devhouse.blogspot.com/20
 const String kOpenAIApiKeyStorageName = 'openai_api_key';
 
 final ThemeData kLightThemeData = ThemeData(
+  fontFamily: 'MiSans',
   useMaterial3: true,
   colorScheme: ColorScheme.fromSeed(
     seedColor: kAccentColor,
@@ -23,6 +24,7 @@ final ThemeData kLightThemeData = ThemeData(
 );
 
 final ThemeData kDarkThemeData = ThemeData(
+  fontFamily: 'MiSans',
   useMaterial3: true,
   colorScheme: ColorScheme.fromSeed(
     // Changed color theme for dark mode

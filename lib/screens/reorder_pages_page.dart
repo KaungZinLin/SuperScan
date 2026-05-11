@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
+import 'package:super_scan/localization/locales.dart';
 import 'package:super_scan/services/scan_storage.dart';
 
 class ReorderPagesPage extends StatefulWidget {
@@ -78,7 +80,7 @@ class _ReorderPagesPageState extends State<ReorderPagesPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Reorder'),
+        title: Text(LocaleData.reorder_noun.getString(context)),
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
           onPressed: () => Navigator.pop(context),
@@ -86,7 +88,7 @@ class _ReorderPagesPageState extends State<ReorderPagesPage> {
         actions: [
           TextButton(
             onPressed: _dirty ? _saveOrder : null,
-            child: const Text('Done'),
+            child: Text(LocaleData.done.getString(context)),
           ),
         ],
       ),

@@ -38,6 +38,7 @@ class _UniversalWebViewState extends State<UniversalWebView> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        centerTitle: true,
       ),
       body: Stack(
         children: [

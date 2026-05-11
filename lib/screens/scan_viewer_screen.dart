@@ -1,11 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:super_scan/controllers/scan_viewer_controller.dart';
 import 'package:super_scan/helpers/add_more_pages_results.dart';
 import 'package:super_scan/helpers/import_images_result.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
 import 'package:super_scan/constants.dart';
 import 'package:super_scan/helpers/toast_helper.dart';
+import 'package:super_scan/localization/locales.dart';
+import 'package:super_scan/models/singletons_data.dart';
+import 'package:super_scan/screens/half_popup_screen.dart';
 import 'package:super_scan/screens/magic_eyes_screen.dart';
 
 class ScanViewerScreen extends StatefulWidget {
@@ -33,6 +37,12 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final errorMessage = LocaleData.unexpected_error.getString(context); // Get it while context is safe
+    final addPagesSuccess = LocaleData.add_pages_success.getString(context);
+    final addPagesFailed = LocaleData.add_pages_failed.getString(context);
+    final fromCameraIOS = LocaleData.from_camera.getString(context);
+    final fromPhotosIOS = LocaleData.from_photos.getString(context);
+
     return Scaffold(
       appBar: AppBar(centerTitle: true, title: Text(_viewController.meta.name)),
       body: Stack(
@@ -82,7 +92,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
             InkWell(
               onTap: PlatformHelper.isDesktop
                   ? null
-                  : () => showAddMorePagesDialog(context, widget.scanDir),
+                  : () => showAddMorePagesDialog(context, widget.scanDir, errorMessage, addPagesSuccess, addPagesFailed, fromCameraIOS, fromPhotosIOS),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -93,7 +103,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                         : kAccentColor,
                   ),
                   Text(
-                    "Add",
+                    LocaleData.add.getString(context),
                     style: TextStyle(
                       fontSize: 12,
                       letterSpacing: 0.0,
@@ -108,13 +118,27 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
             InkWell(
               onTap: PlatformHelper.isDesktop
                   ? null
-                  : () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            MagicEyesScreen(scanDir: widget.scanDir),
-                      ),
-                    ),
+                  : () {
+                    if (appData.entitlementIsActive) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              MagicEyesScreen(scanDir: widget.scanDir),
+                        ),
+                      );
+                    } else {
+                      showModalBottomSheet<void>(
+                        context: context,
+                          builder: (BuildContext context) => HalfPopupScreen(
+                            title: LocaleData.support_title.getString(context),
+                            subtitle: LocaleData.support_subtitle.getString(context),
+                            body: '',
+                            iconData: Icons.favorite,
+                          ),
+                      );
+                    }
+                  },
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -144,7 +168,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                 children: [
                   Icon(Icons.ios_share_rounded, color: kAccentColor),
                   Text(
-                    "Share",
+                    LocaleData.share_button.getString(context),
                     style: TextStyle(fontSize: 12, color: kAccentColor),
                   ),
                 ],
@@ -157,7 +181,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                       try {
                         _viewController.renameScan(context, widget.scanDir);
                       } catch (e) {
-                        ToastHelper.show('Failed to rename');
+                        ToastHelper.show(LocaleData.rename_failed.getString(context));
                       }
                     },
               child: Column(
@@ -170,7 +194,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                         : kAccentColor,
                   ),
                   Text(
-                    "Rename",
+                    LocaleData.rename.getString(context),
                     style: TextStyle(
                       fontSize: 12,
                       color: PlatformHelper.isDesktop
@@ -190,7 +214,7 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                 children: [
                   Icon(Icons.delete_rounded, color: kAccentColor),
                   Text(
-                    "Delete",
+                    LocaleData.delete.getString(context),
                     style: TextStyle(fontSize: 12, color: kAccentColor),
                   ),
                 ],
@@ -205,6 +229,11 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
   Future<void> showAddMorePagesDialog(
     BuildContext context,
     Directory scanDir,
+      String errorMessage,
+      String addPagesSuccess,
+      String addPagesFailed,
+      String cameraiOS,
+      String photosiOS,
   ) async {
     if (!Platform.isIOS) {
       try {
@@ -213,24 +242,24 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
         if (!mounted) return;
 
         if (result == AddMorePagesResults.success) {
-          ToastHelper.show('Pages added successfully');
+          ToastHelper.show(addPagesSuccess);
         } else {
-          ToastHelper.show('Failed to add pages');
+          ToastHelper.show(addPagesFailed);
         }
       } catch (e) {
         if (!mounted) return;
-        ToastHelper.show('Unexpected error: $e');
+        ToastHelper.show('$errorMessage: $e');
       }
     } else {
       await showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('How would you like to add more scans?'),
+            title: Text(LocaleData.add_question.getString(context)),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
+                child: Text(LocaleData.cancel.getString(context)),
               ),
               TextButton(
                 onPressed: () async {
@@ -241,17 +270,17 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                     if (!mounted) return;
 
                     if (result == ImportImagesResult.success) {
-                      ToastHelper.show('Images imported successfully');
+                      ToastHelper.show(addPagesSuccess);
                     } else {
-                      ToastHelper.show('Failed to import images');
+                      ToastHelper.show(addPagesFailed);
                     }
                   } catch (e) {
                     if (!mounted) return;
-                    ToastHelper.show('Unexpected error: $e');
+                    ToastHelper.show('$errorMessage $e');
                   }
                 },
-                child: const Text(
-                  'From Photo Library',
+                child: Text(
+                  photosiOS,
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -264,17 +293,17 @@ class _ScanViewerScreenState extends State<ScanViewerScreen> {
                     if (!mounted) return;
 
                     if (result == AddMorePagesResults.success) {
-                      ToastHelper.show('Pages added successfully');
+                      ToastHelper.show(addPagesSuccess);
                     } else {
-                      ToastHelper.show('Failed to add pages');
+                      ToastHelper.show(addPagesFailed);
                     }
                   } catch (e) {
                     if (!mounted) return;
-                    ToastHelper.show('Unexpected error: $e');
+                    ToastHelper.show('$errorMessage $e');
                   }
                 },
-                child: const Text(
-                  'From Camera',
+                child: Text(
+                  cameraiOS,
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),

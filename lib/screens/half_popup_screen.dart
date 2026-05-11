@@ -1,16 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
+import 'package:super_scan/localization/locales.dart';
 import 'package:super_scan/screens/donation_screen.dart';
 import 'package:super_scan/widgets/ad_banner.dart';
 
-class AfterSharingScreen extends StatefulWidget {
-  const AfterSharingScreen({super.key});
+class HalfPopupScreen extends StatefulWidget {
+  final String title;
+  final String subtitle;
+  final String body;
+  final IconData iconData;
+
+  const HalfPopupScreen({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.body,
+    required this.iconData,
+  });
 
   @override
-  State<AfterSharingScreen> createState() => _AfterSharingScreenState();
+  State<HalfPopupScreen> createState() => _HalfPopupScreenState();
 }
 
-class _AfterSharingScreenState extends State<AfterSharingScreen> {
+class _HalfPopupScreenState extends State<HalfPopupScreen> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,20 +36,20 @@ class _AfterSharingScreenState extends State<AfterSharingScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(
-                Icons.check_rounded,
+                widget.iconData,
                 color: Colors.green,
                 size: 60,
                 fontWeight: FontWeight.bold,
               ),
               Text(
-                'Success',
+                widget.title,
                 style: TextStyle(
                   fontSize: 28.0,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                'Your document has been exported!',
+                widget.subtitle,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18.0,
@@ -43,7 +57,7 @@ class _AfterSharingScreenState extends State<AfterSharingScreen> {
               ),
               SizedBox(height: 16),
               Text(
-                  "Keeping SuperScan is the dream, but for now, the ads I've implemented help me pay the bills. If you want to help me out, you can donate to remove ads and to get access to AI features.",
+                widget.body,
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 16),
@@ -55,7 +69,7 @@ class _AfterSharingScreenState extends State<AfterSharingScreen> {
                         Navigator.pop(context);
                         Navigator.push(context, MaterialPageRoute(builder: (_) => DonateScreen()));
                       },
-                      label: const Text('Donate'),
+                      label: Text(LocaleData.donate_button.getString(context)),
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
@@ -70,7 +84,7 @@ class _AfterSharingScreenState extends State<AfterSharingScreen> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      label: const Text('Close'),
+                      label: Text(LocaleData.close.getString(context)),
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(

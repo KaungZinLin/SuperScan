@@ -2,12 +2,15 @@ import 'dart:io';
 import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:super_scan/constants.dart';
 import 'package:super_scan/controllers/magic_eyes_controller.dart';
 import 'package:flutter/services.dart';
 import 'package:super_scan/helpers/toast_helper.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:super_scan/helpers/api_key_storage.dart';
+import 'package:super_scan/localization/locales.dart';
+import 'package:super_scan/screens/api_key_screen.dart';
 
 enum ScreenView { extract, summarize, proofread, chat }
 
@@ -32,12 +35,65 @@ class _MagicEyesScreenState extends State<MagicEyesScreen> {
       ..addListener(() {
         if (mounted) setState(() {});
       });
+
+    _loadKey();
   }
 
   @override
   void dispose() {
     controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadKey() async {
+    final key = await ApiKeyStorage.loadApiKey();
+
+    if (!mounted) return;
+
+    if (key == null || key.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => AlertDialog(
+            title: Text(LocaleData.no_api_detected.getString(context)),
+            content: Text(
+              LocaleData.api_key_required.getString(context),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  LocaleData.close.getString(context),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ApiKeyScreen(),
+                    ),
+                  );
+                },
+                child: Text(
+                  LocaleData.go_to_ai_config.getString(context),
+                  style: TextStyle(
+                    fontWeight: .bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      });
+    }
   }
 
   @override
@@ -50,17 +106,17 @@ class _MagicEyesScreenState extends State<MagicEyesScreen> {
           // --- Segmented Control ---
           SegmentedButton<ScreenView>(
             showSelectedIcon: false,
-            segments: const [
-              ButtonSegment(value: ScreenView.extract, label: Text('Extract')),
+            segments: [
+              ButtonSegment(value: ScreenView.extract, label: Text(LocaleData.extract.getString(context))),
               ButtonSegment(
                 value: ScreenView.summarize,
-                label: Text('Summarize'),
+                label: Text(LocaleData.summarize.getString(context)),
               ),
               ButtonSegment(
                 value: ScreenView.proofread,
-                label: Text('Proofread'),
+                label: Text(LocaleData.proofread.getString(context)),
               ),
-              ButtonSegment(value: ScreenView.chat, label: Text('Chat')),
+              ButtonSegment(value: ScreenView.chat, label: Text(LocaleData.chat.getString(context))),
             ],
             selected: {currentView},
             onSelectionChanged: (Set<ScreenView> newSelection) {
@@ -127,7 +183,7 @@ class _ExtractUI extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               child: SelectableText(
                 controller.extractedText.isEmpty
-                    ? "Extracted text will appear here."
+                    ? LocaleData.extracted_placeholder.getString(context)
                     : controller.extractedText,
                 style: TextStyle(
                   fontSize: 15,
@@ -154,7 +210,7 @@ class _ExtractUI extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            "Processing page ${controller.progressCurrent} of ${controller.progressTotal}...",
+            "${LocaleData.processing_pages.getString(context)} (${controller.progressCurrent}/${controller.progressTotal})",
             style: TextStyle(
               color: colorScheme.primary,
               fontWeight: FontWeight.w500,
@@ -171,7 +227,7 @@ class _ExtractUI extends StatelessWidget {
           child: FilledButton.tonalIcon(
             onPressed: () => controller.runOCR(scanDir),
             icon: const Icon(Icons.document_scanner_outlined, size: 20),
-            label: const Text("Extract Text"),
+            label: Text(LocaleData.extract_button.getString(context)),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
@@ -185,7 +241,7 @@ class _ExtractUI extends StatelessWidget {
 
         // COPY BUTTON (WORKING)
         IconButton.filledTonal(
-          tooltip: "Copy summary",
+          tooltip: LocaleData.clipboard_tooltip.getString(context),
           onPressed: controller.extractedText.isEmpty
               ? null
               : () async {
@@ -194,7 +250,7 @@ class _ExtractUI extends StatelessWidget {
                   );
                   if (!context.mounted) return;
                   // optional snack bar feedback
-                  ToastHelper.show('Copied to clipboard');
+                  ToastHelper.show(LocaleData.clipboard_copy.getString(context));
 
                 },
           icon: const Icon(Icons.copy),
@@ -204,7 +260,7 @@ class _ExtractUI extends StatelessWidget {
 
         // PLACEHOLDER BUTTON (NO FUNCTION)
         IconButton.filledTonal(
-          tooltip: "Share summary",
+          tooltip: LocaleData.share_tooltip.getString(context),
           onPressed: controller.extractedText.isEmpty
               ? null
               : () async {
@@ -246,7 +302,7 @@ class _SummarizeUI extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               child: SelectableText(
                 controller.summaryText.isEmpty
-                    ? "Summary will appear here."
+                    ? LocaleData.summary_placeholder.getString(context)
                     : controller.summaryText,
                 style: TextStyle(
                   fontSize: 15,
@@ -273,8 +329,8 @@ class _SummarizeUI extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             controller.isProcessing
-                ? "Scanning document..."
-                : "Generating summary...",
+                ? LocaleData.extracting_text.getString(context)
+                : LocaleData.generating_summary.getString(context),
             style: TextStyle(
               color: colorScheme.primary,
               fontWeight: FontWeight.w500,
@@ -291,7 +347,7 @@ class _SummarizeUI extends StatelessWidget {
           child: FilledButton.tonalIcon(
             onPressed: () => controller.summarizeFromScan(scanDir),
             icon: const Icon(Icons.auto_awesome_outlined),
-            label: const Text("Generate Summary"),
+            label: Text(LocaleData.summarize_button.getString(context)),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
@@ -305,7 +361,7 @@ class _SummarizeUI extends StatelessWidget {
 
         // COPY BUTTON (WORKING)
         IconButton.filledTonal(
-          tooltip: "Copy summary",
+          tooltip: LocaleData.clipboard_tooltip.getString(context),
           onPressed: controller.summaryText.isEmpty
               ? null
               : () async {
@@ -315,7 +371,7 @@ class _SummarizeUI extends StatelessWidget {
 
                   // optional snack bar feedback
                   if (!context.mounted) return;
-                  ToastHelper.show('Copied to clipboard');
+                  ToastHelper.show(LocaleData.clipboard_copy.getString(context));
                 },
           icon: const Icon(Icons.copy_rounded),
         ),
@@ -324,7 +380,7 @@ class _SummarizeUI extends StatelessWidget {
 
         // PLACEHOLDER BUTTON (NO FUNCTION)
         IconButton.filledTonal(
-          tooltip: "Share summary",
+          tooltip: LocaleData.share_tooltip.getString(context),
           onPressed: controller.summaryText.isEmpty
               ? null
               : () async {
@@ -366,7 +422,7 @@ class _ProofreadUI extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               child: SelectableText(
                 controller.proofreadResultText.isEmpty
-                    ? "Results will appear here."
+                    ? LocaleData.results_placeholder.getString(context)
                     : controller.proofreadResultText,
                 style: TextStyle(
                   fontSize: 15,
@@ -393,8 +449,8 @@ class _ProofreadUI extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             controller.isProcessing
-                ? "Scanning document..."
-                : "Proofreading document...",
+                ? LocaleData.extracting_text.getString(context)
+                : LocaleData.proofreading_document.getString(context),
             style: TextStyle(
               color: colorScheme.primary,
               fontWeight: FontWeight.w500,
@@ -411,7 +467,7 @@ class _ProofreadUI extends StatelessWidget {
           child: FilledButton.tonalIcon(
             onPressed: () => controller.proofreadFromScan(scanDir),
             icon: const Icon(Icons.search_rounded),
-            label: const Text("Proofread Document"),
+            label: Text(LocaleData.proofread_button.getString(context)),
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
@@ -425,7 +481,7 @@ class _ProofreadUI extends StatelessWidget {
 
         // COPY BUTTON (WORKING)
         IconButton.filledTonal(
-          tooltip: "Copy summary",
+          tooltip: LocaleData.clipboard_tooltip.getString(context),
           onPressed: controller.proofreadResultText.isEmpty
               ? null
               : () async {
@@ -435,7 +491,7 @@ class _ProofreadUI extends StatelessWidget {
                   if (!context.mounted) return;
 
                   // optional snack bar feedback
-                  ToastHelper.show('Copied to clipboard');
+                  ToastHelper.show(LocaleData.clipboard_copy.getString(context));
                 },
           icon: const Icon(Icons.copy_rounded),
         ),
@@ -444,7 +500,7 @@ class _ProofreadUI extends StatelessWidget {
 
         // PLACEHOLDER BUTTON (NO FUNCTION)
         IconButton.filledTonal(
-          tooltip: "Share summary",
+          tooltip: LocaleData.share_tooltip.getString(context),
           onPressed: controller.proofreadResultText.isEmpty
               ? null
               : () async {
@@ -515,7 +571,7 @@ class _ChatUIState extends State<_ChatUI> {
               inputDecoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.grey[900],
-                hintText: "Type a message...",
+                hintText: LocaleData.chat_message.getString(context),
                 hintStyle: TextStyle(color: Colors.grey),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
@@ -556,7 +612,7 @@ class _ChatUIState extends State<_ChatUI> {
     } catch (e) {
       // Check if the widget is still mounted before showing toast
       if (!mounted) return; //  use mounted from the State
-      ToastHelper.show('OCR failed: $e');
+      ToastHelper.show('$e');
     }
 
     // Build combined prompt

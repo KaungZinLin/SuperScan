@@ -93,7 +93,7 @@ class _AdBannerState extends State<AdBanner> {
           : ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Image.asset(
-          'assets/images/lha_sponsor.jpg',
+          'assets/images/default_banner_ad.png',
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,

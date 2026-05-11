@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:super_scan/helpers/inline_ad_helper.dart';
 import 'package:super_scan/helpers/toast_helper.dart';
+import 'package:super_scan/localization/locales.dart';
 import 'package:super_scan/main.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
 import 'package:super_scan/controllers/home_controller.dart';
 import 'package:super_scan/screens/settings_screen.dart';
-
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 // import 'package:super_scan/widgets/action_button.dart';
 // import 'package:super_scan/widgets/expandable_fab.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
@@ -14,6 +17,8 @@ import 'package:super_scan/widgets/ad_banner.dart';
 import 'dart:io';
 import 'package:super_scan/widgets/no_scans_widgets.dart';
 import 'package:super_scan/widgets/scan_search_delegate.dart';
+
+import '../models/singletons_data.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String id = 'home_screen';
@@ -52,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   // Dispose
   @override
   void dispose() {
+    InlineAdManager.dispose();
     routeObserver.unsubscribe(this);
     super.dispose();
   }
@@ -83,95 +89,94 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   @override
   Widget build(BuildContext context) {
     final scansToShow =
-        (PlatformHelper.isDesktop
-                ? _viewController.filteredDesktopScans
-                : _viewController.filteredScans)
-            .where((s) => s.dir.existsSync())
-            .toList();
+    (PlatformHelper.isDesktop
+        ? _viewController.filteredDesktopScans
+        : _viewController.filteredScans)
+        .where((s) => s.dir.existsSync())
+        .toList();
+
+    final showAds =
+        !appData.entitlementIsActive &&
+            !PlatformHelper.isDesktop;
+
+    const adFrequency = 3;
+
+    final adCount = showAds
+        ? (scansToShow.length / adFrequency).floor()
+        : 0;
+
+    final totalItemCount =
+        scansToShow.length + adCount;
+
+    final errorMessage = LocaleData.unexpected_error.getString(context);
+
+
+
     return Scaffold(
-      // Completely removed FAB on desktop
       floatingActionButton: PlatformHelper.isDesktop
           ? null
-          // Disabled custom FAB as the app is Android-only for now and the scanning screen already allows users to import images
-          // : ExpandableFab(
-          //     distance: 20,
-          //     children: [
-          //       ActionButton(
-          //         icon: Icon(Icons.photo_library, color: Colors.white),
-          //         onPressed: () {
-          //           _viewController.importImages(context);
-          //         },
-          //       ),
-          //       ActionButto
-          //       letterSpacing(
-          //         icon: Icon(Icons.camera_alt, color: Colors.white),
-          //         onPressed: () {
-          //           _viewController.processScan(
-          //             context,
-          //             FlutterDocScanner().getScannedDocumentAsImages(page: 4),
-          //           );
-          //         },
-          //       ),
-          //     ],
-          //   ),
           : FloatingActionButton.extended(
-              label: Text('Scan'),
-              icon: Icon(Icons.add_rounded),
-              backgroundColor: kAccentColor,
-              foregroundColor: Colors.white,
-              onPressed: () async {
-                if (Platform.isAndroid) {
-                  _viewController.processScan(
-                    context,
-                    FlutterDocScanner().getScannedDocumentAsImages(page: 4),
-                  );
-                } else {
-                  await showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: const Text(
-                          'How would you like to scan your documents?',
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () async {
-                              Navigator.pop(context);
-                              _viewController.importImages();
-                            },
-                            child: const Text(
-                              'From Photo Library',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () async {
-                              Navigator.pop(context);
-                              _viewController.processScan(
-                                context,
-                                FlutterDocScanner().getScannedDocumentAsImages(page: 4),
-                              );
-                            },
-                            child: const Text(
-                              'From Camera',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                }
+        label: Text(LocaleData.scan.getString(context)),
+        icon: const Icon(Icons.add_rounded),
+        backgroundColor: kAccentColor,
+        foregroundColor: Colors.white,
+        onPressed: () async {
+          if (Platform.isAndroid) {
+            _viewController.processScan(
+              errorMessage,
+              context,
+              FlutterDocScanner().getScannedDocumentAsImages(page: 4),
+            );
+          } else {
+            await showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: const Text(
+                    'How would you like to scan your documents?',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text(LocaleData.cancel.getString(context)),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        Navigator.pop(context);
+                        _viewController.importImages(errorMessage);
+                      },
+                      child: Text(
+                        LocaleData.from_photos.getString(context),
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        Navigator.pop(context);
+                        _viewController.processScan(
+                          errorMessage,
+                          context,
+                          FlutterDocScanner().getScannedDocumentAsImages(
+                              page: 4),
+                        );
+                      },
+                      child: Text(
+                        LocaleData.from_camera.getString(context),
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                );
               },
-            ),
-      // Changed appBar name to Sync on desktop
+            );
+          }
+        },
+      ),
+
       appBar: AppBar(
         centerTitle: true,
-        title: Text('SuperScan', style: TextStyle(fontWeight: .bold)),
+        title: const Text(
+            'SuperScan', style: TextStyle(fontWeight: FontWeight.bold)),
         leadingWidth: 100,
         leading: Row(
           mainAxisSize: MainAxisSize.min,
@@ -188,37 +193,34 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               },
             ),
             IconButton(
-              icon:
-                  _viewController.isSyncing ||
-                      _viewController
-                          .isLoading // Show indicator if either local syncing or desktop loading is active
+              icon: _viewController.isSyncing || _viewController.isLoading
                   ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        color: kAccentColor,
-                        strokeWidth: 2,
-                      ),
-                    )
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: kAccentColor,
+                  strokeWidth: 2,
+                ),
+              )
                   : Icon(Icons.cloud_sync_rounded, color: kAccentColor),
               onPressed: (_viewController.isSyncing || _loading)
                   ? null
                   : () async {
-                      if (!_viewController.auth.isSignedIn) {
-                        ToastHelper.show('Sign in to sync');
-                      }
-                      // await _viewController.syncScans();
-                      final error = await _viewController.syncScans();
+                if (!_viewController.auth.isSignedIn) {
+                  ToastHelper.show('Sign in to sync');
+                }
 
-                      if (!context.mounted) return;
+                final error = await _viewController.syncScans(errorMessage);
 
-                      if (error != null) {
-                        ToastHelper.show(error);
-                      }
-                      if (PlatformHelper.isDesktop) {
-                        await _viewController.loadDriveScans();
-                      }
-                    },
+                if (!context.mounted) return;
+
+                if (error != null) {
+                  ToastHelper.show(error);
+                }
+                if (PlatformHelper.isDesktop) {
+                  await _viewController.loadDriveScans();
+                }
+              },
             ),
           ],
         ),
@@ -232,94 +234,162 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               );
 
               await _viewController.loadSavedScans();
-
-              // Wait until the UI has fully returned to the home screen
               await WidgetsBinding.instance.endOfFrame;
-
-              await _viewController.syncScans();
+              await _viewController.syncScans(errorMessage);
             },
           ),
         ],
       ),
 
-      body: Stack(
-        children: [
-          SafeArea(
-            child: scansToShow.isEmpty
-                ? EmptyScansPlaceHolder()
-                : ListView.builder(
-                    key: UniqueKey(),
-                    padding: const EdgeInsets.all(16),
-                    itemCount: scansToShow.length,
-                    itemBuilder: (context, index) {
-                      final savedScan = scansToShow[index];
-                      final scanDir = savedScan.dir;
-                      final meta = savedScan.meta;
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Load inline ads ONCE
+          return Stack(
+            children: [
+              SafeArea(
+                child: scansToShow.isEmpty
+                    ? EmptyScansPlaceHolder()
+                    : ListView.builder(
+                  //key: UniqueKey(),
+                  padding: const EdgeInsets.all(16),
+                  itemCount: totalItemCount,
+                  itemBuilder: (context, index) {
+                    // Ad Slot
+                    // Ad Slot Logic
+                    if (showAds &&
+                        (index + 1) % (adFrequency + 1) == 0) {
+                      final adIndex = index ~/ (adFrequency + 1);
 
-                      if (!scanDir.existsSync()) {
-                        return SizedBox.shrink(); // Return nothing or in this case a shrunk sized box when the folder no longer exists
-                      }
+                      return ValueListenableBuilder<int>(
+                        valueListenable: InlineAdManager.adUpdate,
+                        builder: (context, _, __) {
+                          final ad = InlineAdManager.getAd(adIndex);
+                          final isLoaded = ad.responseInfo != null;
 
-                      final pages = scanDir
-                          .listSync()
-                          .whereType<File>()
-                          .where((f) => f.path.endsWith('.jpg'))
-                          .length;
-
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 0.0,
-                        color: kAccentColor.withAlpha(20),
-                        child: ListTile(
-                          trailing: const Icon(Icons.chevron_right_rounded),
-                          title: Text(meta.name),
-                          subtitle: Text(
-                            '$pages page(s) • ${_viewController.formatDate(meta.createdAt)}',
-                          ),
-                          onLongPress: () => _viewController.showScanOptions(
-                            savedScan,
-                            context,
-                          ),
-                          onTap: () async {
-                            _viewController
-                                .openScanViewer(scanDir, context)
-                                .then((_) {
-                                  _viewController.loadSavedScans();
-                                  _viewController.syncScans();
-                                });
-                          },
-                        ),
+                          return AnimatedSize(
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.fastOutSlowIn,
+                            child: isLoaded
+                                ? Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: kAccentColor.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min, // Shrink to fit content
+                                  children: [
+                                    // The "Ad" Label
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                                      child: Text(
+                                        "AD",
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: kAccentColor.withOpacity(0.6),
+                                        ),
+                                      ),
+                                    ),
+                                    // The actual Ad
+                                    ClipRRect(
+                                      borderRadius: const BorderRadius.only(
+                                        topRight: Radius.circular(12),
+                                        bottomRight: Radius.circular(12),
+                                      ),
+                                      child: SizedBox(
+                                        width: ad.size.width.toDouble(),
+                                        height: ad.size.height.toDouble(),
+                                        child: AdWidget(ad: ad),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                                : const SizedBox(width: double.infinity, height: 0),
+                          );
+                        },
                       );
-                    },
-                  ),
-          ),
+                    }
 
-          if (_loading)
-            Container(
-              color: Theme.of(
-                context,
-              ).scaffoldBackgroundColor.withValues(alpha: 0.9),
-              child: const Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [CircularProgressIndicator()],
+                    // NORMAL ITEM
+                    final scanIndex =
+                        index - (index ~/ (adFrequency + 1));
+
+                    final savedScan = scansToShow[scanIndex];
+                    final scanDir = savedScan.dir;
+                    final meta = savedScan.meta;
+
+                    if (!scanDir.existsSync()) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final pages = scanDir
+                        .listSync()
+                        .whereType<File>()
+                        .where((f) => f.path.endsWith('.jpg'))
+                        .length;
+
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0.0,
+                      color: kAccentColor.withAlpha(20),
+                      child: ListTile(
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        title: Text(meta.name),
+                        subtitle: Text(
+                            '${context.formatString(LocaleData.pages, [pages])} • ${_viewController.formatDate(errorMessage, meta.createdAt)}'
+                        ),
+                        onLongPress: () =>
+                            _viewController.showScanOptions(errorMessage, savedScan, context),
+                        onTap: () async {
+                          _viewController
+                              .openScanViewer(errorMessage, scanDir, context)
+                              .then((_) {
+                            _viewController.loadSavedScans();
+                            _viewController.syncScans(errorMessage);
+                          });
+                        },
+                      ),
+                    );
+                  },
                 ),
               ),
-            ),
-        ],
+
+              if (_loading)
+                Container(
+                  color: Theme
+                      .of(context)
+                      .scaffoldBackgroundColor
+                      .withValues(alpha: 0.9),
+                  child: const Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [CircularProgressIndicator()],
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
-      bottomNavigationBar: PlatformHelper.isDesktop
+
+      bottomNavigationBar:
+      PlatformHelper.isDesktop ||
+          appData.entitlementIsActive
           ? null
           : BottomAppBar(
-              height: 100,
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 1.0),
-                child: Row(children: [Expanded(child: const AdBanner())]),
-              ),
-            ),
+        height: 100,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 1.0),
+          child: Row(children: [Expanded(child: const AdBanner())]),
+        ),
+      ),
     );
   }
 }

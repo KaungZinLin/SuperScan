@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:super_scan/helpers/platform_helper.dart';
 import 'package:super_scan/constants.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:super_scan/localization/locales.dart';
 import 'package:super_scan/services/google_auth_service.dart';
 
 class EmptyScansPlaceHolder extends StatefulWidget {
@@ -58,30 +60,30 @@ class _EmptyScansPlaceHolderState extends State<EmptyScansPlaceHolder> {
             if (!isConnected) ...[
               const Icon(Icons.wifi_off_rounded, size: 80, color: Colors.red),
               const SizedBox(height: 16),
-              const Text(
-                'No Internet Connection',
+              Text(
+                LocaleData.no_internet.getString(context),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
             ] else if (user == null) ...[
               const Icon(Icons.person_add_rounded, size: 80, color: kAccentColor),
               const SizedBox(height: 16),
-              const Text(
-                'Not Signed In',
+              Text(
+                LocaleData.not_signed_in.getString(context),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 3),
-              const Opacity(
+              Opacity(
                 opacity: 0.6,
                 child: Text(
-                  'Sign in to get synced scans. Go to Settings > Sign In',
+                  LocaleData.sign_in_text.getString(context),
                   style: TextStyle(fontSize: 14),
                 ),
               ),
             ] else ... [
               Icon(Icons.document_scanner_rounded, size: 80, color: kAccentColor),
               const SizedBox(height: 16),
-              const Text(
-                "No Scans Yet",
+              Text(
+                LocaleData.no_scans_yet.getString(context),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               )
             ],
@@ -97,14 +99,14 @@ class _EmptyScansPlaceHolderState extends State<EmptyScansPlaceHolder> {
           Icon(Icons.document_scanner_rounded, size: 80, color: kAccentColor),
           const SizedBox(height: 16),
           Text(
-            'No Scans Yet',
+            LocaleData.no_scans_yet.getString(context),
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Opacity(
             opacity: 0.6,
             child: Text(
-              'Start scanning by pressing “+”',
+              LocaleData.no_scans_yet_text.getString(context),
               style: const TextStyle(fontSize: 14),
             ),
           ),

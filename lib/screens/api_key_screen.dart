@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:super_scan/constants.dart';
 import 'package:super_scan/helpers/api_key_storage.dart';
 import 'package:super_scan/helpers/toast_helper.dart';
+import 'package:super_scan/localization/locales.dart';
 
 class ApiKeyScreen extends StatefulWidget {
   const ApiKeyScreen({super.key});
@@ -41,7 +43,7 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
 
   // Helper to mask the key for UI beauty
   String _getMaskedKey(String key) {
-    if (key.isEmpty) return "No key configured";
+    if (key.isEmpty) return LocaleData.no_api_key.getString(context);
     if (key.length < 12) return "********";
     return "${key.substring(0, 8)}...${key.substring(key.length - 4)}";
   }
@@ -50,9 +52,13 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final apiKeySuccessMessage = LocaleData.api_key_added_success.getString(context);
+    final apiKeyInvalidMessage = LocaleData.api_key_invalid.getString(context);
+    final apiKeyRemovedMessage = LocaleData.api_key_removed.getString(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI Configuration'),
+        title: Text(LocaleData.ai_config.getString(context)),
         elevation: 0, // Flat AppBar
         centerTitle: true,
       ),
@@ -121,8 +127,8 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            onPressed: _saveKey,
-                            child: const Text('Save'),
+                            onPressed: () => _saveKey(apiKeySuccessMessage, apiKeyInvalidMessage),
+                            child: Text(LocaleData.save.getString(context)),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -135,9 +141,9 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          onPressed: _deleteKey,
-                          child: const Text(
-                            'Delete',
+                          onPressed: () => _deleteKey(apiKeyRemovedMessage),
+                          child: Text(
+                            LocaleData.delete.getString(context),
                             style: TextStyle(color: Colors.red),
                           ),
                         ),
@@ -150,7 +156,7 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
 
             const SizedBox(height: 32),
             Text(
-              "Guide & Information",
+              LocaleData.guide_and_info.getString(context),
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -160,18 +166,18 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
             // --- Info Cards (Already Flat) ---
             _infoTile(
               Icons.help_rounded,
-              "What is this?",
-              "An OpenAI API key allows MagicEyes to securely use AI to summarize and analyze your documents. It works like a private access token for your personal OpenAI account.",
+              LocaleData.what_is_this.getString(context),
+              LocaleData.what_is_this_description.getString(context),
             ),
             _infoTile(
               Icons.privacy_tip_rounded,
-              "Privacy First",
-              "We never see your key. Documents are sent directly from your device to OpenAI. You only pay for what you use, directly to OpenAI.",
+              LocaleData.privacy_first.getString(context),
+              LocaleData.privacy_first_description.getString(context),
             ),
             _infoTile(
               Icons.account_balance_wallet_rounded,
-              "How to get one?",
-              "1. Sign in to platform.openai.com\n2. Navigate to API Keys\n3. Create a 'Secret Key' and paste it above.",
+              LocaleData.how_to_get_one.getString(context),
+              LocaleData.how_to_get_one_description.getString(context),
             ),
           ],
         ),
@@ -197,7 +203,7 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          "Current Status: ${_currentKeyDisplay.isNotEmpty ? 'Active' : 'Inactive'}",
+          "${LocaleData.ai_status.getString(context)} ${_currentKeyDisplay.isNotEmpty ? LocaleData.status_active.getString(context) : LocaleData.status_inactive.getString(context)}",
           style: TextStyle(
             color: _currentKeyDisplay.isNotEmpty ? Colors.green : Colors.grey,
             fontWeight: FontWeight.w600,
@@ -240,22 +246,22 @@ class _ApiKeyScreenState extends State<ApiKeyScreen> {
     );
   }
 
-  Future<void> _saveKey() async {
+  Future<void> _saveKey(String apiKeyUpdatedMessage, apiKeyInvalidMessage) async {
     final trimmed = _controller.text.trim();
     if (trimmed.isNotEmpty) {
       await ApiKeyStorage.saveApiKey(trimmed);
       await _loadKey();
       if (mounted) {
-        ToastHelper.show('API Key Updated Successfully');
+        ToastHelper.show(apiKeyUpdatedMessage);
       }
     } else {
-      if (mounted) ToastHelper.show('Please enter a valid key');
+      if (mounted) ToastHelper.show(apiKeyInvalidMessage);
     }
   }
 
-  Future<void> _deleteKey() async {
+  Future<void> _deleteKey(String apiKeyRemovedMessage) async {
     await ApiKeyStorage.deleteApiKey();
     await _loadKey();
-    if (mounted) ToastHelper.show('API Key Removed');
+    if (mounted) ToastHelper.show(apiKeyRemovedMessage);
   }
 }

@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:super_scan/helpers/toast_helper.dart';
+import 'package:super_scan/localization/locales.dart';
 import 'package:super_scan/models/saved_scan.dart';
 import 'package:super_scan/models/drive_scan.dart';
 import 'package:super_scan/services/google_drive_service.dart';
@@ -44,7 +46,7 @@ class HomeController extends ChangeNotifier {
     super.dispose();
   }
 
-  String formatDate(DateTime date) {
+  String formatDate(String errorMessage, DateTime date) {
     return DateFormat.yMd().add_jm().format(date);
   }
 
@@ -58,7 +60,7 @@ class HomeController extends ChangeNotifier {
   //   await syncScans(context);
   // }
   // scan viewer opener
-  Future<void> openScanViewer(Directory scanDir, context) async {
+  Future<void> openScanViewer(String errorMessage, Directory scanDir, context) async {
   final changed = await Navigator.push<bool>(
     context,
     MaterialPageRoute(
@@ -71,11 +73,11 @@ class HomeController extends ChangeNotifier {
     await Future.delayed(const Duration(milliseconds: 150));
 
     await loadSavedScans();
-    await syncScans();
+    await syncScans(errorMessage);
   }
 }
 
-  Future<void> importImages() async {
+  Future<void> importImages(String errorMessage,) async {
     try {
       final picker = ImagePicker();
 
@@ -91,9 +93,7 @@ class HomeController extends ChangeNotifier {
 
       await loadSavedScans();
 
-      ToastHelper.show('Imported images successfully');
-
-      await syncScans();
+      await syncScans(errorMessage);
     } catch (e) {
       if (!isMounted) return;
 
@@ -103,6 +103,7 @@ class HomeController extends ChangeNotifier {
 
 
   Future<void> processScan(
+      String errorMessage,
       BuildContext context,
       Future<dynamic> scanTask,
       ) async {
@@ -167,32 +168,32 @@ class HomeController extends ChangeNotifier {
     }
 
     await loadSavedScans();
-    await syncScans();
+    await syncScans(errorMessage);
   }
 
-  Future<void> showScanOptions(SavedScan scan, context) async {
+  Future<void> showScanOptions(String errorMessage, SavedScan scan, context) async {
     await showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text(
-            'Options for “${scan.meta.name}”',
+            '${LocaleData.options_alert.getString(context)} “${scan.meta.name}”',
           ),
-          content: const Text(
-            'What would you like to do?',
+          content: Text(
+            LocaleData.options_message.getString(context),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(LocaleData.cancel.getString(context)),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                renameScan(scan, context);
+                renameScan(errorMessage, scan, context);
               },
-              child: const Text(
-                'Rename',
+              child: Text(
+                LocaleData.rename.getString(context),
                 style: TextStyle(letterSpacing: 0.0)
               ),
             ),
@@ -201,8 +202,8 @@ class HomeController extends ChangeNotifier {
                 Navigator.pop(context);
                 deleteScan(scan, context);
               },
-              child: const Text(
-                'Delete',
+              child: Text(
+                LocaleData.delete.getString(context),
                 style: TextStyle(
                   color: Colors.red,
                   fontWeight: .bold,
@@ -243,28 +244,28 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> renameScan(SavedScan scan, context) async {
+  Future<void> renameScan(String errorMessage, SavedScan scan, context) async {
     final controller = TextEditingController(text: scan.meta.name);
 
     final result = await showDialog<String>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Rename scan'),
+          title: Text(LocaleData.rename.getString(context)),
           content: TextField(
             controller: controller,
             autofocus: true,
-            decoration: const InputDecoration(hintText: 'Scan Name'),
+            decoration: InputDecoration(hintText: LocaleData.rename_hint.getString(context)),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(LocaleData.cancel.getString(context)),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, controller.text.trim()),
-              child: const Text(
-                'Save',
+              child: Text(
+                LocaleData.save.getString(context),
                 style: TextStyle(fontWeight: .bold),
               ),
             ),
@@ -278,7 +279,7 @@ class HomeController extends ChangeNotifier {
     await ScanStorage.renameScan(scanDir: scan.dir, newName: result);
 
     await loadSavedScans();
-    await syncScans();
+    await syncScans(errorMessage);
   }
 
   Future<void> deleteScan(SavedScan scan, context) async {
@@ -286,20 +287,20 @@ class HomeController extends ChangeNotifier {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Delete scan?'),
+          title: Text(LocaleData.delete_question.getString(context)),
           content: Text(
-            '“${scan.meta.name}” will be permanently deleted.',
+            '“${scan.meta.name}” ${LocaleData.delete_text.getString(context)}',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text(LocaleData.cancel.getString(context)),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
               style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text(
-                'Delete',
+              child: Text(
+                LocaleData.delete.getString(context),
                 style: TextStyle(fontWeight: .bold),
               ),
             ),
@@ -317,7 +318,7 @@ class HomeController extends ChangeNotifier {
     // print('Reloaded save scans');
 
     ToastHelper.show(
-        'Deleted permanently',
+      LocaleData.deleted.getString(context)
     );
   }
 
@@ -341,7 +342,7 @@ class HomeController extends ChangeNotifier {
     return scansDir.listSync().whereType<Directory>().toList();
   }
 
-  Future<String?> syncScans({bool force = false}) async {
+  Future<String?> syncScans(String errorMessage, {bool force = false}) async {
     if (!isSignedIn) return null;
 
     isSyncing = true;
@@ -353,7 +354,7 @@ class HomeController extends ChangeNotifier {
       await SyncController.syncScans(scans, force: force);
       return null; // success
     } catch (e) {
-      return 'Failed to sync: $e'; // Return the error
+      return '$errorMessage $e'; // Return the error
     } finally {
       isSyncing = false;
       isLoading = false;

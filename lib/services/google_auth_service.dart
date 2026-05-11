@@ -4,6 +4,7 @@ import 'package:super_scan/helpers/auth_restore_result.dart';
 import 'google_oauth_config.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 
 class GoogleAuthService {
   GoogleAuthService._internal();
@@ -65,21 +66,30 @@ class GoogleAuthService {
 
   Future<AuthRestoreResult> restoreSession() async {
     try {
+      // 1. Attempt the silent sign-in
       final creds = await _googleSignIn.silentSignIn();
 
-      if (creds == null) {
-        _user = null;
-        return AuthRestoreResult.none;
+      if (creds != null) {
+        _user = GoogleUser.fromIdToken(creds.accessToken, creds.idToken);
+        return AuthRestoreResult.restored;
       }
 
-      _user = GoogleUser.fromIdToken(creds.accessToken, creds.idToken);
+      // 2. If silentSignIn failed, check if we have data in Prefs
+      // This allows the UI to stay logged in while we perhaps prompt for a re-auth later
+      final prefs = await SharedPreferences.getInstance();
+      final savedEmail = prefs.getString('google_email');
 
-      if (_user?.email == null || _user?.displayName == null) {
+      if (savedEmail != null && savedEmail.isNotEmpty) {
+        // We have a session but need a fresh token.
+        // You might want to call signIn() automatically here or
+        // return a specific status to trigger a UI "Re-auth" button.
         return AuthRestoreResult.expired;
       }
 
-      return AuthRestoreResult.restored;
-    } catch (_) {
+      _user = null;
+      return AuthRestoreResult.none;
+    } catch (e) {
+      debugPrint("Restore session error: $e");
       _user = null;
       return AuthRestoreResult.expired;
     }

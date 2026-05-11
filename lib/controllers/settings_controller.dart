@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localization/flutter_localization.dart';
 import 'package:super_scan/helpers/sign_in_result.dart';
 import 'package:super_scan/helpers/sign_out_result.dart';
 import 'package:super_scan/helpers/toast_helper.dart';
+import 'package:super_scan/localization/locales.dart';
 import 'package:super_scan/services/google_auth_service.dart';
 import 'package:flutter/services.dart';
 
@@ -81,7 +83,7 @@ class SettingsController extends ChangeNotifier {
       notifyListeners(); // Notify about animation
 
       await auth.signOut();
-      debugPrint('Sign in okay:');
+      debugPrint('Sign out okay:');
 
       return SignOutResult.success;
 
@@ -100,12 +102,12 @@ class SettingsController extends ChangeNotifier {
       builder: (context) {
         return AlertDialog(
           title: Text(
-            'Are you sure you want to sign out?',
+            LocaleData.sign_out_question.getString(context)
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(LocaleData.cancel.getString(context)),
             ),
             TextButton(
               onPressed: () async {
@@ -118,13 +120,13 @@ class SettingsController extends ChangeNotifier {
                 if (!context.mounted) return;
 
                 if (result == SignOutResult.success) {
-                  ToastHelper.show('Signed out');
+                  ToastHelper.show(LocaleData.sign_out_success.getString(context));
                 } else {
-                  ToastHelper.show('Sign out failed');
+                  ToastHelper.show(LocaleData.sign_out_failed.getString(context));
                 }
               },
-              child: const Text(
-                'Sign Out',
+              child: Text(
+                LocaleData.sign_out.getString(context),
                 style: TextStyle(
                   fontWeight: .bold,
                   color: Colors.red,
