@@ -9,6 +9,13 @@
   Welcome to the official GitHub repository of SuperScan!
 </p>
 
+<p align="center">
+  <a href="https://play.google.com/store/apps/details?id=com.kzl.super_scan&pcampaignid=web_share">Google Play</a> &bull;
+  <a href="https://github.com/KaungZinLin/SuperScan/releases/">Download for Mac & Windows</a> &bull;
+  <a href="https://zennon.carrd.co/">Website</a>
+</p>
+
+
 # Highlights
 - Scan documents using native scanning tools (such as MLKit on iOS)
 - Sync the scanned documents to desktop using Google Drive
@@ -55,17 +62,11 @@ The reason I've chosen Google Drive is because I want the user to use a cloud st
 - ✅ Flutter Stage Management
 # Release & Download
 ## Android
-Available on the "Releases" page! 
+Available on the Google Play Store!
 ## macOS
 Please remember that since it's not notarized by Apple, macOS would prevent you from running the app. But, don't worry! Run the app as is, it'll give you a warning, dismiss that, go to Settings > Privacy & Security > scroll down > and click "Open Anyway" to open the app. Now, you can run it normally every time!
 As of now, SuperScan is still work in progress, and basic features are still being developed. Once I've completed the basic feautures and I'm confident that SuperScan is ready for public release, I'll publish the app to the Google Play Store, and I'll manually release the desktop versions. For now, you can download and install it on Android using the APKs on the Release tab.
-## Open Beta
-As per Google Play Store's policies, new apps from new developer accounts made after November 2023 must run an open beta of their apps for 14 days with 20 people. If you're interested, you can fill out the form to become a tester yourself and the form will be released in a few days.
 ## Expected Beta Launch Date
-**As APKs on Android, macOS, and Windows**: March 2026
-
-**Google Play Store on Android**: TBA
-
 **Apple App Store on iOS and Apple-notarized app on macOS**: TBA
 
 **Linux**: TBA
