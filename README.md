@@ -17,7 +17,7 @@
 
 
 # Highlights
-- Scan documents using native scanning tools (such as MLKit on iOS)
+- Scan documents using native scanning tools (such as MLKit on Android and VisionKit on iOS)
 - Sync the scanned documents to desktop using Google Drive
 - Extract text directly from scanned documents using OCR (Optical Character Recognition)
 - Summarize scanned documents with AI
